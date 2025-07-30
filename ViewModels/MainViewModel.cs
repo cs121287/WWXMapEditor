@@ -38,8 +38,6 @@ namespace WwXMapEditor.ViewModels
         private int _selectionStartY;
         private int _selectionEndX;
         private int _selectionEndY;
-        private WeatherType _selectedWeather = WeatherType.Clear;
-        private bool _fogOfWarEnabled = true;
 
         public enum EditTool { Terrain, Property, Unit, Fill, Select }
 
@@ -159,46 +157,11 @@ namespace WwXMapEditor.ViewModels
             set => SetProperty(ref _selectedOwner, value);
         }
 
-        public WeatherType SelectedWeather
-        {
-            get => _selectedWeather;
-            set
-            {
-                if (SetProperty(ref _selectedWeather, value))
-                {
-                    if (CurrentMap != null)
-                    {
-                        CurrentMap.Weather = value;
-                        StatusText = $"Weather changed to: {value}";
-                        OnMapChanged?.Invoke();
-                    }
-                }
-            }
-        }
-
-        public bool FogOfWarEnabled
-        {
-            get => _fogOfWarEnabled;
-            set
-            {
-                if (SetProperty(ref _fogOfWarEnabled, value))
-                {
-                    if (CurrentMap != null)
-                    {
-                        CurrentMap.FogOfWarEnabled = value;
-                        StatusText = $"Fog of War: {(value ? "Enabled" : "Disabled")}";
-                        OnMapChanged?.Invoke();
-                    }
-                }
-            }
-        }
-
         public ObservableCollection<Player> Players { get; } = new();
         public ObservableCollection<TerrainType> TerrainTypes { get; } = new();
         public ObservableCollection<PropertyType> PropertyTypes { get; } = new();
         public ObservableCollection<UnitType> UnitTypes { get; } = new();
         public ObservableCollection<string> OwnerTypes { get; } = new();
-        public ObservableCollection<WeatherType> WeatherTypes { get; } = new();
 
         public bool CanUndo => _undoRedoManager.CanUndo;
         public bool CanRedo => _undoRedoManager.CanRedo;
@@ -262,12 +225,6 @@ namespace WwXMapEditor.ViewModels
                 UnitTypes.Add(unitType);
             }
 
-            // Weather types
-            foreach (WeatherType weatherType in Enum.GetValues(typeof(WeatherType)))
-            {
-                WeatherTypes.Add(weatherType);
-            }
-
             OwnerTypes.Add("Player");
             OwnerTypes.Add("Neutral");
             OwnerTypes.Add("Computer");
@@ -286,7 +243,7 @@ namespace WwXMapEditor.ViewModels
                 {
                     var autoSavePath = _currentFilePath + ".autosave";
                     CurrentMap.FlattenTileArray();
-                    MapService.SaveMap(CurrentMap, autoSavePath);
+                    MapService.SaveMap(CurrentMap, autoSavePath, true); // Use compression for autosave
                     StatusText = "Auto-saved";
                 }
                 catch
@@ -304,7 +261,7 @@ namespace WwXMapEditor.ViewModels
                 Width = options.Width,
                 Height = options.Length,
                 Season = options.Season,
-                Weather = WeatherType.Clear,
+                Weather = Enum.Parse<WeatherType>(options.Weather),
                 FogOfWarEnabled = true,
                 Metadata = new MapMetadata { Author = Environment.UserName, Created = DateTime.Now.ToString("yyyy-MM-dd") }
             };
@@ -343,8 +300,6 @@ namespace WwXMapEditor.ViewModels
                 _undoRedoManager.Reset(CurrentMap);
                 UpdatePlayers();
                 UpdateViewportSize();
-                SelectedWeather = CurrentMap.Weather;
-                FogOfWarEnabled = CurrentMap.FogOfWarEnabled;
                 StatusText = $"Map loaded: {System.IO.Path.GetFileName(filePath)}";
             }
             catch (Exception ex)
@@ -389,59 +344,87 @@ namespace WwXMapEditor.ViewModels
         {
             if (CurrentMap == null) return;
 
-            switch (CurrentTool)
+            try
             {
-                case EditTool.Terrain:
-                    if (CurrentMap.TileArray[x, y] != null)
-                        CurrentMap.TileArray[x, y].Terrain = SelectedTerrain;
-                    break;
-                case EditTool.Property:
-                    SetProperty(x, y, SelectedPropertyType, SelectedOwner);
-                    break;
-                case EditTool.Unit:
-                    SetUnit(x, y, SelectedUnitType, SelectedOwner);
-                    break;
-                case EditTool.Fill:
-                    FillArea(x, y, SelectedTerrain);
-                    break;
-            }
+                switch (CurrentTool)
+                {
+                    case EditTool.Terrain:
+                        if (CurrentMap.TileArray[x, y] != null)
+                            CurrentMap.TileArray[x, y].Terrain = SelectedTerrain;
+                        break;
+                    case EditTool.Property:
+                        PlaceProperty(x, y, SelectedPropertyType, SelectedOwner);
+                        break;
+                    case EditTool.Unit:
+                        PlaceUnit(x, y, SelectedUnitType, SelectedOwner);
+                        break;
+                    case EditTool.Fill:
+                        FillArea(x, y, SelectedTerrain);
+                        break;
+                }
 
-            _undoRedoManager.Push(CurrentMap);
-        }
-
-        private void SetProperty(int x, int y, PropertyType type, string owner)
-        {
-            if (CurrentMap == null) return;
-            var prop = CurrentMap.Properties.Find(p => p.X == x && p.Y == y);
-            if (prop == null)
-            {
-                prop = new Property { X = x, Y = y, Type = type, Owner = owner };
-                prop.SetDefaultValues();
-                CurrentMap.Properties.Add(prop);
+                _undoRedoManager.Push(CurrentMap);
             }
-            else
+            catch (Exception ex)
             {
-                prop.Type = type;
-                prop.Owner = owner;
-                prop.SetDefaultValues();
+                System.Diagnostics.Debug.WriteLine($"PaintTile error: {ex.Message}");
+                StatusText = "Error placing object";
             }
         }
 
-        private void SetUnit(int x, int y, UnitType type, string owner)
+        // Renamed from SetProperty to avoid conflict with base class method
+        private void PlaceProperty(int x, int y, PropertyType type, string owner)
         {
             if (CurrentMap == null) return;
-            var unit = CurrentMap.Units.Find(u => u.X == x && u.Y == y);
-            if (unit == null)
+
+            try
             {
-                unit = new Unit { X = x, Y = y, Type = type, Owner = owner };
-                unit.SetDefaultValues();
-                CurrentMap.Units.Add(unit);
+                var prop = CurrentMap.Properties.Find(p => p.X == x && p.Y == y);
+                if (prop == null)
+                {
+                    prop = new Property { X = x, Y = y, Type = type, Owner = owner };
+                    prop.SetDefaultValues(); // Call after setting type
+                    CurrentMap.Properties.Add(prop);
+                }
+                else
+                {
+                    prop.Type = type;
+                    prop.Owner = owner;
+                    prop.SetDefaultValues(); // Update values after changing type
+                }
             }
-            else
+            catch (Exception ex)
             {
-                unit.Type = type;
-                unit.Owner = owner;
-                unit.SetDefaultValues();
+                System.Diagnostics.Debug.WriteLine($"PlaceProperty error: {ex.Message}");
+                throw;
+            }
+        }
+
+        // Renamed from SetUnit to be consistent
+        private void PlaceUnit(int x, int y, UnitType type, string owner)
+        {
+            if (CurrentMap == null) return;
+
+            try
+            {
+                var unit = CurrentMap.Units.Find(u => u.X == x && u.Y == y);
+                if (unit == null)
+                {
+                    unit = new Unit { X = x, Y = y, Type = type, Owner = owner };
+                    unit.SetDefaultValues(); // Call after setting type
+                    CurrentMap.Units.Add(unit);
+                }
+                else
+                {
+                    unit.Type = type;
+                    unit.Owner = owner;
+                    unit.SetDefaultValues(); // Update values after changing type
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"PlaceUnit error: {ex.Message}");
+                throw;
             }
         }
 
@@ -560,11 +543,11 @@ namespace WwXMapEditor.ViewModels
             _selectedTileY = y;
         }
 
-        public void SaveCurrentMap(string filePath)
+        public void SaveCurrentMap(string filePath, bool useCompression = true)
         {
             if (CurrentMap == null) return;
             CurrentMap.FlattenTileArray();
-            MapService.SaveMap(CurrentMap, filePath);
+            MapService.SaveMap(CurrentMap, filePath, useCompression);
             _currentFilePath = filePath;
             StatusText = $"Map saved: {System.IO.Path.GetFileName(filePath)}";
         }

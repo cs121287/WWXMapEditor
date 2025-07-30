@@ -116,24 +116,39 @@ namespace WwXMapEditor.Controls
             var scaleX = MiniMapImage.ActualWidth / Map.Width;
             var scaleY = MiniMapImage.ActualHeight / Map.Height;
 
-            ViewportRect.Width = ViewportWidth * scaleX;
-            ViewportRect.Height = ViewportHeight * scaleY;
-            Canvas.SetLeft(ViewportRect, ViewportX * scaleX);
-            Canvas.SetTop(ViewportRect, ViewportY * scaleY);
+            // Calculate viewport rectangle size
+            ViewportRect.Width = Math.Min(ViewportWidth * scaleX, MiniMapImage.ActualWidth);
+            ViewportRect.Height = Math.Min(ViewportHeight * scaleY, MiniMapImage.ActualHeight);
+
+            // Calculate viewport position
+            var left = ViewportX * scaleX;
+            var top = ViewportY * scaleY;
+
+            // Clamp viewport to stay within minimap bounds
+            left = Math.Max(0, Math.Min(left, MiniMapImage.ActualWidth - ViewportRect.Width));
+            top = Math.Max(0, Math.Min(top, MiniMapImage.ActualHeight - ViewportRect.Height));
+
+            Canvas.SetLeft(ViewportRect, left);
+            Canvas.SetTop(ViewportRect, top);
         }
 
-        private Color GetTerrainColor(string terrain)
+        private Color GetTerrainColor(TerrainType terrain)
         {
             return terrain switch
             {
-                "Plain" => Colors.LightGreen,
-                "Forest" => Colors.DarkGreen,
-                "Mountain" => Colors.Brown,
-                "Sea" => Colors.DarkBlue,
-                "Beach" => Colors.SandyBrown,
-                "Water" => Colors.LightBlue,
-                "Road" => Colors.Gray,
-                "River" => Colors.CornflowerBlue,
+                TerrainType.Plain => Colors.LightGreen,
+                TerrainType.Forest => Colors.DarkGreen,
+                TerrainType.Mountain => Colors.Brown,
+                TerrainType.Road => Colors.Gray,
+                TerrainType.Bridge => Colors.DarkGray,
+                TerrainType.Sea => Colors.DarkBlue,
+                TerrainType.Beach => Colors.SandyBrown,
+                TerrainType.River => Colors.CornflowerBlue,
+                TerrainType.City => Colors.LightGray,
+                TerrainType.Factory => Colors.SlateGray,
+                TerrainType.HQ => Colors.Gold,
+                TerrainType.Airport => Colors.DimGray,
+                TerrainType.Port => Colors.Navy,
                 _ => Colors.LightGray
             };
         }

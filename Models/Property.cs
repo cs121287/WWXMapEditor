@@ -11,10 +11,11 @@ namespace WwXMapEditor.Models
 
         public Property()
         {
-            SetDefaultValues();
+            // Remove automatic SetDefaultValues() call to prevent issues
+            // SetDefaultValues() should be called explicitly when needed
         }
 
-        private void SetDefaultValues()
+        public void SetDefaultValues()
         {
             switch (Type)
             {

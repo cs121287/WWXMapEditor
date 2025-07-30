@@ -9,15 +9,19 @@ namespace WwXMapEditor.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string colorName)
+            if (value is string colorString)
             {
-                try
+                switch (colorString.ToLower())
                 {
-                    return (Color)ColorConverter.ConvertFromString(colorName);
-                }
-                catch
-                {
-                    return Colors.Gray;
+                    case "blue": return Colors.Blue;
+                    case "red": return Colors.Red;
+                    case "green": return Colors.Green;
+                    case "yellow": return Colors.Yellow;
+                    case "orange": return Colors.Orange;
+                    case "purple": return Colors.Purple;
+                    case "cyan": return Colors.Cyan;
+                    case "pink": return Colors.Pink;
+                    default: return Colors.Gray;
                 }
             }
             return Colors.Gray;
@@ -25,11 +29,7 @@ namespace WwXMapEditor.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Color color)
-            {
-                return color.ToString();
-            }
-            return "Gray";
+            throw new NotImplementedException();
         }
     }
 }

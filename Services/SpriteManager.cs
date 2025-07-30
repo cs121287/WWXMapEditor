@@ -12,14 +12,23 @@ namespace WwXMapEditor.Services
         private static SpriteManager? _instance;
         public static SpriteManager Instance => _instance ??= new SpriteManager();
 
-        private readonly Dictionary<string, ImageSource> _spriteCache = new();
+        private readonly Dictionary<string, BitmapSource> _spriteCache = new();
         private readonly Dictionary<string, Color> _fallbackColors = new();
-        private readonly Dictionary<string, string> _fallbackPatterns = new();
+
+        // Sprite sheets for each terrain type
+        private readonly Dictionary<string, BitmapSource?> _terrainSheets = new();
+        private readonly Dictionary<string, BitmapSource?> _propertySprites = new();
+        private readonly Dictionary<string, BitmapSource?> _unitSprites = new();
+
+        private const int SPRITE_SIZE = 32;
+        private const int SPRITES_PER_ROW = 2;
+        private const int SPRITES_PER_COLUMN = 4;
+        private const int SPRITES_PER_SHEET = 8;
 
         private SpriteManager()
         {
             InitializeFallbackColors();
-            InitializeFallbackPatterns();
+            LoadSpriteSheets();
         }
 
         private void InitializeFallbackColors()
@@ -39,7 +48,17 @@ namespace WwXMapEditor.Services
             _fallbackColors["Airport"] = Colors.DimGray;
             _fallbackColors["Port"] = Colors.Navy;
 
-            // Unit fallback colors
+            // Property owner colors for fallback
+            _fallbackColors["Property_Player"] = Colors.Blue;
+            _fallbackColors["Property_Neutral"] = Colors.Gray;
+            _fallbackColors["Property_Computer"] = Colors.Red;
+
+            // Unit owner colors for fallback
+            _fallbackColors["Unit_Player"] = Colors.DarkBlue;
+            _fallbackColors["Unit_Neutral"] = Colors.DarkGray;
+            _fallbackColors["Unit_Computer"] = Colors.DarkRed;
+
+            // Specific unit fallback colors
             _fallbackColors["Infantry"] = Colors.DarkOliveGreen;
             _fallbackColors["Mechanized"] = Colors.OliveDrab;
             _fallbackColors["Tank"] = Colors.DarkSlateGray;
@@ -60,392 +79,492 @@ namespace WwXMapEditor.Services
             _fallbackColors["NavalTransport"] = Colors.Teal;
             _fallbackColors["Carrier"] = Colors.LightSlateGray;
             _fallbackColors["Lander"] = Colors.CadetBlue;
-
-            // Owner colors
-            _fallbackColors["Player"] = Colors.Blue;
-            _fallbackColors["Neutral"] = Colors.Gray;
-            _fallbackColors["Computer"] = Colors.Red;
-
-            // Weather overlay colors
-            _fallbackColors["Rain"] = Color.FromArgb(64, 100, 100, 150);
-            _fallbackColors["Snow"] = Color.FromArgb(96, 220, 220, 255);
-            _fallbackColors["Fog"] = Color.FromArgb(128, 180, 180, 180);
-            _fallbackColors["Storm"] = Color.FromArgb(96, 80, 80, 120);
-            _fallbackColors["Sandstorm"] = Color.FromArgb(96, 200, 180, 100);
         }
 
-        private void InitializeFallbackPatterns()
+        private void LoadSpriteSheets()
         {
-            _fallbackPatterns["terrain"] = "solid";
-            _fallbackPatterns["property"] = "building";
-            _fallbackPatterns["unit"] = "circle";
-        }
-
-        public ImageSource GetSprite(string type, string variant, string layer, int size)
-        {
-            string cacheKey = $"{type}_{variant}_{layer}_{size}";
-
-            if (_spriteCache.TryGetValue(cacheKey, out var cached))
-            {
-                return cached;
-            }
-
-            string fileName = GenerateSpriteFileName(type, variant, layer);
-            string resourcePath = $"pack://application:,,,/Resources/Images/Tiles/{fileName}";
-
             try
             {
-                Uri uri = new Uri(resourcePath, UriKind.Absolute);
-                var bitmap = new BitmapImage(uri);
-
-                if (bitmap.PixelWidth != size || bitmap.PixelHeight != size)
+                // Load terrain sprite sheets for each terrain type
+                var terrainTypes = Enum.GetValues(typeof(TerrainType));
+                foreach (TerrainType terrain in terrainTypes)
                 {
-                    var scaledBitmap = new TransformedBitmap(bitmap,
-                        new ScaleTransform(size / (double)bitmap.PixelWidth, size / (double)bitmap.PixelHeight));
-                    _spriteCache[cacheKey] = scaledBitmap;
-                    return scaledBitmap;
+                    string terrainName = terrain.ToString().ToLower();
+
+                    // Load summer sheet
+                    var summerKey = $"{terrainName}_summer";
+                    var summerPath = $"Resources/Sprites/{terrainName}_summer.png";
+                    _terrainSheets[summerKey] = LoadImage(summerPath);
+
+                    // Load winter sheet
+                    var winterKey = $"{terrainName}_winter";
+                    var winterPath = $"Resources/Sprites/{terrainName}_winter.png";
+                    _terrainSheets[winterKey] = LoadImage(winterPath);
                 }
 
-                _spriteCache[cacheKey] = bitmap;
+                // Load property sprites for each owner type
+                LoadPropertySprites("City");
+                LoadPropertySprites("Factory");
+                LoadPropertySprites("HQ");
+                LoadPropertySprites("Airport");
+                LoadPropertySprites("Port");
+
+                // Load unit sprites for each owner type
+                LoadUnitSprites();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading sprite sheets: {ex.Message}");
+            }
+        }
+
+        private void LoadPropertySprites(string propertyType)
+        {
+            string[] owners = { "Player", "Neutral", "Computer" };
+            string[] seasons = { "Summer", "Winter" };
+
+            foreach (var owner in owners)
+            {
+                foreach (var season in seasons)
+                {
+                    var key = $"{propertyType}_{owner}_{season}";
+                    var path = $"Resources/Sprites/{propertyType.ToLower()}_{owner.ToLower()}_{season.ToLower()}.png";
+                    _propertySprites[key] = LoadImage(path);
+                }
+            }
+        }
+
+        private void LoadUnitSprites()
+        {
+            var unitTypes = Enum.GetNames(typeof(UnitType));
+            string[] owners = { "Player", "Neutral", "Computer" };
+            string[] seasons = { "Summer", "Winter" };
+
+            foreach (var unitType in unitTypes)
+            {
+                foreach (var owner in owners)
+                {
+                    foreach (var season in seasons)
+                    {
+                        var key = $"{unitType}_{owner}_{season}";
+                        var path = $"Resources/Sprites/{unitType.ToLower()}_{owner.ToLower()}_{season.ToLower()}.png";
+                        _unitSprites[key] = LoadImage(path);
+                    }
+                }
+            }
+        }
+
+        private BitmapSource? LoadImage(string path)
+        {
+            try
+            {
+                var uri = new Uri(path, UriKind.Relative);
+                var bitmap = new BitmapImage(uri);
+
+                // Force load the image to check if it exists
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+
                 return bitmap;
             }
             catch
             {
-                var fallbackSprite = GenerateFallbackSprite(type, variant, layer, size);
-                _spriteCache[cacheKey] = fallbackSprite;
-                return fallbackSprite;
+                // Return null if image doesn't exist or can't be loaded
+                return null;
             }
         }
 
-        public ImageSource GetWeatherOverlay(WeatherType weather, int width, int height)
+        public BitmapSource GetTerrainSprite(TerrainType terrain, string season, int spriteIndex)
         {
-            string cacheKey = $"weather_{weather}_{width}_{height}";
+            // Validate and normalize sprite index
+            int validSpriteIndex = ValidateSpriteIndex(spriteIndex);
 
+            // Check cache first
+            var cacheKey = $"terrain_{terrain}_{season}_{validSpriteIndex}";
             if (_spriteCache.TryGetValue(cacheKey, out var cached))
             {
                 return cached;
             }
 
-            var overlay = GenerateWeatherOverlay(weather, width, height);
-            _spriteCache[cacheKey] = overlay;
-            return overlay;
-        }
+            // Get the appropriate sprite sheet
+            var sheetKey = $"{terrain.ToString().ToLower()}_{season.ToLower()}";
 
-        private ImageSource GenerateWeatherOverlay(WeatherType weather, int width, int height)
-        {
-            var drawingGroup = new DrawingGroup();
-            var drawingContext = drawingGroup.Open();
-
-            Color overlayColor = Colors.Transparent;
-            switch (weather)
+            if (_terrainSheets.TryGetValue(sheetKey, out var sheet) && sheet != null)
             {
-                case WeatherType.Rain:
-                    overlayColor = _fallbackColors["Rain"];
-                    break;
-                case WeatherType.Snow:
-                    overlayColor = _fallbackColors["Snow"];
-                    break;
-                case WeatherType.Fog:
-                    overlayColor = _fallbackColors["Fog"];
-                    break;
-                case WeatherType.Storm:
-                    overlayColor = _fallbackColors["Storm"];
-                    break;
-                case WeatherType.Sandstorm:
-                    overlayColor = _fallbackColors["Sandstorm"];
-                    break;
+                // Extract sprite from sheet
+                var sprite = ExtractSpriteFromSheet(sheet, validSpriteIndex);
+                _spriteCache[cacheKey] = sprite;
+                return sprite;
             }
 
-            if (overlayColor != Colors.Transparent)
-            {
-                var brush = new SolidColorBrush(overlayColor);
-                brush.Freeze();
-                drawingContext.DrawRectangle(brush, null, new Rect(0, 0, width, height));
+            // No sprite sheet loaded, create fallback
+            var fallback = CreateFallbackSprite(terrain.ToString(), validSpriteIndex);
+            _spriteCache[cacheKey] = fallback;
+            return fallback;
+        }
 
-                // Add weather effects
-                if (weather == WeatherType.Rain || weather == WeatherType.Storm)
+        public BitmapSource GetTerrainSpriteSheet(TerrainType terrain, string season)
+        {
+            var sheetKey = $"{terrain.ToString().ToLower()}_{season.ToLower()}";
+
+            if (_terrainSheets.TryGetValue(sheetKey, out var sheet) && sheet != null)
+            {
+                return sheet;
+            }
+
+            // Return fallback sprite sheet
+            return CreateFallbackSpriteSheet(terrain);
+        }
+
+        public BitmapSource GetPropertySprite(PropertyType propertyType, string owner, string season)
+        {
+            // Check cache first
+            var cacheKey = $"property_{propertyType}_{owner}_{season}";
+            if (_spriteCache.TryGetValue(cacheKey, out var cached))
+            {
+                return cached;
+            }
+
+            var key = $"{propertyType}_{owner}_{season}";
+
+            if (_propertySprites.TryGetValue(key, out var sprite) && sprite != null)
+            {
+                _spriteCache[cacheKey] = sprite;
+                return sprite;
+            }
+
+            // Return fallback sprite with owner-specific color overlay
+            var baseColor = _fallbackColors.GetValueOrDefault(propertyType.ToString(), Colors.Gray);
+            var ownerColor = _fallbackColors.GetValueOrDefault($"Property_{owner}", Colors.Gray);
+            var fallback = CreatePropertyFallbackSprite(propertyType.ToString(), baseColor, ownerColor);
+            _spriteCache[cacheKey] = fallback;
+            return fallback;
+        }
+
+        public BitmapSource GetUnitSprite(UnitType unitType, string owner, string season)
+        {
+            // Check cache first
+            var cacheKey = $"unit_{unitType}_{owner}_{season}";
+            if (_spriteCache.TryGetValue(cacheKey, out var cached))
+            {
+                return cached;
+            }
+
+            var key = $"{unitType}_{owner}_{season}";
+
+            if (_unitSprites.TryGetValue(key, out var sprite) && sprite != null)
+            {
+                _spriteCache[cacheKey] = sprite;
+                return sprite;
+            }
+
+            // Return fallback sprite with unit-specific color and owner indicator
+            var unitColor = _fallbackColors.GetValueOrDefault(unitType.ToString(), Colors.DarkGray);
+            var ownerColor = _fallbackColors.GetValueOrDefault($"Unit_{owner}", Colors.DarkGray);
+            var fallback = CreateUnitFallbackSprite(unitType.ToString(), unitColor, ownerColor);
+            _spriteCache[cacheKey] = fallback;
+            return fallback;
+        }
+
+        private int ValidateSpriteIndex(int spriteIndex)
+        {
+            // If sprite index is invalid (negative or out of bounds), default to 0
+            if (spriteIndex < 0 || spriteIndex >= SPRITES_PER_SHEET)
+            {
+                return 0;
+            }
+            return spriteIndex;
+        }
+
+        private BitmapSource ExtractSpriteFromSheet(BitmapSource sheet, int spriteIndex)
+        {
+            // Ensure index is within bounds (already validated, but double-check)
+            spriteIndex = ValidateSpriteIndex(spriteIndex);
+
+            // Calculate row and column in 2x4 grid
+            int col = spriteIndex % SPRITES_PER_ROW;
+            int row = spriteIndex / SPRITES_PER_ROW;
+
+            var cropRect = new Int32Rect(col * SPRITE_SIZE, row * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE);
+
+            try
+            {
+                var croppedBitmap = new CroppedBitmap(sheet, cropRect);
+                return croppedBitmap;
+            }
+            catch
+            {
+                return CreateFallbackSprite("Error", 0, Colors.Red);
+            }
+        }
+
+        public int GetDefaultTerrainIndex(TerrainType terrain)
+        {
+            // Default to first sprite (index 0)
+            return 0;
+        }
+
+        private BitmapSource CreateFallbackSprite(string type, int index = 0, Color? overrideColor = null)
+        {
+            var color = overrideColor ?? _fallbackColors.GetValueOrDefault(type, Colors.Gray);
+
+            var visual = new DrawingVisual();
+            using (var context = visual.RenderOpen())
+            {
+                // Draw base color
+                context.DrawRectangle(new SolidColorBrush(color), null, new Rect(0, 0, SPRITE_SIZE, SPRITE_SIZE));
+
+                // Add border for better visibility
+                var borderPen = new Pen(new SolidColorBrush(Colors.Black), 1);
+                context.DrawRectangle(null, borderPen, new Rect(0.5, 0.5, SPRITE_SIZE - 1, SPRITE_SIZE - 1));
+
+                // Add a simple pattern or text to distinguish different types
+                var textBrush = new SolidColorBrush(GetContrastColor(color));
+                var typeface = new Typeface("Arial");
+
+                // Show type abbreviation
+                var typeText = type.Length > 3 ? type.Substring(0, 3) : type;
+                var formattedText = new FormattedText(
+                    typeText,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    10,
+                    textBrush,
+                    VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                formattedText.TextAlignment = TextAlignment.Center;
+                context.DrawText(formattedText, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 2 - 8));
+
+                // Show sprite index
+                var indexText = new FormattedText(
+                    index.ToString(),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    8,
+                    textBrush,
+                    VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                indexText.TextAlignment = TextAlignment.Center;
+                context.DrawText(indexText, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 2 + 2));
+            }
+
+            var bitmap = new RenderTargetBitmap(SPRITE_SIZE, SPRITE_SIZE, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+
+        private BitmapSource CreatePropertyFallbackSprite(string type, Color baseColor, Color ownerColor)
+        {
+            var visual = new DrawingVisual();
+            using (var context = visual.RenderOpen())
+            {
+                // Draw base terrain
+                context.DrawRectangle(new SolidColorBrush(Colors.LightGray), null, new Rect(0, 0, SPRITE_SIZE, SPRITE_SIZE));
+
+                // Draw building
+                var buildingRect = new Rect(SPRITE_SIZE / 4, SPRITE_SIZE / 3, SPRITE_SIZE / 2, SPRITE_SIZE / 2);
+                context.DrawRectangle(new SolidColorBrush(baseColor), new Pen(Brushes.Black, 1), buildingRect);
+
+                // Draw owner flag/indicator
+                var flagRect = new Rect(SPRITE_SIZE / 3, SPRITE_SIZE / 2, SPRITE_SIZE / 3, SPRITE_SIZE / 6);
+                context.DrawRectangle(new SolidColorBrush(ownerColor), new Pen(Brushes.Black, 1), flagRect);
+
+                // Add property type indicator
+                var textBrush = new SolidColorBrush(GetContrastColor(baseColor));
+                var typeface = new Typeface("Arial");
+                var formattedText = new FormattedText(
+                    type.Substring(0, 1),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    8,
+                    textBrush,
+                    VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                formattedText.TextAlignment = TextAlignment.Center;
+                context.DrawText(formattedText, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 3));
+            }
+
+            var bitmap = new RenderTargetBitmap(SPRITE_SIZE, SPRITE_SIZE, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+
+        private BitmapSource CreateUnitFallbackSprite(string type, Color unitColor, Color ownerColor)
+        {
+            var visual = new DrawingVisual();
+            using (var context = visual.RenderOpen())
+            {
+                // Draw transparent background
+                context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, SPRITE_SIZE, SPRITE_SIZE));
+
+                // Draw unit shape based on type
+                var unitBrush = new SolidColorBrush(unitColor);
+                var outlinePen = new Pen(Brushes.Black, 1);
+
+                if (type.Contains("Infantry") || type.Contains("Mechanized"))
                 {
-                    DrawRainEffect(drawingContext, width, height);
+                    // Draw circle for infantry
+                    context.DrawEllipse(unitBrush, outlinePen, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 2), SPRITE_SIZE / 3, SPRITE_SIZE / 3);
                 }
-                else if (weather == WeatherType.Snow)
+                else if (type.Contains("Tank") || type.Contains("Artillery") || type.Contains("AntiAir"))
                 {
-                    DrawSnowEffect(drawingContext, width, height);
+                    // Draw rectangle for vehicles
+                    var rect = new Rect(SPRITE_SIZE / 4, SPRITE_SIZE / 4, SPRITE_SIZE / 2, SPRITE_SIZE / 2);
+                    context.DrawRectangle(unitBrush, outlinePen, rect);
                 }
-            }
-
-            drawingContext.Close();
-
-            var drawingImage = new DrawingImage(drawingGroup);
-            drawingImage.Freeze();
-            return drawingImage;
-        }
-
-        private void DrawRainEffect(DrawingContext dc, int width, int height)
-        {
-            var rainPen = new Pen(new SolidColorBrush(Color.FromArgb(64, 200, 200, 255)), 1);
-            rainPen.Freeze();
-
-            var random = new Random(42); // Fixed seed for consistent pattern
-            for (int i = 0; i < 20; i++)
-            {
-                int x = random.Next(width);
-                int y = random.Next(height);
-                dc.DrawLine(rainPen, new Point(x, y), new Point(x - 5, y + 10));
-            }
-        }
-
-        private void DrawSnowEffect(DrawingContext dc, int width, int height)
-        {
-            var snowBrush = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
-            snowBrush.Freeze();
-
-            var random = new Random(42); // Fixed seed for consistent pattern
-            for (int i = 0; i < 30; i++)
-            {
-                int x = random.Next(width);
-                int y = random.Next(height);
-                dc.DrawEllipse(snowBrush, null, new Point(x, y), 2, 2);
-            }
-        }
-
-        private string GenerateSpriteFileName(string type, string variant, string layer)
-        {
-            if (layer == "terrain")
-                return $"{type}_{variant}.png";
-            else if (layer == "property")
-                return $"{type}_property.png";
-            else if (layer == "unit")
-                return $"{type}_{variant}.png";
-            return $"{type}.png";
-        }
-
-        private ImageSource GenerateFallbackSprite(string type, string variant, string layer, int size)
-        {
-            var drawingGroup = new DrawingGroup();
-            var drawingContext = drawingGroup.Open();
-
-            Color baseColor = _fallbackColors.ContainsKey(type) ? _fallbackColors[type] : Colors.Gray;
-            Color ownerColor = _fallbackColors.ContainsKey(variant) ? _fallbackColors[variant] : Colors.Gray;
-
-            if (layer == "terrain")
-            {
-                DrawTerrainFallback(drawingContext, baseColor, size, type);
-            }
-            else if (layer == "property")
-            {
-                DrawPropertyFallback(drawingContext, baseColor, ownerColor, size, type);
-            }
-            else if (layer == "unit")
-            {
-                DrawUnitFallback(drawingContext, baseColor, ownerColor, size, type);
-            }
-
-            drawingContext.Close();
-
-            var drawingImage = new DrawingImage(drawingGroup);
-            drawingImage.Freeze();
-            return drawingImage;
-        }
-
-        private void DrawTerrainFallback(DrawingContext dc, Color color, int size, string type)
-        {
-            var rect = new Rect(0, 0, size, size);
-            var brush = new SolidColorBrush(color);
-            brush.Freeze();
-
-            dc.DrawRectangle(brush, null, rect);
-
-            // Add texture patterns for specific terrain types
-            if (type == "Forest")
-            {
-                var treeBrush = new SolidColorBrush(Color.FromRgb(0, 80, 0));
-                treeBrush.Freeze();
-                for (int i = 0; i < 3; i++)
+                else if (type.Contains("Fighter") || type.Contains("Bomber") || type.Contains("Helicopter") || type.Contains("Stealth"))
                 {
-                    for (int j = 0; j < 3; j++)
+                    // Draw triangle for air units
+                    var points = new Point[]
                     {
-                        var treeRect = new Rect(i * size / 3 + size / 12, j * size / 3 + size / 12, size / 6, size / 6);
-                        dc.DrawEllipse(treeBrush, null, new Point(treeRect.X + treeRect.Width / 2, treeRect.Y + treeRect.Height / 2), treeRect.Width / 2, treeRect.Height / 2);
-                    }
+                        new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 4),
+                        new Point(SPRITE_SIZE / 4, SPRITE_SIZE * 3 / 4),
+                        new Point(SPRITE_SIZE * 3 / 4, SPRITE_SIZE * 3 / 4)
+                    };
+                    var figure = new PathFigure(points[0], new[] { new LineSegment(points[1], true), new LineSegment(points[2], true) }, true);
+                    var geometry = new PathGeometry(new[] { figure });
+                    context.DrawGeometry(unitBrush, outlinePen, geometry);
                 }
-            }
-            else if (type == "Mountain")
-            {
-                var mountainBrush = new SolidColorBrush(Color.FromRgb(101, 67, 33));
-                mountainBrush.Freeze();
-                var points = new PointCollection
+                else if (type.Contains("Ship") || type.Contains("Naval") || type.Contains("Battleship") || type.Contains("Cruiser") || type.Contains("Submarine") || type.Contains("Carrier") || type.Contains("Lander"))
                 {
-                    new Point(size / 2, size / 4),
-                    new Point(size / 4, size * 3 / 4),
-                    new Point(size * 3 / 4, size * 3 / 4)
-                };
-                dc.DrawGeometry(mountainBrush, null, new PathGeometry(new[] { new PathFigure(points[0], new[] { new LineSegment(points[1], true), new LineSegment(points[2], true) }, true) }));
-            }
-            else if (type == "Sea" || type == "River")
-            {
-                var waveBrush = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
-                waveBrush.Freeze();
-                var pen = new Pen(waveBrush, 2);
-                pen.Freeze();
-                for (int i = 0; i < 3; i++)
-                {
-                    var y = (i + 1) * size / 4;
-                    dc.DrawLine(pen, new Point(0, y), new Point(size, y));
-                }
-            }
-            else if (type == "Road" || type == "Bridge")
-            {
-                var roadBrush = new SolidColorBrush(Colors.DarkGray);
-                roadBrush.Freeze();
-                dc.DrawRectangle(roadBrush, null, new Rect(size / 3, 0, size / 3, size));
-
-                if (type == "Road")
-                {
-                    var dashBrush = new SolidColorBrush(Colors.Yellow);
-                    dashBrush.Freeze();
-                    for (int i = 0; i < 4; i++)
+                    // Draw hexagon for naval units
+                    var points = new Point[6];
+                    for (int i = 0; i < 6; i++)
                     {
-                        dc.DrawRectangle(dashBrush, null, new Rect(size / 2 - 2, i * size / 3, 4, size / 6));
+                        var angle = i * Math.PI / 3;
+                        points[i] = new Point(
+                            SPRITE_SIZE / 2 + SPRITE_SIZE / 3 * Math.Cos(angle),
+                            SPRITE_SIZE / 2 + SPRITE_SIZE / 3 * Math.Sin(angle)
+                        );
                     }
+                    var segments = new LineSegment[5];
+                    for (int i = 0; i < 5; i++)
+                    {
+                        segments[i] = new LineSegment(points[i + 1], true);
+                    }
+                    var figure = new PathFigure(points[0], segments, true);
+                    var geometry = new PathGeometry(new[] { figure });
+                    context.DrawGeometry(unitBrush, outlinePen, geometry);
                 }
-            }
-            else if (type == "Beach")
-            {
-                var sandBrush = new SolidColorBrush(Colors.SandyBrown);
-                sandBrush.Freeze();
-                dc.DrawRectangle(sandBrush, null, rect);
+                else
+                {
+                    // Default rectangle for other units
+                    var rect = new Rect(SPRITE_SIZE / 4, SPRITE_SIZE / 4, SPRITE_SIZE / 2, SPRITE_SIZE / 2);
+                    context.DrawRectangle(unitBrush, outlinePen, rect);
+                }
 
-                var waveBrush = new SolidColorBrush(Color.FromArgb(128, 100, 150, 200));
-                waveBrush.Freeze();
-                dc.DrawRectangle(waveBrush, null, new Rect(0, 0, size / 3, size));
+                // Draw owner indicator (small circle in center)
+                context.DrawEllipse(new SolidColorBrush(ownerColor), outlinePen, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 2), SPRITE_SIZE / 8, SPRITE_SIZE / 8);
+
+                // Add unit type initial
+                var textBrush = new SolidColorBrush(GetContrastColor(ownerColor));
+                var typeface = new Typeface("Arial");
+                var formattedText = new FormattedText(
+                    type.Substring(0, 1),
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    typeface,
+                    7,
+                    textBrush,
+                    VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                formattedText.TextAlignment = TextAlignment.Center;
+                context.DrawText(formattedText, new Point(SPRITE_SIZE / 2, SPRITE_SIZE / 2 - 4));
             }
+
+            var bitmap = new RenderTargetBitmap(SPRITE_SIZE, SPRITE_SIZE, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+
+            return bitmap;
         }
 
-        private void DrawPropertyFallback(DrawingContext dc, Color propertyColor, Color ownerColor, int size, string type)
+        private BitmapSource CreateFallbackSpriteSheet(TerrainType terrain)
         {
-            // Draw terrain base first
-            if (type == "City" || type == "Factory" || type == "HQ" || type == "Airport" || type == "Port")
+            var visual = new DrawingVisual();
+            using (var context = visual.RenderOpen())
             {
-                var terrainBrush = new SolidColorBrush(Colors.LightGray);
-                terrainBrush.Freeze();
-                dc.DrawRectangle(terrainBrush, null, new Rect(0, 0, size, size));
+                var color = _fallbackColors.GetValueOrDefault(terrain.ToString(), Colors.Gray);
+
+                // Create a 2x4 grid of sprites
+                for (int i = 0; i < SPRITES_PER_SHEET; i++)
+                {
+                    int col = i % SPRITES_PER_ROW;
+                    int row = i / SPRITES_PER_ROW;
+
+                    var rect = new Rect(col * SPRITE_SIZE, row * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE);
+
+                    // Vary the shade slightly for each sprite
+                    var spriteColor = Color.FromRgb(
+                        (byte)Math.Min(255, color.R + (i * 10)),
+                        (byte)Math.Min(255, color.G + (i * 10)),
+                        (byte)Math.Min(255, color.B + (i * 10))
+                    );
+
+                    context.DrawRectangle(new SolidColorBrush(spriteColor), null, rect);
+
+                    // Add border
+                    var borderPen = new Pen(new SolidColorBrush(Colors.Black), 1);
+                    context.DrawRectangle(null, borderPen, new Rect(col * SPRITE_SIZE + 0.5, row * SPRITE_SIZE + 0.5, SPRITE_SIZE - 1, SPRITE_SIZE - 1));
+
+                    // Add text
+                    var textBrush = new SolidColorBrush(GetContrastColor(spriteColor));
+                    var typeface = new Typeface("Arial");
+
+                    // Show terrain type abbreviation
+                    var terrainText = terrain.ToString().Substring(0, Math.Min(3, terrain.ToString().Length));
+                    var formattedText = new FormattedText(
+                        terrainText,
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        FlowDirection.LeftToRight,
+                        typeface,
+                        8,
+                        textBrush,
+                        VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                    formattedText.TextAlignment = TextAlignment.Center;
+                    context.DrawText(formattedText, new Point(col * SPRITE_SIZE + SPRITE_SIZE / 2, row * SPRITE_SIZE + SPRITE_SIZE / 2 - 8));
+
+                    // Show sprite index
+                    var indexText = new FormattedText(
+                        i.ToString(),
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        FlowDirection.LeftToRight,
+                        typeface,
+                        6,
+                        textBrush,
+                        VisualTreeHelper.GetDpi(visual).PixelsPerDip);
+
+                    indexText.TextAlignment = TextAlignment.Center;
+                    context.DrawText(indexText, new Point(col * SPRITE_SIZE + SPRITE_SIZE / 2, row * SPRITE_SIZE + SPRITE_SIZE / 2 + 2));
+                }
             }
 
-            // Draw building
-            var baseRect = new Rect(size / 4, size / 3, size / 2, size / 2);
-            var baseBrush = new SolidColorBrush(propertyColor);
-            baseBrush.Freeze();
-            dc.DrawRectangle(baseBrush, null, baseRect);
+            var bitmap = new RenderTargetBitmap(SPRITES_PER_ROW * SPRITE_SIZE, SPRITES_PER_COLUMN * SPRITE_SIZE, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
 
-            // Draw property-specific features
-            if (type == "HQ")
-            {
-                var flagPole = new Rect(size / 2 - 1, size / 6, 2, size / 3);
-                var poleBrush = new SolidColorBrush(Colors.Black);
-                poleBrush.Freeze();
-                dc.DrawRectangle(poleBrush, null, flagPole);
-
-                var flagRect = new Rect(size / 2 + 1, size / 6, size / 4, size / 6);
-                var flagBrush = new SolidColorBrush(ownerColor);
-                flagBrush.Freeze();
-                dc.DrawRectangle(flagBrush, null, flagRect);
-            }
-            else if (type == "Factory")
-            {
-                var chimneyRect = new Rect(size * 3 / 5, size / 4, size / 8, size / 3);
-                var chimneyBrush = new SolidColorBrush(Colors.DarkRed);
-                chimneyBrush.Freeze();
-                dc.DrawRectangle(chimneyBrush, null, chimneyRect);
-            }
-            else if (type == "Airport")
-            {
-                var runwayBrush = new SolidColorBrush(Colors.Black);
-                runwayBrush.Freeze();
-                dc.DrawRectangle(runwayBrush, null, new Rect(0, size * 2 / 3, size, size / 6));
-            }
-            else if (type == "Port")
-            {
-                var waterBrush = new SolidColorBrush(Colors.LightBlue);
-                waterBrush.Freeze();
-                dc.DrawRectangle(waterBrush, null, new Rect(0, size * 2 / 3, size, size / 3));
-            }
-
-            // Draw owner indicator
-            var ownerRect = new Rect(size / 3, size / 2, size / 3, size / 6);
-            var ownerBrush = new SolidColorBrush(ownerColor);
-            ownerBrush.Freeze();
-            dc.DrawRectangle(ownerBrush, null, ownerRect);
+            return bitmap;
         }
 
-        private void DrawUnitFallback(DrawingContext dc, Color unitColor, Color ownerColor, int size, string type)
+        private Color GetContrastColor(Color color)
         {
-            var center = new Point(size / 2, size / 2);
-            var unitBrush = new SolidColorBrush(unitColor);
-            unitBrush.Freeze();
-            var ownerBrush = new SolidColorBrush(ownerColor);
-            ownerBrush.Freeze();
-            var outlinePen = new Pen(Brushes.Black, 1);
-            outlinePen.Freeze();
-
-            // Draw unit based on movement type
-            if (type.Contains("Infantry") || type.Contains("Mechanized"))
-            {
-                dc.DrawEllipse(unitBrush, outlinePen, center, size / 3, size / 3);
-            }
-            else if (type.Contains("Tank") || type.Contains("Artillery") || type.Contains("AntiAir"))
-            {
-                var rect = new Rect(size / 4, size / 4, size / 2, size / 2);
-                dc.DrawRectangle(unitBrush, outlinePen, rect);
-            }
-            else if (type.Contains("Fighter") || type.Contains("Bomber") || type.Contains("Helicopter") || type.Contains("Stealth"))
-            {
-                var points = new PointCollection
-                {
-                    new Point(size / 2, size / 4),
-                    new Point(size / 4, size * 3 / 4),
-                    new Point(size * 3 / 4, size * 3 / 4)
-                };
-                dc.DrawGeometry(unitBrush, outlinePen, new PathGeometry(new[] { new PathFigure(points[0], new[] { new LineSegment(points[1], true), new LineSegment(points[2], true) }, true) }));
-            }
-            else if (type.Contains("Ship") || type.Contains("Naval") || type.Contains("Battleship") || type.Contains("Cruiser") || type.Contains("Submarine") || type.Contains("Carrier") || type.Contains("Lander"))
-            {
-                var points = new PointCollection();
-                for (int i = 0; i < 6; i++)
-                {
-                    var angle = i * Math.PI / 3;
-                    points.Add(new Point(
-                        center.X + size / 3 * Math.Cos(angle),
-                        center.Y + size / 3 * Math.Sin(angle)
-                    ));
-                }
-                var segments = new List<LineSegment>();
-                for (int i = 1; i < points.Count; i++)
-                {
-                    segments.Add(new LineSegment(points[i], true));
-                }
-                dc.DrawGeometry(unitBrush, outlinePen, new PathGeometry(new[] { new PathFigure(points[0], segments, true) }));
-            }
-            else if (type.Contains("Transport") || type.Contains("Supply"))
-            {
-                var rect = new Rect(size / 5, size / 3, size * 3 / 5, size / 3);
-                dc.DrawRectangle(unitBrush, outlinePen, rect);
-            }
-
-            // Draw owner indicator
-            dc.DrawEllipse(ownerBrush, null, center, size / 8, size / 8);
+            // Calculate perceived brightness
+            double brightness = (color.R * 0.299 + color.G * 0.587 + color.B * 0.114) / 255;
+            return brightness > 0.5 ? Colors.Black : Colors.White;
         }
 
         public void ClearCache()
         {
             _spriteCache.Clear();
-        }
-
-        public void PreloadSprites(IEnumerable<(string type, string variant, string layer)> sprites, int size)
-        {
-            foreach (var (type, variant, layer) in sprites)
-            {
-                GetSprite(type, variant, layer, size);
-            }
         }
     }
 }

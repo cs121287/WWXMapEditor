@@ -10,6 +10,7 @@ namespace WwXMapEditor
         public int Width { get; set; } = 100;
         public string Terrain { get; set; } = "Plain";
         public string Season { get; set; } = "Summer";
+        public string Weather { get; set; } = "Random";
     }
 
     public partial class NewMapOptionsWindow : Window
@@ -27,6 +28,7 @@ namespace WwXMapEditor
             WidthBox.Text = "100";
             TerrainCombo.SelectedIndex = 0; // Plain
             SeasonCombo.SelectedIndex = 0;  // Summer
+            WeatherCombo.SelectedIndex = 0; // Random
         }
 
         private void CreateMap_Click(object sender, RoutedEventArgs e)
@@ -43,6 +45,7 @@ namespace WwXMapEditor
             }
             var terrain = (TerrainCombo.SelectedItem as ComboBoxItem)?.Content as string ?? "Plain";
             var season = (SeasonCombo.SelectedItem as ComboBoxItem)?.Content as string ?? "Summer";
+            var weather = (WeatherCombo.SelectedItem as ComboBoxItem)?.Content as string ?? "Random";
             var name = string.IsNullOrWhiteSpace(NameBox.Text) ? "UntitledMap" : NameBox.Text.Trim();
 
             MapOptions = new MapOptions
@@ -51,7 +54,8 @@ namespace WwXMapEditor
                 Length = length,
                 Width = width,
                 Terrain = terrain,
-                Season = season
+                Season = season,
+                Weather = weather
             };
 
             DialogResult = true;

@@ -8,166 +8,109 @@ namespace WwXMapEditor.Services
     {
         public class ValidationError
         {
-            public string Type { get; set; } = string.Empty;
-            public string Message { get; set; } = string.Empty;
+            public string Message { get; set; } = "";
+            public ValidationErrorType Type { get; set; }
             public int? X { get; set; }
             public int? Y { get; set; }
+        }
+
+        public enum ValidationErrorType
+        {
+            NoHQ,
+            MultipleHQs,
+            NoPlayers,
+            InvalidUnitPlacement,
+            InvalidPropertyPlacement,
+            UnreachableArea,
+            NoProductionFacilities
         }
 
         public List<ValidationError> ValidateMap(Map map)
         {
             var errors = new List<ValidationError>();
 
-            // Validate map dimensions
-            if (map.Width < 20 || map.Width > 2000)
+            // Check for HQ presence
+            var hqCount = map.Properties.Count(p => p.Type == PropertyType.HQ);
+            if (hqCount == 0)
             {
                 errors.Add(new ValidationError
                 {
-                    Type = "Dimension",
-                    Message = $"Map width {map.Width} is outside valid range (20-2000)"
+                    Message = "Map must have at least one HQ",
+                    Type = ValidationErrorType.NoHQ
                 });
             }
 
-            if (map.Height < 20 || map.Height > 2000)
+            // Check for players
+            if (map.Players.Count == 0)
             {
                 errors.Add(new ValidationError
                 {
-                    Type = "Dimension",
-                    Message = $"Map height {map.Height} is outside valid range (20-2000)"
+                    Message = "Map must have at least one player",
+                    Type = ValidationErrorType.NoPlayers
                 });
             }
 
-            // Validate tiles
-            if (map.TileArray == null)
+            // Check for production facilities per player
+            var playerNames = map.Players.Select(p => p.Name).ToList();
+            foreach (var player in playerNames)
             {
-                errors.Add(new ValidationError
-                {
-                    Type = "Structure",
-                    Message = "Map tile array is not initialized"
-                });
-                return errors;
-            }
+                var hasProduction = map.Properties.Any(p =>
+                    p.Owner == player &&
+                    (p.Type == PropertyType.Factory || p.Type == PropertyType.Airport || p.Type == PropertyType.Port));
 
-            // Check for null tiles
-            for (int y = 0; y < map.Height; y++)
-            {
-                for (int x = 0; x < map.Width; x++)
+                if (!hasProduction)
                 {
-                    if (map.TileArray[x, y] == null)
+                    errors.Add(new ValidationError
                     {
-                        errors.Add(new ValidationError
-                        {
-                            Type = "Tile",
-                            Message = $"Null tile at position ({x},{y})",
-                            X = x,
-                            Y = y
-                        });
-                    }
+                        Message = $"Player '{player}' has no production facilities",
+                        Type = ValidationErrorType.NoProductionFacilities
+                    });
                 }
             }
 
-            // Validate units
+            // Check unit placement
             foreach (var unit in map.Units)
             {
                 if (unit.X < 0 || unit.X >= map.Width || unit.Y < 0 || unit.Y >= map.Height)
                 {
                     errors.Add(new ValidationError
                     {
-                        Type = "Unit",
-                        Message = $"Unit at ({unit.X},{unit.Y}) is outside map bounds",
+                        Message = $"Unit at ({unit.X}, {unit.Y}) is out of bounds",
+                        Type = ValidationErrorType.InvalidUnitPlacement,
                         X = unit.X,
                         Y = unit.Y
                     });
+                    continue;
                 }
 
-                if (unit.HP <= 0)
+                var tile = map.TileArray[unit.X, unit.Y];
+                if (tile == null) continue;
+
+                // Check if unit type can be on this terrain
+                bool validPlacement = IsValidUnitPlacement(unit, tile.Terrain);
+                if (!validPlacement)
                 {
                     errors.Add(new ValidationError
                     {
-                        Type = "Unit",
-                        Message = $"Unit at ({unit.X},{unit.Y}) has invalid HP: {unit.HP}",
+                        Message = $"{unit.Type} cannot be placed on {tile.Terrain} terrain",
+                        Type = ValidationErrorType.InvalidUnitPlacement,
                         X = unit.X,
                         Y = unit.Y
                     });
                 }
-
-                // Check if unit is on traversable terrain
-                if (unit.X >= 0 && unit.X < map.Width && unit.Y >= 0 && unit.Y < map.Height)
-                {
-                    var tile = map.TileArray[unit.X, unit.Y];
-                    if (tile != null && !tile.Traversable)
-                    {
-                        errors.Add(new ValidationError
-                        {
-                            Type = "Unit",
-                            Message = $"Unit at ({unit.X},{unit.Y}) is on non-traversable terrain",
-                            X = unit.X,
-                            Y = unit.Y
-                        });
-                    }
-                }
             }
 
-            // Validate properties
+            // Check property placement
             foreach (var property in map.Properties)
             {
                 if (property.X < 0 || property.X >= map.Width || property.Y < 0 || property.Y >= map.Height)
                 {
                     errors.Add(new ValidationError
                     {
-                        Type = "Property",
-                        Message = $"Property at ({property.X},{property.Y}) is outside map bounds",
+                        Message = $"Property at ({property.X}, {property.Y}) is out of bounds",
+                        Type = ValidationErrorType.InvalidPropertyPlacement,
                         X = property.X,
                         Y = property.Y
-                    });
-                }
-            }
-
-            // Check for duplicate units/properties at same position
-            var unitPositions = map.Units.GroupBy(u => new { u.X, u.Y }).Where(g => g.Count() > 1);
-            foreach (var pos in unitPositions)
-            {
-                errors.Add(new ValidationError
-                {
-                    Type = "Unit",
-                    Message = $"Multiple units at position ({pos.Key.X},{pos.Key.Y})",
-                    X = pos.Key.X,
-                    Y = pos.Key.Y
-                });
-            }
-
-            var propertyPositions = map.Properties.GroupBy(p => new { p.X, p.Y }).Where(g => g.Count() > 1);
-            foreach (var pos in propertyPositions)
-            {
-                errors.Add(new ValidationError
-                {
-                    Type = "Property",
-                    Message = $"Multiple properties at position ({pos.Key.X},{pos.Key.Y})",
-                    X = pos.Key.X,
-                    Y = pos.Key.Y
-                });
-            }
-
-            // Validate players
-            if (map.Players == null || map.Players.Count == 0)
-            {
-                errors.Add(new ValidationError
-                {
-                    Type = "Player",
-                    Message = "Map has no players defined"
-                });
-            }
-
-            // Check for at least one HQ per player
-            var playerHQs = map.Properties.Where(p => p.Type == "HQ").GroupBy(p => p.Owner);
-            foreach (var player in map.Players ?? new List<Player>())
-            {
-                if (!playerHQs.Any(g => g.Key == player.Name))
-                {
-                    errors.Add(new ValidationError
-                    {
-                        Type = "Victory",
-                        Message = $"Player {player.Name} has no HQ"
                     });
                 }
             }
@@ -175,9 +118,29 @@ namespace WwXMapEditor.Services
             return errors;
         }
 
-        public bool IsMapValid(Map map)
+        private bool IsValidUnitPlacement(Unit unit, TerrainType terrain)
         {
-            return !ValidateMap(map).Any();
+            switch (unit.MovementType)
+            {
+                case MovementType.Infantry:
+                    return terrain != TerrainType.Sea;
+
+                case MovementType.Wheeled:
+                case MovementType.Treaded:
+                    return terrain != TerrainType.Sea && terrain != TerrainType.Mountain;
+
+                case MovementType.Ship:
+                    return terrain == TerrainType.Sea || terrain == TerrainType.Port;
+
+                case MovementType.Lander:
+                    return terrain == TerrainType.Sea || terrain == TerrainType.Beach || terrain == TerrainType.Port;
+
+                case MovementType.Air:
+                    return true; // Air units can be placed anywhere
+
+                default:
+                    return true;
+            }
         }
     }
 }

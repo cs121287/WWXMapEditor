@@ -6,6 +6,7 @@ namespace WwXMapEditor.Models
         public int Y { get; set; }
         public TerrainType Terrain { get; set; } = TerrainType.Plain;
         public bool Traversable { get; set; } = true;
+        public int? SpriteIndex { get; set; }
     }
 
     public enum TerrainType

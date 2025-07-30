@@ -15,7 +15,7 @@ namespace WwXMapEditor.Models
         public List<Property> Properties { get; set; } = new();
         public List<Unit> Units { get; set; } = new();
         public List<Player> Players { get; set; } = new();
-        public WeatherType Weather { get; set; } = WeatherType.Clear;
+        public WeatherType Weather { get; set; } = WeatherType.Random;
         public bool FogOfWarEnabled { get; set; } = true;
         public VictoryConditions VictoryConditions { get; set; } = new();
         public MapMetadata Metadata { get; set; } = new();
@@ -40,11 +40,9 @@ namespace WwXMapEditor.Models
 
     public enum WeatherType
     {
+        Random,
         Clear,
         Rain,
-        Snow,
-        Fog,
-        Storm,
-        Sandstorm
+        Snow
     }
 }

@@ -21,7 +21,7 @@ namespace WwXMapEditor.Converters
             {
                 return Enum.ToObject(targetType, intValue);
             }
-            return Activator.CreateInstance(targetType);
+            return Enum.ToObject(targetType, 0);
         }
     }
 }

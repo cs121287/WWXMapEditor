@@ -5,7 +5,7 @@ namespace WwXMapEditor.Models
         public int X { get; set; }
         public int Y { get; set; }
         public UnitType Type { get; set; }
-        public string Owner { get; set; }
+        public string Owner { get; set; } = "Neutral";
         public int HP { get; set; } = 100;
         public int Fuel { get; set; }
         public int Ammo { get; set; }
@@ -17,10 +17,11 @@ namespace WwXMapEditor.Models
 
         public Unit()
         {
-            SetDefaultValues();
+            // Remove automatic SetDefaultValues() call to prevent issues
+            // SetDefaultValues() should be called explicitly when needed
         }
 
-        private void SetDefaultValues()
+        public void SetDefaultValues()
         {
             switch (Type)
             {
