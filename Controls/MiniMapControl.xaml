@@ -7,7 +7,8 @@
             <Image Name="MiniMapImage" Stretch="Fill"/>
             <Canvas Name="MiniMapCanvas" 
                     Background="Transparent"
-                    MouseLeftButtonDown="MiniMapCanvas_MouseLeftButtonDown">
+                    MouseLeftButtonDown="MiniMapCanvas_MouseLeftButtonDown"
+                    MouseMove="MiniMapCanvas_MouseMove">
                 <Rectangle Name="ViewportRect" 
                            Stroke="Red" 
                            StrokeThickness="2" 

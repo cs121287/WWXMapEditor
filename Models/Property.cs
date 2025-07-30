@@ -11,8 +11,11 @@ namespace WwXMapEditor.Models
 
         public Property()
         {
-            // Remove automatic SetDefaultValues() call to prevent issues
-            // SetDefaultValues() should be called explicitly when needed
+            // Initialize with default values based on Type
+            // Since Type defaults to 0 (City), set City defaults
+            Type = PropertyType.City;
+            VisionRange = 2;
+            Income = 1000;
         }
 
         public void SetDefaultValues()

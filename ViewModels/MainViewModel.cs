@@ -243,7 +243,7 @@ namespace WwXMapEditor.ViewModels
                 {
                     var autoSavePath = _currentFilePath + ".autosave";
                     CurrentMap.FlattenTileArray();
-                    MapService.SaveMap(CurrentMap, autoSavePath, true); // Use compression for autosave
+                    MapService.SaveMap(CurrentMap, autoSavePath);
                     StatusText = "Auto-saved";
                 }
                 catch
@@ -276,7 +276,8 @@ namespace WwXMapEditor.ViewModels
                         X = x,
                         Y = y,
                         Terrain = Enum.Parse<TerrainType>(options.Terrain),
-                        Traversable = true
+                        Traversable = true,
+                        SpriteIndex = 0
                     };
                     CurrentMap.TileArray[x, y] = tile;
                     CurrentMap.Tiles.Add(tile);
@@ -295,7 +296,6 @@ namespace WwXMapEditor.ViewModels
                 var loadedMap = MapService.LoadMap(filePath);
                 CurrentMap = loadedMap;
                 _currentFilePath = filePath;
-                CurrentMap.BuildTileArray();
                 ValidateMap();
                 _undoRedoManager.Reset(CurrentMap);
                 UpdatePlayers();
@@ -342,89 +342,64 @@ namespace WwXMapEditor.ViewModels
 
         public void PaintTile(int x, int y)
         {
-            if (CurrentMap == null) return;
+            if (CurrentMap == null || x < 0 || x >= CurrentMap.Width || y < 0 || y >= CurrentMap.Height) return;
 
-            try
+            switch (CurrentTool)
             {
-                switch (CurrentTool)
-                {
-                    case EditTool.Terrain:
-                        if (CurrentMap.TileArray[x, y] != null)
-                            CurrentMap.TileArray[x, y].Terrain = SelectedTerrain;
-                        break;
-                    case EditTool.Property:
-                        PlaceProperty(x, y, SelectedPropertyType, SelectedOwner);
-                        break;
-                    case EditTool.Unit:
-                        PlaceUnit(x, y, SelectedUnitType, SelectedOwner);
-                        break;
-                    case EditTool.Fill:
-                        FillArea(x, y, SelectedTerrain);
-                        break;
-                }
+                case EditTool.Terrain:
+                    if (CurrentMap.TileArray[x, y] != null)
+                    {
+                        CurrentMap.TileArray[x, y].Terrain = SelectedTerrain;
+                        // Preserve existing traversable value unless it's a terrain that should affect it
+                        if (SelectedTerrain == TerrainType.Mountain || SelectedTerrain == TerrainType.Sea)
+                        {
+                            // Let the user decide, don't auto-change
+                        }
+                    }
+                    break;
+                case EditTool.Property:
+                    PlaceProperty(x, y, SelectedPropertyType, SelectedOwner);
+                    break;
+                case EditTool.Unit:
+                    PlaceUnit(x, y, SelectedUnitType, SelectedOwner);
+                    break;
+                case EditTool.Fill:
+                    FillArea(x, y, SelectedTerrain);
+                    break;
+            }
 
-                _undoRedoManager.Push(CurrentMap);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"PaintTile error: {ex.Message}");
-                StatusText = "Error placing object";
-            }
+            _undoRedoManager.Push(CurrentMap);
         }
 
-        // Renamed from SetProperty to avoid conflict with base class method
         private void PlaceProperty(int x, int y, PropertyType type, string owner)
         {
             if (CurrentMap == null) return;
-
-            try
+            var prop = CurrentMap.Properties.Find(p => p.X == x && p.Y == y);
+            if (prop == null)
             {
-                var prop = CurrentMap.Properties.Find(p => p.X == x && p.Y == y);
-                if (prop == null)
-                {
-                    prop = new Property { X = x, Y = y, Type = type, Owner = owner };
-                    prop.SetDefaultValues(); // Call after setting type
-                    CurrentMap.Properties.Add(prop);
-                }
-                else
-                {
-                    prop.Type = type;
-                    prop.Owner = owner;
-                    prop.SetDefaultValues(); // Update values after changing type
-                }
+                prop = new Property { X = x, Y = y, Type = type, Owner = owner };
+                CurrentMap.Properties.Add(prop);
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"PlaceProperty error: {ex.Message}");
-                throw;
+                prop.Type = type;
+                prop.Owner = owner;
             }
         }
 
-        // Renamed from SetUnit to be consistent
         private void PlaceUnit(int x, int y, UnitType type, string owner)
         {
             if (CurrentMap == null) return;
-
-            try
+            var unit = CurrentMap.Units.Find(u => u.X == x && u.Y == y);
+            if (unit == null)
             {
-                var unit = CurrentMap.Units.Find(u => u.X == x && u.Y == y);
-                if (unit == null)
-                {
-                    unit = new Unit { X = x, Y = y, Type = type, Owner = owner };
-                    unit.SetDefaultValues(); // Call after setting type
-                    CurrentMap.Units.Add(unit);
-                }
-                else
-                {
-                    unit.Type = type;
-                    unit.Owner = owner;
-                    unit.SetDefaultValues(); // Update values after changing type
-                }
+                unit = new Unit { X = x, Y = y, Type = type, Owner = owner };
+                CurrentMap.Units.Add(unit);
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"PlaceUnit error: {ex.Message}");
-                throw;
+                unit.Type = type;
+                unit.Owner = owner;
             }
         }
 
@@ -450,6 +425,7 @@ namespace WwXMapEditor.ViewModels
 
                 visited[cx, cy] = true;
                 CurrentMap.TileArray[cx, cy].Terrain = terrain;
+                // Preserve traversable value during fill
 
                 stack.Push((cx + 1, cy));
                 stack.Push((cx - 1, cy));
@@ -543,10 +519,13 @@ namespace WwXMapEditor.ViewModels
             _selectedTileY = y;
         }
 
-        public void SaveCurrentMap(string filePath, bool useCompression = true)
+        public void SaveCurrentMap(string filePath, bool useCompression = false)
         {
             if (CurrentMap == null) return;
+
+            // Ensure all tiles are properly saved
             CurrentMap.FlattenTileArray();
+
             MapService.SaveMap(CurrentMap, filePath, useCompression);
             _currentFilePath = filePath;
             StatusText = $"Map saved: {System.IO.Path.GetFileName(filePath)}";

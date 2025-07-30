@@ -119,6 +119,15 @@ namespace WwXMapEditor
             _viewModel.OnCopyRequested += CopySelection;
             _viewModel.OnPasteRequested += PasteSelection;
             _viewModel.OnDeleteRequested += DeleteSelection;
+
+            // Subscribe to tool changes to clear selection
+            _viewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(_viewModel.CurrentTool))
+                {
+                    ClearSelection();
+                }
+            };
         }
 
         private void RequestRender()
@@ -511,6 +520,7 @@ namespace WwXMapEditor
 
                 // Update mini-map
                 MiniMap.Map = _viewModel.CurrentMap;
+                MiniMap.ForceUpdate();
             }
             catch (Exception ex)
             {
@@ -907,6 +917,17 @@ namespace WwXMapEditor
             {
                 System.Diagnostics.Debug.WriteLine($"MouseRightButtonDown error: {ex.Message}");
             }
+        }
+
+        private void ClearSelection()
+        {
+            _isSelecting = false;
+            if (_selectionRectangle != null)
+            {
+                MapCanvas.Children.Remove(_selectionRectangle);
+                _selectionRectangle = null;
+            }
+            _viewModel.SetSelectedArea(0, 0, 0, 0);
         }
 
         private void UpdateSelectionRectangle()

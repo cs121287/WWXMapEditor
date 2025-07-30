@@ -17,12 +17,24 @@ namespace WwXMapEditor.Models
 
         public Unit()
         {
-            // Remove automatic SetDefaultValues() call to prevent issues
-            // SetDefaultValues() should be called explicitly when needed
+            // Initialize with default values based on Type
+            // Since Type defaults to 0 (Infantry), set Infantry defaults
+            Type = UnitType.Infantry;
+            MovementType = MovementType.Infantry;
+            MovementRange = 3;
+            VisionRange = 2;
+            Fuel = 50;
+            Ammo = 10;
+            HP = 100;
+            HasMoved = false;
+            HasAttacked = false;
         }
 
         public void SetDefaultValues()
         {
+            // Reset HP to full if not specified
+            if (HP == 0) HP = 100;
+
             switch (Type)
             {
                 case UnitType.Infantry:
