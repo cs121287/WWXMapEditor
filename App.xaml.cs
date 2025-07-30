@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace WWXMapEditor
+namespace WwXMapEditor
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -10,5 +10,4 @@ namespace WWXMapEditor
     public partial class App : Application
     {
     }
-
 }

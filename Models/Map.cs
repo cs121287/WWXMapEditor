@@ -15,7 +15,8 @@ namespace WwXMapEditor.Models
         public List<Property> Properties { get; set; } = new();
         public List<Unit> Units { get; set; } = new();
         public List<Player> Players { get; set; } = new();
-        public string Weather { get; set; } = "Clear";
+        public WeatherType Weather { get; set; } = WeatherType.Clear;
+        public bool FogOfWarEnabled { get; set; } = true;
         public VictoryConditions VictoryConditions { get; set; } = new();
         public MapMetadata Metadata { get; set; } = new();
 
@@ -35,5 +36,15 @@ namespace WwXMapEditor.Models
                     if (TileArray[x, y] != null)
                         Tiles.Add(TileArray[x, y]);
         }
+    }
+
+    public enum WeatherType
+    {
+        Clear,
+        Rain,
+        Snow,
+        Fog,
+        Storm,
+        Sandstorm
     }
 }
