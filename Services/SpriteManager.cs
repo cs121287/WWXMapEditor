@@ -20,6 +20,9 @@ namespace WwXMapEditor.Services
         private readonly Dictionary<string, BitmapSource?> _propertySprites = new();
         private readonly Dictionary<string, BitmapSource?> _unitSprites = new();
 
+        // Cache for scaled sprites with format: "original_key_size"
+        private readonly Dictionary<string, BitmapSource> _scaledSpriteCache = new();
+
         private const int SPRITE_SIZE = 32;
         private const int SPRITES_PER_ROW = 2;
         private const int SPRITES_PER_COLUMN = 4;
@@ -175,16 +178,30 @@ namespace WwXMapEditor.Services
             }
         }
 
-        public BitmapSource GetTerrainSprite(TerrainType terrain, string season, int spriteIndex)
+        public BitmapSource GetTerrainSprite(TerrainType terrain, string season, int spriteIndex, int targetSize = SPRITE_SIZE)
         {
             // Validate and normalize sprite index
             int validSpriteIndex = ValidateSpriteIndex(spriteIndex);
 
-            // Check cache first
+            // Check cache first (including scaled cache if size differs)
             var cacheKey = $"terrain_{terrain}_{season}_{validSpriteIndex}";
-            if (_spriteCache.TryGetValue(cacheKey, out var cached))
+
+            if (targetSize == SPRITE_SIZE)
             {
-                return cached;
+                // Check regular cache for default size
+                if (_spriteCache.TryGetValue(cacheKey, out var cached))
+                {
+                    return cached;
+                }
+            }
+            else
+            {
+                // Check scaled cache for non-default size
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                if (_scaledSpriteCache.TryGetValue(scaledCacheKey, out var scaledCached))
+                {
+                    return scaledCached;
+                }
             }
 
             // Get the appropriate sprite sheet
@@ -194,14 +211,40 @@ namespace WwXMapEditor.Services
             {
                 // Extract sprite from sheet
                 var sprite = ExtractSpriteFromSheet(sheet, validSpriteIndex);
+
+                // Cache at original size
                 _spriteCache[cacheKey] = sprite;
+
+                // Scale if needed and cache
+                if (targetSize != SPRITE_SIZE)
+                {
+                    sprite = ScaleSprite(sprite, targetSize);
+                    var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                    _scaledSpriteCache[scaledCacheKey] = sprite;
+                }
+
                 return sprite;
             }
 
             // No sprite sheet loaded, create fallback
             var fallback = CreateFallbackSprite(terrain.ToString(), validSpriteIndex);
             _spriteCache[cacheKey] = fallback;
+
+            // Scale fallback if needed
+            if (targetSize != SPRITE_SIZE)
+            {
+                fallback = ScaleSprite(fallback, targetSize);
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                _scaledSpriteCache[scaledCacheKey] = fallback;
+            }
+
             return fallback;
+        }
+
+        // Overload for backward compatibility
+        public BitmapSource GetTerrainSprite(TerrainType terrain, string season, int spriteIndex)
+        {
+            return GetTerrainSprite(terrain, season, spriteIndex, SPRITE_SIZE);
         }
 
         public BitmapSource GetTerrainSpriteSheet(TerrainType terrain, string season)
@@ -217,13 +260,25 @@ namespace WwXMapEditor.Services
             return CreateFallbackSpriteSheet(terrain);
         }
 
-        public BitmapSource GetPropertySprite(PropertyType propertyType, string owner, string season)
+        public BitmapSource GetPropertySprite(PropertyType propertyType, string owner, string season, int targetSize = SPRITE_SIZE)
         {
             // Check cache first
             var cacheKey = $"property_{propertyType}_{owner}_{season}";
-            if (_spriteCache.TryGetValue(cacheKey, out var cached))
+
+            if (targetSize == SPRITE_SIZE)
             {
-                return cached;
+                if (_spriteCache.TryGetValue(cacheKey, out var cached))
+                {
+                    return cached;
+                }
+            }
+            else
+            {
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                if (_scaledSpriteCache.TryGetValue(scaledCacheKey, out var scaledCached))
+                {
+                    return scaledCached;
+                }
             }
 
             var key = $"{propertyType}_{owner}_{season}";
@@ -231,6 +286,14 @@ namespace WwXMapEditor.Services
             if (_propertySprites.TryGetValue(key, out var sprite) && sprite != null)
             {
                 _spriteCache[cacheKey] = sprite;
+
+                if (targetSize != SPRITE_SIZE)
+                {
+                    sprite = ScaleSprite(sprite, targetSize);
+                    var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                    _scaledSpriteCache[scaledCacheKey] = sprite;
+                }
+
                 return sprite;
             }
 
@@ -239,16 +302,42 @@ namespace WwXMapEditor.Services
             var ownerColor = _fallbackColors.GetValueOrDefault($"Property_{owner}", Colors.Gray);
             var fallback = CreatePropertyFallbackSprite(propertyType.ToString(), baseColor, ownerColor);
             _spriteCache[cacheKey] = fallback;
+
+            if (targetSize != SPRITE_SIZE)
+            {
+                fallback = ScaleSprite(fallback, targetSize);
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                _scaledSpriteCache[scaledCacheKey] = fallback;
+            }
+
             return fallback;
         }
 
-        public BitmapSource GetUnitSprite(UnitType unitType, string owner, string season)
+        // Overload for backward compatibility
+        public BitmapSource GetPropertySprite(PropertyType propertyType, string owner, string season)
+        {
+            return GetPropertySprite(propertyType, owner, season, SPRITE_SIZE);
+        }
+
+        public BitmapSource GetUnitSprite(UnitType unitType, string owner, string season, int targetSize = SPRITE_SIZE)
         {
             // Check cache first
             var cacheKey = $"unit_{unitType}_{owner}_{season}";
-            if (_spriteCache.TryGetValue(cacheKey, out var cached))
+
+            if (targetSize == SPRITE_SIZE)
             {
-                return cached;
+                if (_spriteCache.TryGetValue(cacheKey, out var cached))
+                {
+                    return cached;
+                }
+            }
+            else
+            {
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                if (_scaledSpriteCache.TryGetValue(scaledCacheKey, out var scaledCached))
+                {
+                    return scaledCached;
+                }
             }
 
             var key = $"{unitType}_{owner}_{season}";
@@ -256,6 +345,14 @@ namespace WwXMapEditor.Services
             if (_unitSprites.TryGetValue(key, out var sprite) && sprite != null)
             {
                 _spriteCache[cacheKey] = sprite;
+
+                if (targetSize != SPRITE_SIZE)
+                {
+                    sprite = ScaleSprite(sprite, targetSize);
+                    var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                    _scaledSpriteCache[scaledCacheKey] = sprite;
+                }
+
                 return sprite;
             }
 
@@ -264,7 +361,42 @@ namespace WwXMapEditor.Services
             var ownerColor = _fallbackColors.GetValueOrDefault($"Unit_{owner}", Colors.DarkGray);
             var fallback = CreateUnitFallbackSprite(unitType.ToString(), unitColor, ownerColor);
             _spriteCache[cacheKey] = fallback;
+
+            if (targetSize != SPRITE_SIZE)
+            {
+                fallback = ScaleSprite(fallback, targetSize);
+                var scaledCacheKey = $"{cacheKey}_{targetSize}";
+                _scaledSpriteCache[scaledCacheKey] = fallback;
+            }
+
             return fallback;
+        }
+
+        // Overload for backward compatibility
+        public BitmapSource GetUnitSprite(UnitType unitType, string owner, string season)
+        {
+            return GetUnitSprite(unitType, owner, season, SPRITE_SIZE);
+        }
+
+        private BitmapSource ScaleSprite(BitmapSource source, int targetSize)
+        {
+            if (source.PixelWidth == targetSize && source.PixelHeight == targetSize)
+            {
+                return source;
+            }
+
+            var scaledBitmap = new RenderTargetBitmap(targetSize, targetSize, 96, 96, PixelFormats.Pbgra32);
+            var drawingVisual = new DrawingVisual();
+
+            using (var drawingContext = drawingVisual.RenderOpen())
+            {
+                drawingContext.DrawImage(source, new Rect(0, 0, targetSize, targetSize));
+            }
+
+            scaledBitmap.Render(drawingVisual);
+            scaledBitmap.Freeze();
+
+            return scaledBitmap;
         }
 
         private int ValidateSpriteIndex(int spriteIndex)
@@ -565,6 +697,7 @@ namespace WwXMapEditor.Services
         public void ClearCache()
         {
             _spriteCache.Clear();
+            _scaledSpriteCache.Clear();
         }
     }
 }

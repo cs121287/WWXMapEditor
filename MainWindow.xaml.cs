@@ -42,6 +42,9 @@ namespace WwXMapEditor
         private List<Unit>? _clipboardUnits;
         private int _clipboardWidth, _clipboardHeight;
 
+        // Keep track of last tile size to know when to clear cache
+        private int _lastTileSize = 32;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -105,7 +108,12 @@ namespace WwXMapEditor
             _viewModel.OnMapChanged += RequestRender;
             _viewModel.OnZoomChanged += () =>
             {
-                SpriteManager.Instance.ClearCache();
+                // Only clear cache if zoom level has changed significantly
+                if (Math.Abs(TileSize - _lastTileSize) > 2)
+                {
+                    SpriteManager.Instance.ClearCache();
+                    _lastTileSize = TileSize;
+                }
                 RequestRender();
             };
             _viewModel.OnCopyRequested += CopySelection;
@@ -569,7 +577,7 @@ namespace WwXMapEditor
                 if (tile == null) return;
 
                 var season = _viewModel.CurrentMap.Season ?? "Summer";
-                var sprite = SpriteManager.Instance.GetTerrainSprite(tile.Terrain, season, tile.SpriteIndex ?? 0);
+                var sprite = SpriteManager.Instance.GetTerrainSprite(tile.Terrain, season, tile.SpriteIndex ?? 0, TileSize);
 
                 DrawSprite(sprite, destRect);
             }
@@ -590,7 +598,7 @@ namespace WwXMapEditor
                 if (prop == null) return;
 
                 var season = _viewModel.CurrentMap.Season ?? "Summer";
-                var sprite = SpriteManager.Instance.GetPropertySprite(prop.Type, prop.Owner, season);
+                var sprite = SpriteManager.Instance.GetPropertySprite(prop.Type, prop.Owner, season, TileSize);
 
                 DrawSprite(sprite, destRect, true);
             }
@@ -610,7 +618,7 @@ namespace WwXMapEditor
                 if (unit == null) return;
 
                 var season = _viewModel.CurrentMap.Season ?? "Summer";
-                var sprite = SpriteManager.Instance.GetUnitSprite(unit.Type, unit.Owner, season);
+                var sprite = SpriteManager.Instance.GetUnitSprite(unit.Type, unit.Owner, season, TileSize);
 
                 DrawSprite(sprite, destRect, true);
             }
@@ -626,19 +634,7 @@ namespace WwXMapEditor
 
             try
             {
-                // Scale sprite to tile size if needed
-                if (sprite.PixelWidth != TileSize || sprite.PixelHeight != TileSize)
-                {
-                    var scaledBitmap = new RenderTargetBitmap(TileSize, TileSize, 96, 96, PixelFormats.Pbgra32);
-                    var drawingVisual = new DrawingVisual();
-                    using (var drawingContext = drawingVisual.RenderOpen())
-                    {
-                        drawingContext.DrawImage(sprite, new Rect(0, 0, TileSize, TileSize));
-                    }
-                    scaledBitmap.Render(drawingVisual);
-                    sprite = scaledBitmap;
-                }
-
+                // No need to scale here - sprite is already scaled by SpriteManager
                 var buffer = new byte[TileSize * TileSize * 4];
                 sprite.CopyPixels(buffer, TileSize * 4, 0);
 
