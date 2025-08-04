@@ -1,0 +1,192 @@
+<UserControl x:Class="WWXMapEditor.Views.MapEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WWXMapEditor.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="1080" d:DesignWidth="1920">
+    
+    <Grid Background="#FF1a1a1a">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Top Toolbar -->
+        <Border Grid.Row="0" Background="#FF2a2a2a" BorderBrush="#FF555555" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <Button Content="File" Style="{StaticResource EditorButtonStyle}" Width="60"/>
+                <Button Content="Edit" Style="{StaticResource EditorButtonStyle}" Width="60"/>
+                <Button Content="View" Style="{StaticResource EditorButtonStyle}" Width="60"/>
+                <Separator Width="20" Opacity="0"/>
+                <Button Content="🏠" Style="{StaticResource EditorButtonStyle}" Command="{Binding BackToMenuCommand}" ToolTip="Back to Main Menu"/>
+                <Button Content="💾" Style="{StaticResource EditorButtonStyle}" Command="{Binding SaveCommand}" ToolTip="Save"/>
+                <Button Content="📁" Style="{StaticResource EditorButtonStyle}" Command="{Binding LoadCommand}" ToolTip="Load"/>
+                <Separator Width="20" Opacity="0"/>
+                <Button Content="↶" Style="{StaticResource EditorButtonStyle}" Command="{Binding UndoCommand}" ToolTip="Undo"/>
+                <Button Content="↷" Style="{StaticResource EditorButtonStyle}" Command="{Binding RedoCommand}" ToolTip="Redo"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Left Panel - Tools -->
+            <Border Grid.Column="0" Background="#FF2a2a2a" BorderBrush="#FF555555" BorderThickness="0,0,1,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="TOOLS" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <GroupBox Header="Brush Tools" Foreground="White" BorderBrush="#FF555555" Margin="0,5">
+                            <StackPanel Margin="5">
+                                <RadioButton Content="Pencil" Foreground="White" IsChecked="True" Margin="0,2"/>
+                                <RadioButton Content="Rectangle" Foreground="White" Margin="0,2"/>
+                                <RadioButton Content="Circle" Foreground="White" Margin="0,2"/>
+                                <RadioButton Content="Fill" Foreground="White" Margin="0,2"/>
+                                <RadioButton Content="Eraser" Foreground="White" Margin="0,2"/>
+                            </StackPanel>
+                        </GroupBox>
+                        
+                        <GroupBox Header="Brush Size" Foreground="White" BorderBrush="#FF555555" Margin="0,5">
+                            <StackPanel Margin="5">
+                                <Slider Minimum="1" Maximum="10" Value="{Binding BrushSize}" />
+                                <TextBlock Text="{Binding BrushSize, StringFormat='Size: {0}'}" Foreground="White" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            
+            <!-- Center - Map Canvas -->
+            <Grid Grid.Column="1" Background="#FF0a0a0a">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Border Background="#FF1a1a1a" Margin="20">
+                        <Canvas x:Name="MapCanvas" 
+                                Width="800" 
+                                Height="600" 
+                                Background="#FF333333"
+                                ClipToBounds="True">
+                            <!-- Map grid will be drawn here -->
+                        </Canvas>
+                    </Border>
+                </ScrollViewer>
+                
+                <!-- Zoom Controls -->
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Right" 
+                            VerticalAlignment="Bottom" 
+                            Margin="20">
+                    <Button Content="-" Style="{StaticResource EditorButtonStyle}" Command="{Binding ZoomOutCommand}"/>
+                    <TextBlock Foreground="White" 
+                               VerticalAlignment="Center" 
+                               Margin="10,0">
+                        <TextBlock.Text>
+                            <Binding Path="ZoomLevel" StringFormat="{}{0}%"/>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <Button Content="+" Style="{StaticResource EditorButtonStyle}" Command="{Binding ZoomInCommand}"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Right Panel - Properties -->
+            <Border Grid.Column="2" Background="#FF2a2a2a" BorderBrush="#FF555555" BorderThickness="1,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="PROPERTIES" Foreground="White" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <GroupBox Header="Map Properties" Foreground="White" BorderBrush="#FF555555" Margin="0,5">
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Text="Name:" Foreground="White" Margin="0,5" Grid.Row="0" Grid.Column="0"/>
+                                <TextBox Text="{Binding MapName}" Grid.Row="0" Grid.Column="1" Margin="5"/>
+                                
+                                <TextBlock Text="Width:" Foreground="White" Margin="0,5" Grid.Row="1" Grid.Column="0"/>
+                                <TextBox Text="{Binding MapWidth}" Grid.Row="1" Grid.Column="1" Margin="5"/>
+                                
+                                <TextBlock Text="Height:" Foreground="White" Margin="0,5" Grid.Row="2" Grid.Column="0"/>
+                                <TextBox Text="{Binding MapHeight}" Grid.Row="2" Grid.Column="1" Margin="5"/>
+                            </Grid>
+                        </GroupBox>
+                        
+                        <GroupBox Header="Tile Sets" Foreground="White" BorderBrush="#FF555555" Margin="0,5">
+                            <ListBox Background="#FF1a1a1a" 
+                                     BorderBrush="#FF555555" 
+                                     Height="200"
+                                     ItemsSource="{Binding TileSets}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#FF555555" BorderThickness="1" Margin="2">
+                                            <Image Width="32" Height="32" Source="{Binding ImagePath}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </GroupBox>
+                        
+                        <GroupBox Header="Layers" Foreground="White" BorderBrush="#FF555555" Margin="0,5">
+                            <StackPanel>
+                                <Button Content="Add Layer" Style="{StaticResource EditorButtonStyle}" Width="Auto" HorizontalAlignment="Stretch"/>
+                                <ListBox Background="#FF1a1a1a" 
+                                         BorderBrush="#FF555555" 
+                                         Height="150"
+                                         ItemsSource="{Binding Layers}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" IsChecked="{Binding IsVisible}" Margin="2"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="White" Margin="5,0"/>
+                                                <Button Grid.Column="2" Content="🗑" Width="20" Height="20" Margin="2"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#FF2a2a2a" BorderBrush="#FF555555" BorderThickness="0,1,0,0">
+            <Grid Margin="5,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="White" Margin="5,0"/>
+                <TextBlock Grid.Column="2" Foreground="White" Margin="5,0">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="X: {0}, Y: {1}">
+                            <Binding Path="MouseX"/>
+                            <Binding Path="MouseY"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

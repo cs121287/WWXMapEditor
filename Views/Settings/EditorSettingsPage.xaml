@@ -1,0 +1,234 @@
+<UserControl x:Class="WWXMapEditor.Views.Settings.EditorSettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="800">
+    
+    <StackPanel>
+        <TextBlock Text="EDITOR SETTINGS" 
+                   Foreground="White" 
+                   FontFamily="Consolas"
+                   FontSize="24" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,20"/>
+        
+        <!-- Grid Section -->
+        <GroupBox Header="Grid" Style="{StaticResource SettingsGroupBoxStyle}">
+            <StackPanel>
+                <CheckBox Content="Show grid" 
+                          IsChecked="{Binding ShowGrid}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Grid color:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <Rectangle Grid.Column="1"
+                               Width="50" Height="25" 
+                               Fill="{Binding GridColor}" 
+                               Stroke="White" 
+                               StrokeThickness="1" 
+                               HorizontalAlignment="Left"
+                               Cursor="Hand">
+                        <Rectangle.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding PickGridColorCommand}"/>
+                        </Rectangle.InputBindings>
+                    </Rectangle>
+                </Grid>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Grid opacity:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <Slider Grid.Column="1" 
+                            Minimum="0" 
+                            Maximum="100" 
+                            Value="{Binding GridOpacity}"
+                            IsEnabled="{Binding ShowGrid}"
+                            Margin="0,0,10,0"/>
+                    
+                    <TextBlock Grid.Column="2" 
+                               Foreground="White" 
+                               Width="40">
+                        <TextBlock.Text>
+                            <Binding Path="GridOpacity" StringFormat="{}{0}%"/>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </Grid>
+                
+                <CheckBox Content="Snap to grid" 
+                          IsChecked="{Binding SnapToGrid}" 
+                          IsEnabled="{Binding ShowGrid}"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10,0,0"/>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Grid size (pixels):" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <ComboBox Grid.Column="1" 
+                              SelectedItem="{Binding GridSize}" 
+                              ItemsSource="{Binding GridSizes}"
+                              IsEditable="True"
+                              IsEnabled="{Binding ShowGrid}"
+                              Style="{StaticResource SettingsComboBoxStyle}"
+                              Width="100"
+                              HorizontalAlignment="Left"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+        
+        <!-- Canvas Section -->
+        <GroupBox Header="Canvas" Style="{StaticResource SettingsGroupBoxStyle}">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Default map width:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,5"
+                               Grid.Row="0"/>
+                    
+                    <TextBox Grid.Column="1" 
+                             Grid.Row="0"
+                             Text="{Binding DefaultMapWidth}" 
+                             Style="{StaticResource SettingsTextBoxStyle}"
+                             Width="100"
+                             HorizontalAlignment="Left"
+                             Margin="0,0,0,5"/>
+                    
+                    <TextBlock Text="Default map height:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"
+                               Grid.Row="1"/>
+                    
+                    <TextBox Grid.Column="1" 
+                             Grid.Row="1"
+                             Text="{Binding DefaultMapHeight}" 
+                             Style="{StaticResource SettingsTextBoxStyle}"
+                             Width="100"
+                             HorizontalAlignment="Left"/>
+                </Grid>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Background color:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <Rectangle Grid.Column="1"
+                               Width="50" Height="25" 
+                               Fill="{Binding CanvasBackgroundColor}" 
+                               Stroke="White" 
+                               StrokeThickness="1" 
+                               HorizontalAlignment="Left"
+                               Cursor="Hand">
+                        <Rectangle.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding PickCanvasColorCommand}"/>
+                        </Rectangle.InputBindings>
+                    </Rectangle>
+                </Grid>
+                
+                <CheckBox Content="Show tile coordinates" 
+                          IsChecked="{Binding ShowTileCoordinates}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10,0,0"/>
+                
+                <CheckBox Content="Show rulers" 
+                          IsChecked="{Binding ShowRulers}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+            </StackPanel>
+        </GroupBox>
+        
+        <!-- Performance Section -->
+        <GroupBox Header="Performance" Style="{StaticResource SettingsGroupBoxStyle}">
+            <StackPanel>
+                <CheckBox Content="Hardware acceleration" 
+                          IsChecked="{Binding HardwareAcceleration}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Undo history limit:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <ComboBox Grid.Column="1" 
+                              SelectedItem="{Binding UndoHistoryLimit}" 
+                              ItemsSource="{Binding UndoHistoryLimits}"
+                              Style="{StaticResource SettingsComboBoxStyle}"
+                              Width="150"
+                              HorizontalAlignment="Left"/>
+                </Grid>
+                
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Texture quality:" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    
+                    <ComboBox Grid.Column="1" 
+                              SelectedItem="{Binding TextureQuality}" 
+                              ItemsSource="{Binding TextureQualities}"
+                              Style="{StaticResource SettingsComboBoxStyle}"
+                              Width="150"
+                              HorizontalAlignment="Left"/>
+                </Grid>
+                
+                <CheckBox Content="Enable smooth zooming" 
+                          IsChecked="{Binding SmoothZooming}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10,0,0"/>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
+</UserControl>

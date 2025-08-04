@@ -1,0 +1,87 @@
+<UserControl x:Class="WWXMapEditor.Views.Configuration.EditorPreferencesStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WWXMapEditor.Views.Configuration"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    <StackPanel>
+        <TextBlock Text="EDITOR PREFERENCES" 
+                   Foreground="{DynamicResource ForegroundBrush}" 
+                   FontFamily="Consolas"
+                   FontSize="32" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,30"/>
+        
+        <!-- Grid Settings -->
+        <GroupBox Header="Grid Settings" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,0,30">
+            <StackPanel Margin="20">
+                <CheckBox Content="Show grid by default" 
+                          IsChecked="{Binding ShowGrid}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          FontSize="16"
+                          Margin="0,10"/>
+                
+                <CheckBox Content="Enable snap to grid" 
+                          IsChecked="{Binding SnapToGrid}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          FontSize="16"
+                          Margin="0,10"/>
+                
+                <Grid Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Grid size (pixels):" 
+                               Foreground="{DynamicResource ForegroundBrush}" 
+                               FontSize="16"
+                               VerticalAlignment="Center"/>
+                    
+                    <ComboBox Grid.Column="1" 
+                              SelectedItem="{Binding GridSize}" 
+                              ItemsSource="{Binding GridSizeOptions}"
+                              Style="{StaticResource SettingsComboBoxStyle}"
+                              FontSize="16"
+                              Width="150"
+                              HorizontalAlignment="Left"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+        
+        <!-- Auto-save Settings -->
+        <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}">
+            <StackPanel Margin="20">
+                <CheckBox Content="Enable auto-save" 
+                          IsChecked="{Binding AutoSaveEnabled}" 
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          FontSize="16"
+                          Margin="0,10"/>
+                
+                <Grid Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Save interval (minutes):" 
+                               Foreground="{DynamicResource ForegroundBrush}" 
+                               FontSize="16"
+                               VerticalAlignment="Center"/>
+                    
+                    <ComboBox Grid.Column="1" 
+                              SelectedItem="{Binding AutoSaveInterval}" 
+                              ItemsSource="{Binding AutoSaveIntervalOptions}"
+                              IsEnabled="{Binding AutoSaveEnabled}"
+                              Style="{StaticResource SettingsComboBoxStyle}"
+                              FontSize="16"
+                              Width="150"
+                              HorizontalAlignment="Left"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
+</UserControl>

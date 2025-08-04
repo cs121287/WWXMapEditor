@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- Dark Theme Colors -->
+    <Color x:Key="BackgroundColor">#FF000000</Color>
+    <Color x:Key="SurfaceColor">#FF1a1a1a</Color>
+    <Color x:Key="Surface2Color">#FF2a2a2a</Color>
+    <Color x:Key="Surface3Color">#FF333333</Color>
+    <Color x:Key="BorderColor">#FF555555</Color>
+    <Color x:Key="ForegroundColor">#FFFFFFFF</Color>
+    <Color x:Key="ForegroundSecondaryColor">#FF808080</Color>
+    <Color x:Key="AccentColor">#FF00FF00</Color>
+    <Color x:Key="HoverColor">#FF444444</Color>
+    <Color x:Key="PressedColor">#FF666666</Color>
+    
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="Surface2Brush" Color="{StaticResource Surface2Color}"/>
+    <SolidColorBrush x:Key="Surface3Brush" Color="{StaticResource Surface3Color}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
+    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="{StaticResource ForegroundSecondaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}"/>
+    <SolidColorBrush x:Key="PressedBrush" Color="{StaticResource PressedColor}"/>
+    
+</ResourceDictionary>

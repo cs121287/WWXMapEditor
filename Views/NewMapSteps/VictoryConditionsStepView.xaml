@@ -1,0 +1,118 @@
+<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.VictoryConditionsStepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    <StackPanel MaxWidth="600">
+        <TextBlock Text="VICTORY CONDITIONS" 
+                   Foreground="{DynamicResource ForegroundBrush}" 
+                   FontFamily="Consolas"
+                   FontSize="32" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,30"/>
+        
+        <TextBlock Text="Choose how players can achieve victory on this map" 
+                   Foreground="{DynamicResource ForegroundSecondaryBrush}" 
+                   FontFamily="Consolas"
+                   FontSize="16" 
+                   Margin="0,0,0,30"/>
+        
+        <Border Background="{DynamicResource Surface2Brush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="30,25">
+            <StackPanel>
+                <CheckBox IsChecked="{Binding ParentViewModel.EliminationVictory}"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Elimination Victory" 
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="Win by defeating all enemy forces. Classic deathmatch-style gameplay."
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </CheckBox>
+                
+                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
+                
+                <CheckBox IsChecked="{Binding ParentViewModel.CaptureObjectivesVictory}"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Capture Objectives" 
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="Win by controlling strategic points on the map for a certain duration."
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </CheckBox>
+                
+                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
+                
+                <CheckBox IsChecked="{Binding ParentViewModel.SurvivalVictory}"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Survival Victory" 
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="Win by surviving for a specified amount of time against waves of enemies."
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </CheckBox>
+                
+                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
+                
+                <CheckBox IsChecked="{Binding ParentViewModel.EconomicVictory}"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,10">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Economic Victory" 
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="Win by reaching economic milestones, such as resource accumulation."
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </CheckBox>
+            </StackPanel>
+        </Border>
+        
+        <TextBlock Text="At least one victory condition must be selected"
+                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                   FontFamily="Consolas"
+                   FontSize="14"
+                   FontStyle="Italic"
+                   Margin="0,20,0,0"
+                   TextWrapping="Wrap"/>
+    </StackPanel>
+</UserControl>
