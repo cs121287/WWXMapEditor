@@ -9,6 +9,7 @@ namespace WWXMapEditor.Models
         public int Width { get; set; }
         public int Height { get; set; }
         public int NumberOfPlayers { get; set; }
+        public string StartingTerrain { get; set; } = "Plains";
         public VictoryConditions VictoryConditions { get; set; } = new VictoryConditions();
         public FogOfWarSettings FogOfWarSettings { get; set; } = new FogOfWarSettings();
         public Tile[,] Tiles { get; set; } = new Tile[0, 0];
@@ -24,6 +25,8 @@ namespace WWXMapEditor.Models
         public int Elevation { get; set; }
         public Unit? Unit { get; set; }
         public Building? Building { get; set; }
+        public bool HasCollision { get; set; }
+        public bool AllowsAircraft { get; set; } = true;
     }
 
     public class Unit

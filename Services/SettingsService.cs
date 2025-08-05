@@ -24,8 +24,20 @@ namespace WWXMapEditor.Services
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var appFolder = Path.Combine(appDataPath, "WWXMapEditor");
-            Directory.CreateDirectory(appFolder);
-            _settingsPath = Path.Combine(appFolder, "settings.json");
+
+            try
+            {
+                Directory.CreateDirectory(appFolder);
+                _settingsPath = Path.Combine(appFolder, "settings.json");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Fall back to using local folder if we can't create in AppData
+                var localFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+                appFolder = Path.Combine(localFolder, "Settings");
+                Directory.CreateDirectory(appFolder);
+                _settingsPath = Path.Combine(appFolder, "settings.json");
+            }
         }
 
         public AppSettings LoadSettings()

@@ -84,8 +84,8 @@ namespace WWXMapEditor.ViewModels
             NextCommand = new RelayCommand(ExecuteNext);
             PreviousCommand = new RelayCommand(ExecutePrevious);
 
-            // Set initial content to be the ConfigurationView
-            CurrentStepContent = new ConfigurationView { DataContext = new ConfigurationViewModel(null) };
+            // Set initial content to be the first step
+            UpdateCurrentStep();
         }
 
         private void UpdateCurrentStep()

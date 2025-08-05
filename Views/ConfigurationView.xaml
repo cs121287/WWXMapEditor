@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="1080" d:DesignWidth="1920">
+             d:DesignHeight="768" d:DesignWidth="1366">
 
     <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
@@ -91,6 +91,10 @@
                                         <Setter TargetName="StepNumberBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
                                         <Setter TargetName="StepNumberText" Property="Foreground" Value="White"/>
                                     </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                        <Setter TargetName="StepNumberBorder" Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                        <Setter TargetName="StepNumberText" Property="Foreground" Value="White"/>
+                                    </DataTrigger>
                                 </DataTemplate.Triggers>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -107,13 +111,12 @@
         <!-- Bottom Navigation -->
         <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,2,0,0">
             <Grid Margin="30,20">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding ProgressText}"
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="16"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                <TextBlock Text="{Binding ProgressText}"
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                           FontFamily="Consolas"
+                           FontSize="16"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="PREVIOUS" 

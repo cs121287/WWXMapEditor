@@ -12,7 +12,7 @@ namespace WWXMapEditor.Models
         public string Language { get; set; } = "English";
         public bool AutoSaveEnabled { get; set; } = true;
         public int AutoSaveInterval { get; set; } = 5;
-        public string AutoSaveLocation { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\AutoSave";
+        public string AutoSaveLocation { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "AutoSave");
         public int RecentFilesCount { get; set; } = 10;
         public List<string> RecentFiles { get; set; } = new List<string>();
 
@@ -58,10 +58,10 @@ namespace WWXMapEditor.Models
         };
 
         // File & Project Settings
-        public string DefaultProjectDirectory { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\Projects";
-        public string DefaultTilesetDirectory { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\Tilesets";
-        public string DefaultExportDirectory { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\Exports";
-        public string TemplatesDirectory { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\Templates";
+        public string DefaultProjectDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Projects");
+        public string DefaultTilesetDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Tilesets");
+        public string DefaultExportDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Exports");
+        public string TemplatesDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Templates");
         public string DefaultSaveFormat { get; set; } = ".wwx";
         public string CompressionLevel { get; set; } = "Fast";
         public bool IncludeMetadata { get; set; } = true;
@@ -86,7 +86,7 @@ namespace WWXMapEditor.Models
         public bool EnableDebugConsole { get; set; } = false;
         public string LogLevel { get; set; } = "Warning";
         public bool EnablePlugins { get; set; } = false;
-        public string PluginDirectory { get; set; } = @"C:\Users\cs121287\Documents\WWXMapEditor\Plugins";
+        public string PluginDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Plugins");
 
         // Configuration Metadata
         [JsonIgnore]
