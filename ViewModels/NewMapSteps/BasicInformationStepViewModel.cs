@@ -2,11 +2,11 @@ namespace WWXMapEditor.ViewModels
 {
     public class BasicInformationStepViewModel : ViewModelBase
     {
-        private readonly NewMapDialogViewModel _parentViewModel;
+        private readonly NewMapViewModel _parentViewModel;
 
-        public NewMapDialogViewModel ParentViewModel => _parentViewModel;
+        public NewMapViewModel ParentViewModel => _parentViewModel;
 
-        public BasicInformationStepViewModel(NewMapDialogViewModel parentViewModel)
+        public BasicInformationStepViewModel(NewMapViewModel parentViewModel)
         {
             _parentViewModel = parentViewModel;
         }

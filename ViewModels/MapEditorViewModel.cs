@@ -100,6 +100,22 @@ namespace WWXMapEditor.ViewModels
         public ObservableCollection<MapStatistic> MapStatistics { get; }
         public ObservableCollection<ValidationResult> ValidationResults { get; }
 
+        // New collections for tile palette integration
+        public ObservableCollection<TilePaletteItem> TilePalette { get; }
+        public ObservableCollection<int> BrushSizes { get; }
+
+        // Additional properties for new functionality
+        private TilePaletteItem? _selectedTilePaletteItem;
+        private int _mouseTileX;
+        private int _mouseTileY;
+
+        // Tool active states for new UI
+        private bool _isSelectToolActive = false;
+        private bool _isBrushToolActive = true;
+        private bool _isRectangleToolActive = false;
+        private bool _isFillToolActive = false;
+        private bool _isEraserToolActive = false;
+
         #region Properties
 
         public Map CurrentMap
@@ -249,6 +265,56 @@ namespace WWXMapEditor.ViewModels
         {
             get => !_blockAircraft;
             set => BlockAircraft = !value;
+        }
+
+        // New properties for tile palette integration
+        public TilePaletteItem? SelectedTile
+        {
+            get => _selectedTilePaletteItem;
+            set => SetProperty(ref _selectedTilePaletteItem, value);
+        }
+
+        public int MouseTileX
+        {
+            get => _mouseTileX;
+            set => SetProperty(ref _mouseTileX, value);
+        }
+
+        public int MouseTileY
+        {
+            get => _mouseTileY;
+            set => SetProperty(ref _mouseTileY, value);
+        }
+
+        // New tool active state properties
+        public bool IsSelectToolActive
+        {
+            get => _isSelectToolActive;
+            set => SetProperty(ref _isSelectToolActive, value);
+        }
+
+        public bool IsBrushToolActive
+        {
+            get => _isBrushToolActive;
+            set => SetProperty(ref _isBrushToolActive, value);
+        }
+
+        public bool IsRectangleToolActive
+        {
+            get => _isRectangleToolActive;
+            set => SetProperty(ref _isRectangleToolActive, value);
+        }
+
+        public bool IsFillToolActive
+        {
+            get => _isFillToolActive;
+            set => SetProperty(ref _isFillToolActive, value);
+        }
+
+        public bool IsEraserToolActive
+        {
+            get => _isEraserToolActive;
+            set => SetProperty(ref _isEraserToolActive, value);
         }
 
         // UI State Properties
@@ -482,6 +548,12 @@ namespace WWXMapEditor.ViewModels
                 {
                     SelectedTool = "Paint";
                     StatusMessage = "Paint tool selected";
+                    // Update new tool states
+                    IsBrushToolActive = true;
+                    IsSelectToolActive = false;
+                    IsRectangleToolActive = false;
+                    IsFillToolActive = false;
+                    IsEraserToolActive = false;
                 }
             }
         }
@@ -495,6 +567,12 @@ namespace WWXMapEditor.ViewModels
                 {
                     SelectedTool = "Eraser";
                     StatusMessage = "Eraser tool selected";
+                    // Update new tool states
+                    IsEraserToolActive = true;
+                    IsBrushToolActive = false;
+                    IsSelectToolActive = false;
+                    IsRectangleToolActive = false;
+                    IsFillToolActive = false;
                 }
             }
         }
@@ -508,6 +586,12 @@ namespace WWXMapEditor.ViewModels
                 {
                     SelectedTool = "Select";
                     StatusMessage = "Selection tool selected";
+                    // Update new tool states
+                    IsSelectToolActive = true;
+                    IsBrushToolActive = false;
+                    IsRectangleToolActive = false;
+                    IsFillToolActive = false;
+                    IsEraserToolActive = false;
                 }
             }
         }
@@ -521,6 +605,12 @@ namespace WWXMapEditor.ViewModels
                 {
                     SelectedTool = "Fill";
                     StatusMessage = "Fill tool selected";
+                    // Update new tool states
+                    IsFillToolActive = true;
+                    IsBrushToolActive = false;
+                    IsSelectToolActive = false;
+                    IsRectangleToolActive = false;
+                    IsEraserToolActive = false;
                 }
             }
         }
@@ -534,6 +624,12 @@ namespace WWXMapEditor.ViewModels
                 {
                     SelectedTool = "Ruler";
                     StatusMessage = "Ruler tool selected";
+                    // Ruler doesn't map to new tool states
+                    IsBrushToolActive = false;
+                    IsSelectToolActive = false;
+                    IsRectangleToolActive = false;
+                    IsFillToolActive = false;
+                    IsEraserToolActive = false;
                 }
             }
         }
@@ -552,6 +648,13 @@ namespace WWXMapEditor.ViewModels
             get => _validationResultsVisibility;
             set => SetProperty(ref _validationResultsVisibility, value);
         }
+
+        // New visibility properties for integration
+        public Visibility IsBrushSettingsVisible =>
+            (SelectedTool == "Brush" || SelectedTool == "Paint" || SelectedTool == "Eraser") ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility IsSelectedTileVisible =>
+            SelectedTile != null ? Visibility.Visible : Visibility.Collapsed;
 
         public string TilesetHeader
         {
@@ -618,6 +721,11 @@ namespace WWXMapEditor.ViewModels
         public ICommand AutoTileCommand { get; }
         public ICommand BalanceResourcesCommand { get; }
 
+        // Additional commands for new functionality
+        public ICommand NewMapCommand { get; }
+        public ICommand OpenMapCommand { get; }
+        public ICommand AboutCommand { get; }
+
         public MapEditorViewModel(MainWindowViewModel mainWindowViewModel, Map? map = null)
         {
             _mainWindowViewModel = mainWindowViewModel;
@@ -641,6 +749,13 @@ namespace WWXMapEditor.ViewModels
             GridLines = new ObservableCollection<GridLine>();
             MapStatistics = new ObservableCollection<MapStatistic>();
             ValidationResults = new ObservableCollection<ValidationResult>();
+
+            // Initialize new collections
+            TilePalette = new ObservableCollection<TilePaletteItem>();
+            BrushSizes = new ObservableCollection<int> { 1, 2, 3, 4, 5 };
+
+            // Initialize tile palette
+            InitializeTilePalette();
 
             // Initialize services
             _undoRedoManager = new UndoRedoManager();
@@ -691,6 +806,11 @@ namespace WWXMapEditor.ViewModels
             AutoTileCommand = new RelayCommand(ExecuteAutoTile);
             BalanceResourcesCommand = new RelayCommand(ExecuteBalanceResources);
 
+            // Initialize additional commands
+            NewMapCommand = new RelayCommand(ExecuteNewMap);
+            OpenMapCommand = new RelayCommand(ExecuteOpenMap);
+            AboutCommand = new RelayCommand(ExecuteAbout);
+
             // Apply settings
             ApplySettings();
 
@@ -700,6 +820,71 @@ namespace WWXMapEditor.ViewModels
             UpdateLayerUI();
             UpdateMapStatistics();
             UpdateAvailableOwners();
+
+            // Select first tile by default
+            if (TilePalette.Count > 0)
+            {
+                SelectTilePaletteItem(TilePalette[0]);
+            }
+        }
+
+        private void InitializeTilePalette()
+        {
+            TilePalette.Add(new TilePaletteItem
+            {
+                Name = "Plains",
+                TerrainType = "Plains",
+                Color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(144, 238, 144))
+            });
+
+            TilePalette.Add(new TilePaletteItem
+            {
+                Name = "Mountain",
+                TerrainType = "Mountain",
+                Color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(139, 137, 137))
+            });
+
+            TilePalette.Add(new TilePaletteItem
+            {
+                Name = "Forest",
+                TerrainType = "Forest",
+                Color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 139, 34))
+            });
+
+            TilePalette.Add(new TilePaletteItem
+            {
+                Name = "Sand",
+                TerrainType = "Sand",
+                Color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(238, 203, 173))
+            });
+
+            TilePalette.Add(new TilePaletteItem
+            {
+                Name = "Sea",
+                TerrainType = "Sea",
+                Color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(64, 164, 223))
+            });
+        }
+
+        private void SelectTilePaletteItem(TilePaletteItem tile)
+        {
+            // Deselect all tiles
+            foreach (var t in TilePalette)
+            {
+                t.IsSelected = false;
+            }
+
+            // Select the new tile
+            tile.IsSelected = true;
+            SelectedTile = tile;
+
+            // Update the old tile data for compatibility
+            if (_selectedTile == null)
+            {
+                _selectedTile = new TileData();
+            }
+            _selectedTile.Name = tile.Name;
+            _selectedTile.ImageSource = "/Assets/Terrain/" + tile.Name.ToLower() + ".png";
         }
 
         private Map CreateDefaultMap()
@@ -996,10 +1181,44 @@ namespace WWXMapEditor.ViewModels
             if (parameter is string tool)
             {
                 SelectedTool = tool;
+                StatusMessage = $"{tool} tool selected";
+
+                // Update tool active states
+                IsSelectToolActive = tool == "Select";
+                IsBrushToolActive = tool == "Brush" || tool == "Paint";
+                IsRectangleToolActive = tool == "Rectangle";
+                IsFillToolActive = tool == "Fill";
+                IsEraserToolActive = tool == "Eraser";
+
+                // Update old tool selection states
+                IsPaintToolSelected = tool == "Paint" || tool == "Brush";
+                IsEraserToolSelected = tool == "Eraser";
+                IsSelectToolSelected = tool == "Select";
+                IsFillToolSelected = tool == "Fill";
+                IsRulerToolSelected = tool == "Ruler";
+
+                // Notify about visibility changes
+                OnPropertyChanged(nameof(IsBrushSettingsVisible));
             }
         }
 
         // New command implementations
+        private void ExecuteNewMap(object parameter)
+        {
+            _mainWindowViewModel.NavigateToNewMapCreation();
+        }
+
+        private void ExecuteOpenMap(object parameter)
+        {
+            // TODO: Implement open map functionality
+            StatusMessage = "Open map functionality not yet implemented";
+        }
+
+        private void ExecuteAbout(object parameter)
+        {
+            _mainWindowViewModel.NavigateToAbout();
+        }
+
         private void ExecuteTestMap(object parameter)
         {
             StatusMessage = "Launching map test...";
@@ -1040,6 +1259,16 @@ namespace WWXMapEditor.ViewModels
                     {
                         RecentTiles.RemoveAt(RecentTiles.Count - 1);
                     }
+                }
+            }
+            else if (parameter is TilePaletteItem paletteItem)
+            {
+                SelectTilePaletteItem(paletteItem);
+
+                // Auto-switch to brush tool when selecting a tile
+                if (SelectedTool != "Brush" && SelectedTool != "Paint" && SelectedTool != "Fill")
+                {
+                    ExecuteSelectTool("Brush");
                 }
             }
         }
@@ -1115,6 +1344,8 @@ namespace WWXMapEditor.ViewModels
             if (tileX >= 0 && tileX < MapWidth && tileY >= 0 && tileY < MapHeight)
             {
                 CoordinateDisplay = $"X: {tileX}, Y: {tileY}";
+                MouseTileX = tileX;
+                MouseTileY = tileY;
 
                 // Update hover indicator
                 if (!_isRulerActive)

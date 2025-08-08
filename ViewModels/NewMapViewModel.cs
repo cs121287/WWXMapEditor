@@ -1,15 +1,16 @@
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using WWXMapEditor.Models;
 using WWXMapEditor.Views.NewMapSteps;
+using WWXMapEditor.Services;
 
 namespace WWXMapEditor.ViewModels
 {
-    public class NewMapDialogViewModel : ViewModelBase
+    public class NewMapViewModel : ViewModelBase
     {
+        private readonly MainWindowViewModel _mainWindowViewModel;
         private int _currentStepIndex = 0;
         private object _currentStepContent = null!;
         private string _progressText = "Step 1 of 3";
@@ -36,6 +37,7 @@ namespace WWXMapEditor.ViewModels
         private bool _fogOfWarEnabled = true;
         private string _shroudType = "Black";
         private double _visionPenaltyMultiplier = 1.0;
+        private string _visionPenaltyMultiplierString = "Default (1x)";
 
         public string MapName
         {
@@ -145,6 +147,30 @@ namespace WWXMapEditor.ViewModels
             set => SetProperty(ref _visionPenaltyMultiplier, value);
         }
 
+        public string VisionPenaltyMultiplierString
+        {
+            get => _visionPenaltyMultiplierString;
+            set
+            {
+                if (SetProperty(ref _visionPenaltyMultiplierString, value))
+                {
+                    // Update the numeric value based on selection
+                    switch (value)
+                    {
+                        case "Default (1x)":
+                            VisionPenaltyMultiplier = 1.0;
+                            break;
+                        case "2x":
+                            VisionPenaltyMultiplier = 2.0;
+                            break;
+                        case "3x":
+                            VisionPenaltyMultiplier = 3.0;
+                            break;
+                    }
+                }
+            }
+        }
+
         public string ValidationMessage
         {
             get => _validationMessage;
@@ -190,21 +216,21 @@ namespace WWXMapEditor.ViewModels
         public ObservableCollection<string> TerrainTypes { get; }
         public ObservableCollection<int> PlayerCountOptions { get; }
         public ObservableCollection<string> ShroudTypes { get; }
+        public ObservableCollection<string> VisionPenaltyMultipliers { get; }
         public ObservableCollection<MapConfigurationStep> ConfigurationSteps { get; }
 
-        public ICommand CreateMapCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand PreviousCommand { get; }
+        public ICommand CancelCommand { get; }
 
-        public MapProperties? MapProperties { get; private set; }
-
-        public event EventHandler? MapCreated;
-
-        public NewMapDialogViewModel()
+        public NewMapViewModel(MainWindowViewModel mainWindowViewModel)
         {
+            _mainWindowViewModel = mainWindowViewModel;
+
             TerrainTypes = new ObservableCollection<string> { "Plains", "Mountain", "Forest", "Sand", "Sea" };
             PlayerCountOptions = new ObservableCollection<int> { 2, 3, 4 };
             ShroudTypes = new ObservableCollection<string> { "Black", "Grey" };
+            VisionPenaltyMultipliers = new ObservableCollection<string> { "Default (1x)", "2x", "3x" };
 
             // Initialize configuration steps
             ConfigurationSteps = new ObservableCollection<MapConfigurationStep>
@@ -219,9 +245,9 @@ namespace WWXMapEditor.ViewModels
             _victoryConditionsViewModel = new VictoryConditionsStepViewModel(this);
             _fogOfWarViewModel = new FogOfWarStepViewModel(this);
 
-            CreateMapCommand = new RelayCommand(ExecuteCreateMap, CanExecuteCreateMap);
             NextCommand = new RelayCommand(ExecuteNext, CanExecuteNext);
             PreviousCommand = new RelayCommand(ExecutePrevious, CanExecutePrevious);
+            CancelCommand = new RelayCommand(ExecuteCancel);
 
             UpdateCurrentStep();
         }
@@ -268,8 +294,6 @@ namespace WWXMapEditor.ViewModels
             {
                 ValidationMessage = "Map height must be between 10 and 500 tiles";
             }
-
-            ((RelayCommand)CreateMapCommand).RaiseCanExecuteChanged();
         }
 
         private void ValidateVictoryConditions()
@@ -282,8 +306,6 @@ namespace WWXMapEditor.ViewModels
             {
                 ValidationMessage = "";
             }
-
-            ((RelayCommand)CreateMapCommand).RaiseCanExecuteChanged();
         }
 
         private bool CanExecuteNext(object? parameter)
@@ -297,7 +319,7 @@ namespace WWXMapEditor.ViewModels
                 case 1: // Victory Conditions
                     return EliminationVictory || CaptureObjectivesVictory || SurvivalVictory || EconomicVictory;
                 case 2: // Fog of War - Last step
-                    return CanExecuteCreateMap(parameter);
+                    return true;
                 default:
                     return false;
             }
@@ -312,7 +334,7 @@ namespace WWXMapEditor.ViewModels
             else
             {
                 // Last step - create the map
-                ExecuteCreateMap(parameter);
+                CreateMap();
             }
         }
 
@@ -329,18 +351,15 @@ namespace WWXMapEditor.ViewModels
             }
         }
 
-        private bool CanExecuteCreateMap(object? parameter)
+        private void ExecuteCancel(object? parameter)
         {
-            return string.IsNullOrWhiteSpace(ValidationMessage) &&
-                   !string.IsNullOrWhiteSpace(MapName) &&
-                   MapWidth >= 10 && MapWidth <= 500 &&
-                   MapHeight >= 10 && MapHeight <= 500 &&
-                   (EliminationVictory || CaptureObjectivesVictory || SurvivalVictory || EconomicVictory);
+            // Navigate back to main menu
+            _mainWindowViewModel.NavigateToMainMenu();
         }
 
-        private void ExecuteCreateMap(object? parameter)
+        private void CreateMap()
         {
-            MapProperties = new MapProperties
+            var mapProperties = new MapProperties
             {
                 Name = MapName,
                 Description = MapDescription,
@@ -363,7 +382,12 @@ namespace WWXMapEditor.ViewModels
                 }
             };
 
-            MapCreated?.Invoke(this, EventArgs.Empty);
+            // Create the map with the specified properties
+            var mapService = new MapService();
+            var map = mapService.CreateNewMap(mapProperties);
+
+            // Navigate to the map editor with the new map
+            _mainWindowViewModel.NavigateToMapEditor(map);
         }
     }
 

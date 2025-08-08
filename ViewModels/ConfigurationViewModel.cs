@@ -565,32 +565,16 @@ namespace WWXMapEditor.ViewModels
             }
         }
 
-        private void ExecuteFinish(object? parameter)
+        private async void ExecuteFinish(object? parameter)
         {
-            try
-            {
-                SaveSettings();
-
-                // Navigate to main menu
-                if (_mainWindowViewModel != null)
-                {
-                    _mainWindowViewModel.NavigateToMainMenu();
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Error saving settings: {ex.Message}", "Configuration Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            // Save configuration and navigate to main menu
+            SaveConfiguration();
         }
 
         private void ExecuteSkip(object? parameter)
         {
             // Navigate to main menu without saving
-            if (_mainWindowViewModel != null)
-            {
-                _mainWindowViewModel.NavigateToMainMenu();
-            }
+            _mainWindowViewModel.NavigateToMainMenu();
         }
 
         private void ExecuteBrowseProjectDirectory(object? parameter)
@@ -635,6 +619,36 @@ namespace WWXMapEditor.ViewModels
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 AutoSaveLocation = dialog.SelectedPath;
+            }
+        }
+
+        private async void SaveConfiguration()
+        {
+            try
+            {
+                // Save settings
+                SaveSettings();
+
+                // Save settings to file
+                var success = await SettingsService.Instance.SaveSettingsAsync(_settingsService.Settings);
+
+                if (success)
+                {
+                    // Apply theme and settings
+                    SettingsService.Instance.ApplyAllSettings();
+
+                    // Navigate to main menu
+                    _mainWindowViewModel.NavigateToMainMenu();
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Failed to save configuration. Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error saving settings: {ex.Message}", "Configuration Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -683,11 +697,6 @@ namespace WWXMapEditor.ViewModels
             }
 
             settings.IsFirstRun = false;
-
-            _settingsService.SaveSettings(settings);
-
-            // Apply all settings after saving
-            _settingsService.ApplyAllSettings();
         }
     }
 

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using WWXMapEditor.Services;
 using WWXMapEditor.ViewModels;
@@ -11,8 +12,32 @@ namespace WWXMapEditor
         {
             base.OnStartup(e);
 
-            // Load settings
-            var settings = SettingsService.Instance.Settings;
+            // Initialize settings service
+            var settingsService = SettingsService.Instance;
+
+            // Check if settings file exists
+            var settingsPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "WWXMapEditor",
+                "settings.json"
+            );
+
+            bool settingsExist = File.Exists(settingsPath);
+
+            // Load settings if they exist
+            if (settingsExist)
+            {
+                var settings = settingsService.LoadSettings();
+
+                // Apply theme and UI scaling globally
+                settingsService.ApplyTheme();
+                settingsService.ApplyUIScaling();
+            }
+            else
+            {
+                // Set default theme for first run
+                ThemeService.Instance.SetTheme(ThemeService.Theme.Dark);
+            }
 
             // Create main window
             var mainWindow = new MainWindow();
@@ -21,31 +46,19 @@ namespace WWXMapEditor
             mainWindow.DataContext = mainViewModel;
 
             // Check if this is first run or settings are invalid
-            if (settings.IsFirstRun)
+            if (!settingsExist || settingsService.Settings.IsFirstRun)
             {
-                // Apply default dark theme for configuration
-                ThemeService.Instance.SetTheme(ThemeService.Theme.Dark);
-
                 // Navigate to configuration
                 mainViewModel.NavigateToConfiguration();
             }
             else
             {
-                // Apply saved theme
-                SettingsService.Instance.ApplyTheme();
-
                 // Navigate to main menu
                 mainViewModel.NavigateToMainMenu();
             }
 
             // Show the window after navigation is set
             mainWindow.Show();
-
-            // Apply UI scaling if not first run
-            if (!settings.IsFirstRun)
-            {
-                SettingsService.Instance.ApplyUIScaling();
-            }
         }
     }
 }

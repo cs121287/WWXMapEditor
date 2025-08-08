@@ -2,11 +2,11 @@ namespace WWXMapEditor.ViewModels
 {
     public class FogOfWarStepViewModel : ViewModelBase
     {
-        private readonly NewMapDialogViewModel _parentViewModel;
+        private readonly NewMapViewModel _parentViewModel;
 
-        public NewMapDialogViewModel ParentViewModel => _parentViewModel;
+        public NewMapViewModel ParentViewModel => _parentViewModel;
 
-        public FogOfWarStepViewModel(NewMapDialogViewModel parentViewModel)
+        public FogOfWarStepViewModel(NewMapViewModel parentViewModel)
         {
             _parentViewModel = parentViewModel;
         }

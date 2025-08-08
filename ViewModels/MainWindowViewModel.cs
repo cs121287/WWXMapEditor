@@ -17,8 +17,7 @@ namespace WWXMapEditor.ViewModels
 
         public MainWindowViewModel()
         {
-            // Start with main menu
-            NavigateToMainMenu();
+            // Don't navigate here - let App.xaml.cs handle initial navigation
         }
 
         public void NavigateToMainMenu()
@@ -31,30 +30,10 @@ namespace WWXMapEditor.ViewModels
 
         public void NavigateToNewMapCreation()
         {
-            var dialog = new NewMapDialog();
-            var viewModel = new NewMapDialogViewModel();
-            dialog.DataContext = viewModel;
-
-            // Subscribe to the MapCreated event
-            viewModel.MapCreated += (sender, e) =>
-            {
-                if (viewModel.MapProperties != null)
-                {
-                    dialog.DialogResult = true;
-                }
-            };
-
-            // Show dialog as modal
-            if (dialog.ShowDialog() == true && viewModel.MapProperties != null)
-            {
-                // Create the map with the specified properties
-                var mapService = new MapService();
-                var map = mapService.CreateNewMap(viewModel.MapProperties);
-
-                // Navigate to the map editor with the new map
-                NavigateToMapEditor(map);
-            }
-            // If canceled, we're still on the main menu (no navigation needed)
+            var newMapView = new NewMapView();
+            var newMapViewModel = new NewMapViewModel(this);
+            newMapView.DataContext = newMapViewModel;
+            CurrentView = newMapView;
         }
 
         public void NavigateToMapEditor(Map? map = null)

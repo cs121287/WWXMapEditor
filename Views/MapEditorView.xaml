@@ -4,72 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
+             xmlns:controls="clr-namespace:WWXMapEditor.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
-
-    <UserControl.InputBindings>
-        <KeyBinding Command="{Binding SaveCommand}" Key="S" Modifiers="Ctrl"/>
-        <KeyBinding Command="{Binding UndoCommand}" Key="Z" Modifiers="Ctrl"/>
-        <KeyBinding Command="{Binding RedoCommand}" Key="Y" Modifiers="Ctrl"/>
-        <KeyBinding Command="{Binding CopyCommand}" Key="C" Modifiers="Ctrl"/>
-        <KeyBinding Command="{Binding PasteCommand}" Key="V" Modifiers="Ctrl"/>
-        <KeyBinding Command="{Binding SelectAllCommand}" Key="A" Modifiers="Ctrl"/>
-    </UserControl.InputBindings>
-
-    <UserControl.Resources>
-        <!-- Define SuccessBrush if not globally available -->
-        <SolidColorBrush x:Key="SuccessBrush" Color="#FF4CAF50"/>
-
-        <!-- Define SettingsSliderStyle if not globally available -->
-        <Style x:Key="SettingsSliderStyle" TargetType="Slider">
-            <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="Height" Value="20"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Slider">
-                        <Grid>
-                            <Border Name="TrackBackground" 
-                                    Margin="5,0"
-                                    VerticalAlignment="Center"
-                                    Height="4"
-                                    Background="{DynamicResource Surface3Brush}"
-                                    CornerRadius="2"/>
-                            <Track Name="PART_Track">
-                                <Track.DecreaseRepeatButton>
-                                    <RepeatButton Style="{x:Null}"
-                                                  Command="Slider.DecreaseLarge"
-                                                  Opacity="0"/>
-                                </Track.DecreaseRepeatButton>
-                                <Track.Thumb>
-                                    <Thumb>
-                                        <Thumb.Style>
-                                            <Style TargetType="Thumb">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="Thumb">
-                                                            <Ellipse Width="16" 
-                                                                     Height="16" 
-                                                                     Fill="{DynamicResource AccentBrush}"/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </Thumb.Style>
-                                    </Thumb>
-                                </Track.Thumb>
-                                <Track.IncreaseRepeatButton>
-                                    <RepeatButton Style="{x:Null}"
-                                                  Command="Slider.IncreaseLarge"
-                                                  Opacity="0"/>
-                                </Track.IncreaseRepeatButton>
-                            </Track>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
 
     <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
@@ -79,1000 +16,373 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header Bar -->
-        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,2">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource ForegroundBrush}">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Map" Command="{Binding NewMapCommand}" InputGestureText="Ctrl+N"/>
+                <MenuItem Header="_Open Map" Command="{Binding OpenMapCommand}" InputGestureText="Ctrl+O"/>
+                <Separator/>
+                <MenuItem Header="_Save" Command="{Binding SaveCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save _As..." Command="{Binding SaveAsCommand}" InputGestureText="Ctrl+Shift+S"/>
+                <Separator/>
+                <MenuItem Header="E_xit to Menu" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" Command="{Binding UndoCommand}" InputGestureText="Ctrl+Z"/>
+                <MenuItem Header="_Redo" Command="{Binding RedoCommand}" InputGestureText="Ctrl+Y"/>
+                <Separator/>
+                <MenuItem Header="Cu_t" Command="{Binding CutCommand}" InputGestureText="Ctrl+X"/>
+                <MenuItem Header="_Copy" Command="{Binding CopyCommand}" InputGestureText="Ctrl+C"/>
+                <MenuItem Header="_Paste" Command="{Binding PasteCommand}" InputGestureText="Ctrl+V"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="Ctrl+Plus"/>
+                <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="Ctrl+Minus"/>
+                <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
+                <Separator/>
+                <MenuItem Header="Show _Grid" IsCheckable="True" IsChecked="{Binding ShowGrid}" InputGestureText="G"/>
+                <MenuItem Header="_Snap to Grid" IsCheckable="True" IsChecked="{Binding SnapToGrid}" InputGestureText="S"/>
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Select" Command="{Binding SelectToolCommand}" CommandParameter="Select"/>
+                <MenuItem Header="_Brush" Command="{Binding SelectToolCommand}" CommandParameter="Brush"/>
+                <MenuItem Header="_Rectangle" Command="{Binding SelectToolCommand}" CommandParameter="Rectangle"/>
+                <MenuItem Header="_Fill" Command="{Binding SelectToolCommand}" CommandParameter="Fill"/>
+                <MenuItem Header="_Eraser" Command="{Binding SelectToolCommand}" CommandParameter="Eraser"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
+            </MenuItem>
+        </Menu>
 
-                <!-- Map Info -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,10">
-                    <TextBlock Text="MAP: " 
-                               FontFamily="Consolas"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding MapName}" 
-                               FontFamily="Consolas"
-                               FontSize="20"
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               VerticalAlignment="Center"
-                               Margin="5,0,0,0"/>
-                </StackPanel>
+        <!-- Toolbar -->
+        <ToolBar Grid.Row="1" Background="{DynamicResource Surface2Brush}" Height="40">
+            <ToolBar.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                    <Setter Property="Width" Value="36"/>
+                    <Setter Property="Height" Value="36"/>
+                    <Setter Property="Margin" Value="2"/>
+                    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                </Style>
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}">
+                    <Setter Property="Width" Value="36"/>
+                    <Setter Property="Height" Value="36"/>
+                    <Setter Property="Margin" Value="2"/>
+                    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                </Style>
+            </ToolBar.Resources>
 
-                <!-- Map Properties Display -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10">
-                    <Border Background="{DynamicResource Surface2Brush}" 
-                            BorderBrush="{DynamicResource BorderBrush}" 
-                            BorderThickness="1" 
-                            CornerRadius="4"
-                            Padding="15,5"
-                            Margin="5,0">
-                        <TextBlock FontFamily="Consolas" FontSize="14" Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Size: "/>
-                            <Run Text="{Binding MapWidth}"/>
-                            <Run Text="×"/>
-                            <Run Text="{Binding MapHeight}"/>
-                        </TextBlock>
-                    </Border>
+            <Button Command="{Binding SaveCommand}" ToolTip="Save (Ctrl+S)">
+                <TextBlock Text="💾" FontSize="20"/>
+            </Button>
+            <Separator/>
 
-                    <Border Background="{DynamicResource Surface2Brush}" 
-                            BorderBrush="{DynamicResource BorderBrush}" 
-                            BorderThickness="1" 
-                            CornerRadius="4"
-                            Padding="15,5"
-                            Margin="5,0">
-                        <TextBlock FontFamily="Consolas" FontSize="14" Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Players: "/>
-                            <Run Text="{Binding NumberOfPlayers}"/>
-                        </TextBlock>
-                    </Border>
+            <Button Command="{Binding UndoCommand}" ToolTip="Undo (Ctrl+Z)">
+                <TextBlock Text="↶" FontSize="20"/>
+            </Button>
+            <Button Command="{Binding RedoCommand}" ToolTip="Redo (Ctrl+Y)">
+                <TextBlock Text="↷" FontSize="20"/>
+            </Button>
+            <Separator/>
 
-                    <Border Background="{DynamicResource Surface2Brush}" 
-                            BorderBrush="{DynamicResource BorderBrush}" 
-                            BorderThickness="1" 
-                            CornerRadius="4"
-                            Padding="15,5"
-                            Margin="5,0">
-                        <TextBlock FontFamily="Consolas" FontSize="14" Foreground="{DynamicResource ForegroundBrush}">
-                            <Run Text="Terrain: "/>
-                            <Run Text="{Binding DefaultTerrain}"/>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
+            <RadioButton GroupName="Tools" IsChecked="{Binding IsSelectToolActive}" 
+                         Command="{Binding SelectToolCommand}" CommandParameter="Select" 
+                         ToolTip="Select Tool">
+                <TextBlock Text="⬚" FontSize="20"/>
+            </RadioButton>
+            <RadioButton GroupName="Tools" IsChecked="{Binding IsBrushToolActive}" 
+                         Command="{Binding SelectToolCommand}" CommandParameter="Brush" 
+                         ToolTip="Brush Tool">
+                <TextBlock Text="🖌" FontSize="20"/>
+            </RadioButton>
+            <RadioButton GroupName="Tools" IsChecked="{Binding IsRectangleToolActive}" 
+                         Command="{Binding SelectToolCommand}" CommandParameter="Rectangle" 
+                         ToolTip="Rectangle Tool">
+                <TextBlock Text="▭" FontSize="20"/>
+            </RadioButton>
+            <RadioButton GroupName="Tools" IsChecked="{Binding IsFillToolActive}" 
+                         Command="{Binding SelectToolCommand}" CommandParameter="Fill" 
+                         ToolTip="Fill Tool">
+                <TextBlock Text="🪣" FontSize="20"/>
+            </RadioButton>
+            <RadioButton GroupName="Tools" IsChecked="{Binding IsEraserToolActive}" 
+                         Command="{Binding SelectToolCommand}" CommandParameter="Eraser" 
+                         ToolTip="Eraser Tool">
+                <TextBlock Text="🗑" FontSize="20"/>
+            </RadioButton>
+            <Separator/>
 
-                <!-- Action Buttons -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="20,10">
-                    <Button Content="SAVE" 
-                            Command="{Binding SaveCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"
-                            Height="35"
-                            Margin="0,0,10,0"/>
-                    <Button Content="TEST MAP" 
-                            Command="{Binding TestMapCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="100"
-                            Height="35"
-                            Margin="0,0,10,0"/>
-                    <Button Content="EXPORT" 
-                            Command="{Binding ExportCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"
-                            Height="35"
-                            Margin="0,0,10,0"/>
-                    <Button Content="EXIT" 
-                            Command="{Binding ExitCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"
-                            Height="35"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+            <ToggleButton IsChecked="{Binding ShowGrid}" ToolTip="Toggle Grid (G)">
+                <TextBlock Text="⊞" FontSize="20"/>
+            </ToggleButton>
+            <ToggleButton IsChecked="{Binding SnapToGrid}" ToolTip="Toggle Snap to Grid (S)">
+                <TextBlock Text="⊟" FontSize="20"/>
+            </ToggleButton>
+        </ToolBar>
 
-        <!-- Quick Actions Bar -->
-        <Border Grid.Row="1" Background="{DynamicResource Surface2Brush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Margin="20,5">
-                <!-- Undo/Redo -->
-                <Button Content="↶" 
-                        Command="{Binding UndoCommand}"
-                        ToolTip="Undo (Ctrl+Z)"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="35"
-                        Height="35"
-                        FontSize="18"
-                        Margin="0,0,5,0"
-                        IsEnabled="{Binding CanUndo}"/>
-                <Button Content="↷" 
-                        Command="{Binding RedoCommand}"
-                        ToolTip="Redo (Ctrl+Y)"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="35"
-                        Height="35"
-                        FontSize="18"
-                        Margin="0,0,20,0"
-                        IsEnabled="{Binding CanRedo}"/>
-
-                <!-- Separator -->
-                <Rectangle Width="1" Fill="{DynamicResource BorderBrush}" Margin="0,5"/>
-
-                <!-- Copy/Paste -->
-                <Button Content="📋" 
-                        Command="{Binding CopyCommand}"
-                        ToolTip="Copy (Ctrl+C)"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="35"
-                        Height="35"
-                        FontSize="16"
-                        Margin="20,0,5,0"/>
-                <Button Content="📄" 
-                        Command="{Binding PasteCommand}"
-                        ToolTip="Paste (Ctrl+V)"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="35"
-                        Height="35"
-                        FontSize="16"
-                        Margin="0,0,20,0"/>
-
-                <!-- Separator -->
-                <Rectangle Width="1" Fill="{DynamicResource BorderBrush}" Margin="0,5"/>
-
-                <!-- View Options -->
-                <CheckBox Content="Show Grid" 
-                          IsChecked="{Binding ShowGrid}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          VerticalAlignment="Center"
-                          Margin="20,0,15,0"/>
-                <CheckBox Content="Show Collision" 
-                          IsChecked="{Binding ShowCollision}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          VerticalAlignment="Center"
-                          Margin="0,0,15,0"/>
-                <CheckBox Content="Show Coordinates" 
-                          IsChecked="{Binding ShowCoordinates}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          VerticalAlignment="Center"
-                          Margin="0,0,20,0"/>
-
-                <!-- Separator -->
-                <Rectangle Width="1" Fill="{DynamicResource BorderBrush}" Margin="0,5"/>
-
-                <!-- Zoom Controls -->
-                <TextBlock Text="Zoom:" 
-                           Foreground="{DynamicResource ForegroundBrush}"
-                           FontFamily="Consolas"
-                           FontSize="14"
-                           VerticalAlignment="Center"
-                           Margin="20,0,10,0"/>
-                <Button Content="-" 
-                        Command="{Binding ZoomOutCommand}"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="30"
-                        Height="30"
-                        FontSize="16"
-                        Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding ZoomLevel, StringFormat={}{0}%}" 
-                           Foreground="{DynamicResource ForegroundBrush}"
-                           FontFamily="Consolas"
-                           FontSize="14"
-                           Width="50"
-                           TextAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <Button Content="+" 
-                        Command="{Binding ZoomInCommand}"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="30"
-                        Height="30"
-                        FontSize="16"
-                        Margin="5,0,10,0"/>
-                <Button Content="100%" 
-                        Command="{Binding ResetZoomCommand}"
-                        Style="{StaticResource EditorButtonStyle}"
-                        Width="50"
-                        Height="30"
-                        FontSize="12"/>
-
-                <!-- Auto-save indicator -->
-                <TextBlock Text="{Binding AutoSaveStatus}" 
-                           Foreground="{StaticResource SuccessBrush}"
-                           FontFamily="Consolas"
-                           FontSize="12"
-                           FontStyle="Italic"
-                           VerticalAlignment="Center"
-                           Margin="30,0,0,0"
-                           Visibility="{Binding AutoSaveVisibility}"/>
-            </StackPanel>
-        </Border>
-
-        <!-- Main Editor Area -->
+        <!-- Main Content Area -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Panel - Tools -->
-            <Border Grid.Column="0" Background="{DynamicResource Surface2Brush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20">
-                        <!-- Layer Selector -->
-                        <TextBlock Text="ACTIVE LAYER" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,10"/>
-                        <ComboBox SelectedItem="{Binding SelectedLayer}"
-                                  ItemsSource="{Binding Layers}"
-                                  Style="{StaticResource SettingsComboBoxStyle}"
-                                  FontSize="14"
-                                  Margin="0,0,0,20">
-                            <ComboBox.ItemTemplate>
+            <!-- Left Panel - Tile Palette -->
+            <Border Grid.Column="0" Background="{DynamicResource Surface2Brush}" 
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="TILE PALETTE" 
+                               Foreground="{DynamicResource ForegroundBrush}" 
+                               FontFamily="Consolas"
+                               FontSize="16"
+                               FontWeight="Bold" 
+                               Margin="10,10,10,5"/>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding TilePalette}" Margin="10">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock>
-                                        <Run Text="{Binding Number}"/>
-                                        <Run Text=" - "/>
-                                        <Run Text="{Binding Name}"/>
-                                    </TextBlock>
+                                    <Border Width="48" Height="48" Margin="2"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            Background="{Binding Color}"
+                                            ToolTip="{Binding Name}">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" 
+                                                         Command="{Binding DataContext.SelectTileCommand, 
+                                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         CommandParameter="{Binding}"/>
+                                        </Border.InputBindings>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="BorderThickness" Value="3"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
                                 </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-
-                        <!-- Tools Section -->
-                        <TextBlock Text="TOOLS" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,10"/>
-                        <Grid Margin="0,0,0,20">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="60"/>
-                                <RowDefinition Height="60"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Paint Tool -->
-                            <Border Grid.Column="0" Grid.Row="0" 
-                                    Margin="2"
-                                    Background="{Binding PaintToolBackground}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <RadioButton GroupName="Tools"
-                                             IsChecked="{Binding IsPaintToolSelected}"
-                                             Style="{StaticResource {x:Type ToggleButton}}"
-                                             Command="{Binding SelectPaintToolCommand}"
-                                             ToolTip="Paint Tool">
-                                    <TextBlock Text="🖌️" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </RadioButton>
-                            </Border>
-
-                            <!-- Eraser Tool -->
-                            <Border Grid.Column="1" Grid.Row="0" 
-                                    Margin="2"
-                                    Background="{Binding EraserToolBackground}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <RadioButton GroupName="Tools"
-                                             IsChecked="{Binding IsEraserToolSelected}"
-                                             Style="{StaticResource {x:Type ToggleButton}}"
-                                             Command="{Binding SelectEraserToolCommand}"
-                                             ToolTip="Eraser Tool">
-                                    <TextBlock Text="🧹" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </RadioButton>
-                            </Border>
-
-                            <!-- Select Tool -->
-                            <Border Grid.Column="2" Grid.Row="0" 
-                                    Margin="2"
-                                    Background="{Binding SelectToolBackground}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <RadioButton GroupName="Tools"
-                                             IsChecked="{Binding IsSelectToolSelected}"
-                                             Style="{StaticResource {x:Type ToggleButton}}"
-                                             Command="{Binding SelectToolCommand}"
-                                             ToolTip="Select Tool">
-                                    <TextBlock Text="⬚" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </RadioButton>
-                            </Border>
-
-                            <!-- Fill Tool -->
-                            <Border Grid.Column="3" Grid.Row="0" 
-                                    Margin="2"
-                                    Background="{Binding FillToolBackground}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <RadioButton GroupName="Tools"
-                                             IsChecked="{Binding IsFillToolSelected}"
-                                             Style="{StaticResource {x:Type ToggleButton}}"
-                                             Command="{Binding SelectFillToolCommand}"
-                                             ToolTip="Fill Tool">
-                                    <TextBlock Text="🪣" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </RadioButton>
-                            </Border>
-
-                            <!-- Ruler Tool -->
-                            <Border Grid.Column="0" Grid.Row="1" 
-                                    Margin="2"
-                                    Background="{Binding RulerToolBackground}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1">
-                                <RadioButton GroupName="Tools"
-                                             IsChecked="{Binding IsRulerToolSelected}"
-                                             Style="{StaticResource {x:Type ToggleButton}}"
-                                             Command="{Binding SelectRulerToolCommand}"
-                                             ToolTip="Ruler Tool">
-                                    <TextBlock Text="📏" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </RadioButton>
-                            </Border>
-                        </Grid>
-
-                        <!-- Brush Size (for terrain and collision layers) -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20"
-                                Visibility="{Binding BrushSizeVisibility}">
-                            <StackPanel>
-                                <TextBlock Text="BRUSH SIZE" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="60"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Grid.Column="0"
-                                            Value="{Binding BrushSize}"
-                                            Minimum="1"
-                                            Maximum="50"
-                                            TickFrequency="1"
-                                            IsSnapToTickEnabled="True"
-                                            Style="{StaticResource SettingsSliderStyle}"/>
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding BrushSize}"
-                                             Style="{StaticResource SettingsTextBoxStyle}"
-                                             FontSize="14"
-                                             Margin="10,0,0,0"/>
-                                </Grid>
-                                <TextBlock Text="{Binding BrushSizeDisplay}" 
-                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="12"
-                                           HorizontalAlignment="Center"
-                                           Margin="0,5,0,0"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Tileset Box (for terrain, properties, and units layers) -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20"
-                                Visibility="{Binding TilesetVisibility}">
-                            <StackPanel>
-                                <TextBlock Text="{Binding TilesetHeader}" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-                                <ScrollViewer Height="200" VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemsSource="{Binding AvailableTiles}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Orientation="Horizontal"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Width="50" Height="50" 
-                                                        Margin="2"
-                                                        Background="{Binding Background}"
-                                                        BorderBrush="{Binding BorderBrush}"
-                                                        BorderThickness="2"
-                                                        ToolTip="{Binding Name}">
-                                                    <Border.InputBindings>
-                                                        <MouseBinding MouseAction="LeftClick" 
-                                                                      Command="{Binding DataContext.SelectTileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                      CommandParameter="{Binding}"/>
-                                                    </Border.InputBindings>
-                                                    <Image Source="{Binding ImageSource}" 
-                                                           Width="40" 
-                                                           Height="40"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-
-                                <!-- Recently Used -->
-                                <TextBlock Text="Recently Used" 
-                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="12"
-                                           Margin="0,10,0,5"/>
-                                <ItemsControl ItemsSource="{Binding RecentTiles}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Width="40" Height="40" 
-                                                    Margin="2"
-                                                    Background="{DynamicResource Surface2Brush}"
-                                                    BorderBrush="{Binding BorderBrush}"
-                                                    BorderThickness="1"
-                                                    ToolTip="{Binding Name}">
-                                                <Border.InputBindings>
-                                                    <MouseBinding MouseAction="LeftClick" 
-                                                                  Command="{Binding DataContext.SelectTileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                  CommandParameter="{Binding}"/>
-                                                </Border.InputBindings>
-                                                <Image Source="{Binding ImageSource}" 
-                                                       Width="32" 
-                                                       Height="32"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Aircraft Permission (for collision layer) -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20"
-                                Visibility="{Binding AircraftOptionsVisibility}">
-                            <StackPanel>
-                                <TextBlock Text="AIRCRAFT PERMISSIONS" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-                                <RadioButton Content="Block Aircraft" 
-                                             IsChecked="{Binding BlockAircraft}"
-                                             Style="{StaticResource SettingsRadioButtonStyle}"
-                                             Margin="0,5"/>
-                                <RadioButton Content="Allow Aircraft" 
-                                             IsChecked="{Binding AllowAircraft}"
-                                             Style="{StaticResource SettingsRadioButtonStyle}"
-                                             Margin="0,5"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Ownership Selector (for properties and units layers) -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20"
-                                Visibility="{Binding OwnershipVisibility}">
-                            <StackPanel>
-                                <TextBlock Text="OWNERSHIP" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-                                <ComboBox SelectedItem="{Binding SelectedOwner}"
-                                          ItemsSource="{Binding AvailableOwners}"
-                                          Style="{StaticResource SettingsComboBoxStyle}"
-                                          FontSize="14">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock>
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding}" Value="Neutral">
-                                                                <Setter Property="Foreground" Value="Gray"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding}" Value="Player 1">
-                                                                <Setter Property="Foreground" Value="Blue"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding}" Value="Player 2">
-                                                                <Setter Property="Foreground" Value="Red"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding}" Value="Player 3">
-                                                                <Setter Property="Foreground" Value="Green"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding}" Value="Player 4">
-                                                                <Setter Property="Foreground" Value="Yellow"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                                <Run Text="{Binding Mode=OneWay}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Layer Options -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="LAYER OPTIONS" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-                                <Slider Value="{Binding LayerOpacity}"
-                                        Minimum="0.1"
-                                        Maximum="1.0"
-                                        TickFrequency="0.1"
-                                        IsSnapToTickEnabled="True"
-                                        Style="{StaticResource SettingsSliderStyle}"
-                                        Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding LayerOpacity, StringFormat=Layer Opacity: {0:P0}}" 
-                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="12"
-                                           HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
             <!-- Center - Map Canvas -->
             <Grid Grid.Column="1" Background="{DynamicResource BackgroundBrush}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="150"/>
-                </Grid.RowDefinitions>
+                <ScrollViewer x:Name="MapScrollViewer" 
+                              HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Auto"
+                              Background="{DynamicResource BackgroundBrush}">
+                    <Border x:Name="MapContainer" 
+                            Background="{DynamicResource Surface3Brush}"
+                            Margin="50">
+                        <Grid>
+                            <Grid.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding ZoomLevel}" 
+                                               ScaleY="{Binding ZoomLevel}" 
+                                               CenterX="0.5" 
+                                               CenterY="0.5"/>
+                            </Grid.LayoutTransform>
 
-                <!-- Main Map View -->
-                <Border Grid.Row="0" Margin="10" 
-                        Background="{DynamicResource Surface2Brush}"
+                            <!-- Map Canvas Control -->
+                            <controls:MapCanvas x:Name="MapCanvas"
+                                              Map="{Binding CurrentMap}"
+                                              ShowGrid="{Binding ShowGrid}"
+                                              GridSize="{Binding GridSize}"
+                                              SelectedTool="{Binding SelectedTool}"
+                                              SelectedTile="{Binding SelectedTile}"
+                                              Width="{Binding CanvasWidth}"
+                                              Height="{Binding CanvasHeight}"
+                                              Background="{DynamicResource Surface3Brush}"
+                                              ClipToBounds="True"/>
+                        </Grid>
+                    </Border>
+                </ScrollViewer>
+
+                <!-- Zoom Controls -->
+                <Border HorizontalAlignment="Right" 
+                        VerticalAlignment="Bottom" 
+                        Margin="20"
+                        Background="{DynamicResource SurfaceBrush}"
                         BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="2">
-                    <Grid>
-                        <ScrollViewer x:Name="MapScrollViewer"
-                                      HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Auto"
-                                      PreviewMouseWheel="OnMapMouseWheel">
-                            <Grid>
-                                <Grid.LayoutTransform>
-                                    <ScaleTransform ScaleX="{Binding ZoomScale}" 
-                                                    ScaleY="{Binding ZoomScale}"/>
-                                </Grid.LayoutTransform>
-
-                                <!-- Map Canvas -->
-                                <Canvas x:Name="MapCanvas"
-                                        Width="{Binding CanvasWidth}"
-                                        Height="{Binding CanvasHeight}"
-                                        Background="{DynamicResource BackgroundBrush}"
-                                        MouseMove="OnMapMouseMove"
-                                        MouseLeftButtonDown="OnMapMouseLeftButtonDown"
-                                        MouseLeftButtonUp="OnMapMouseLeftButtonUp"
-                                        MouseRightButtonDown="OnMapMouseRightButtonDown"
-                                        MouseLeave="OnMapMouseLeave">
-
-                                    <!-- Grid Overlay -->
-                                    <ItemsControl ItemsSource="{Binding GridLines}"
-                                                  Visibility="{Binding GridVisibility}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <Canvas/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Line X1="{Binding X1}" Y1="{Binding Y1}"
-                                                      X2="{Binding X2}" Y2="{Binding Y2}"
-                                                      Stroke="{DynamicResource BorderBrush}"
-                                                      StrokeThickness="0.5"
-                                                      Opacity="0.3"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <!-- Map Tiles -->
-                                    <ItemsControl ItemsSource="{Binding MapTiles}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <Canvas/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemContainerStyle>
-                                            <Style>
-                                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                                            </Style>
-                                        </ItemsControl.ItemContainerStyle>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Width="{Binding Width}" Height="{Binding Height}">
-                                                    <!-- Terrain Layer -->
-                                                    <Image Source="{Binding TerrainImage}" 
-                                                           Opacity="{Binding TerrainOpacity}"/>
-
-                                                    <!-- Collision Layer -->
-                                                    <Rectangle Fill="Red" 
-                                                               Opacity="{Binding CollisionOpacity}"
-                                                               Visibility="{Binding CollisionVisibility}"/>
-
-                                                    <!-- Property Layer -->
-                                                    <Image Source="{Binding PropertyImage}" 
-                                                           Opacity="{Binding PropertyOpacity}"
-                                                           Visibility="{Binding PropertyVisibility}"/>
-
-                                                    <!-- Unit Layer -->
-                                                    <Image Source="{Binding UnitImage}" 
-                                                           Opacity="{Binding UnitOpacity}"
-                                                           Visibility="{Binding UnitVisibility}"/>
-
-                                                    <!-- Selection Overlay -->
-                                                    <Rectangle Stroke="{DynamicResource AccentBrush}"
-                                                               StrokeThickness="2"
-                                                               Fill="Transparent"
-                                                               Visibility="{Binding SelectionVisibility}"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <!-- Hover Indicator -->
-                                    <Rectangle Width="{Binding HoverIndicatorWidth}"
-                                               Height="{Binding HoverIndicatorHeight}"
-                                               Canvas.Left="{Binding HoverIndicatorX}"
-                                               Canvas.Top="{Binding HoverIndicatorY}"
-                                               Stroke="{DynamicResource AccentBrush}"
-                                               StrokeThickness="2"
-                                               Fill="{DynamicResource AccentBrush}"
-                                               Opacity="0.3"
-                                               Visibility="{Binding HoverIndicatorVisibility}"/>
-
-                                    <!-- Ruler Line -->
-                                    <Line X1="{Binding RulerX1}" Y1="{Binding RulerY1}"
-                                          X2="{Binding RulerX2}" Y2="{Binding RulerY2}"
-                                          Stroke="{DynamicResource AccentBrush}"
-                                          StrokeThickness="2"
-                                          Visibility="{Binding RulerVisibility}"/>
-
-                                    <!-- Ruler Text -->
-                                    <Border Canvas.Left="{Binding RulerTextX}"
-                                            Canvas.Top="{Binding RulerTextY}"
-                                            Background="{DynamicResource Surface3Brush}"
-                                            BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="3"
-                                            Padding="5,2"
-                                            Visibility="{Binding RulerVisibility}">
-                                        <TextBlock Text="{Binding RulerDistance}" 
-                                                   Foreground="{DynamicResource ForegroundBrush}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="12"/>
-                                    </Border>
-                                </Canvas>
-                            </Grid>
-                        </ScrollViewer>
-
-                        <!-- Coordinate Display -->
-                        <Border HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Margin="10"
-                                Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="3"
-                                Padding="10,5"
-                                Visibility="{Binding CoordinateDisplayVisibility}">
-                            <TextBlock Text="{Binding CoordinateDisplay}" 
-                                       Foreground="{DynamicResource ForegroundBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="12"/>
-                        </Border>
-                    </Grid>
-                </Border>
-
-                <!-- Mini-map -->
-                <Border Grid.Row="1" Margin="10,0,10,10"
-                        Background="{DynamicResource Surface2Brush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="2">
-                    <Grid>
-                        <TextBlock Text="MINI-MAP" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="10,5">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="-" 
+                                Style="{StaticResource EditorButtonStyle}" 
+                                Width="30"
+                                Height="30"
+                                Command="{Binding ZoomOutCommand}"/>
+                        <TextBlock Foreground="{DynamicResource ForegroundBrush}" 
                                    FontFamily="Consolas"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Top"
-                                   Margin="0,5,0,0"/>
-
-                        <Canvas x:Name="MiniMapCanvas"
-                                Width="{Binding MiniMapWidth}"
-                                Height="{Binding MiniMapHeight}"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="{DynamicResource BackgroundBrush}"
-                                MouseLeftButtonDown="OnMiniMapClick">
-
-                            <!-- Mini-map content -->
-                            <Image Source="{Binding MiniMapImage}" 
-                                   Width="{Binding MiniMapWidth}"
-                                   Height="{Binding MiniMapHeight}"/>
-
-                            <!-- Viewport indicator -->
-                            <Rectangle Canvas.Left="{Binding ViewportX}"
-                                       Canvas.Top="{Binding ViewportY}"
-                                       Width="{Binding ViewportWidth}"
-                                       Height="{Binding ViewportHeight}"
-                                       Stroke="Yellow"
-                                       StrokeThickness="2"
-                                       Fill="Yellow"
-                                       Opacity="0.2"/>
-                        </Canvas>
-                    </Grid>
+                                   VerticalAlignment="Center" 
+                                   Margin="10,0"
+                                   MinWidth="50"
+                                   TextAlignment="Center">
+                            <TextBlock.Text>
+                                <Binding Path="ZoomLevel" StringFormat="{}{0:P0}"/>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <Button Content="+" 
+                                Style="{StaticResource EditorButtonStyle}" 
+                                Width="30"
+                                Height="30"
+                                Command="{Binding ZoomInCommand}"/>
+                    </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Right Panel - Properties -->
-            <Border Grid.Column="2" Background="{DynamicResource Surface2Brush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
+            <Border Grid.Column="2" Background="{DynamicResource Surface2Brush}" 
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20">
-                        <!-- Selected Tile Info -->
-                        <TextBlock Text="TILE PROPERTIES" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
+                    <StackPanel Margin="10">
+                        <TextBlock Text="MAP PROPERTIES" 
+                                   Foreground="{DynamicResource ForegroundBrush}" 
                                    FontFamily="Consolas"
                                    FontSize="16"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15"/>
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,10"/>
 
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20">
-                            <StackPanel>
-                                <TextBlock Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           Margin="0,0,0,5">
-                                    <Run Text="Position: "/>
-                                    <Run Text="{Binding SelectedTileX}"/>
-                                    <Run Text=", "/>
-                                    <Run Text="{Binding SelectedTileY}"/>
-                                </TextBlock>
+                        <GroupBox Header="Map Information" Style="{StaticResource SettingsGroupBoxStyle}">
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                <TextBlock Text="{Binding SelectedTileTerrain}"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           Margin="0,0,0,5"/>
+                                <TextBlock Text="Name:" Foreground="{DynamicResource ForegroundBrush}" 
+                                          Margin="0,5" Grid.Row="0" Grid.Column="0"/>
+                                <TextBox Text="{Binding CurrentMap.Name}" 
+                                        Style="{StaticResource SettingsTextBoxStyle}"
+                                        Grid.Row="0" Grid.Column="1" Margin="5"/>
 
-                                <TextBlock Text="{Binding SelectedTileCollision}"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           Margin="0,0,0,5"/>
+                                <TextBlock Text="Width:" Foreground="{DynamicResource ForegroundBrush}" 
+                                          Margin="0,5" Grid.Row="1" Grid.Column="0"/>
+                                <TextBlock Text="{Binding CurrentMap.Width}" 
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Grid.Row="1" Grid.Column="1" Margin="5"/>
 
-                                <TextBlock Text="{Binding SelectedTileProperty}"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           Margin="0,0,0,5"
-                                           Visibility="{Binding SelectedTilePropertyVisibility}"/>
+                                <TextBlock Text="Height:" Foreground="{DynamicResource ForegroundBrush}" 
+                                          Margin="0,5" Grid.Row="2" Grid.Column="0"/>
+                                <TextBlock Text="{Binding CurrentMap.Height}" 
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Grid.Row="2" Grid.Column="1" Margin="5"/>
 
-                                <TextBlock Text="{Binding SelectedTileUnit}"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           Visibility="{Binding SelectedTileUnitVisibility}"/>
+                                <TextBlock Text="Players:" Foreground="{DynamicResource ForegroundBrush}" 
+                                          Margin="0,5" Grid.Row="3" Grid.Column="0"/>
+                                <TextBlock Text="{Binding CurrentMap.NumberOfPlayers}" 
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          Grid.Row="3" Grid.Column="1" Margin="5"/>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="Current Tool" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,10,0,0">
+                            <StackPanel Margin="5">
+                                <TextBlock Text="{Binding SelectedTool}" 
+                                          Foreground="{DynamicResource ForegroundBrush}"
+                                          FontWeight="Bold"
+                                          Margin="0,0,0,5"/>
+
+                                <Grid Visibility="{Binding IsBrushSettingsVisible}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Brush Size:" 
+                                              Foreground="{DynamicResource ForegroundBrush}" 
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,10,0"/>
+
+                                    <ComboBox Grid.Column="1" 
+                                              SelectedItem="{Binding BrushSize}" 
+                                              ItemsSource="{Binding BrushSizes}"
+                                              Style="{StaticResource SettingsComboBoxStyle}"/>
+                                </Grid>
                             </StackPanel>
-                        </Border>
+                        </GroupBox>
 
-                        <!-- Map Statistics -->
-                        <TextBlock Text="MAP STATISTICS" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15"/>
+                        <GroupBox Header="Selected Tile" Style="{StaticResource SettingsGroupBoxStyle}" 
+                                  Margin="0,10,0,0"
+                                  Visibility="{Binding IsSelectedTileVisible}">
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="64"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,0,0,20">
-                            <ItemsControl ItemsSource="{Binding MapStatistics}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Foreground="{DynamicResource ForegroundBrush}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="12"
-                                                   Margin="0,2">
-                                            <Run Text="{Binding Label}"/>
-                                            <Run Text=": "/>
-                                            <Run Text="{Binding Value}" FontWeight="Bold"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Border>
+                                <Border Grid.Column="0"
+                                        Width="64" Height="64"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        Background="{Binding SelectedTile.Color}"/>
 
-                        <!-- Quick Actions -->
-                        <TextBlock Text="QUICK ACTIONS" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15"/>
-
-                        <StackPanel>
-                            <Button Content="Validate Map" 
-                                    Command="{Binding ValidateMapCommand}"
-                                    Style="{StaticResource MenuButtonStyle}"
-                                    Height="35"
-                                    FontSize="14"
-                                    Margin="0,0,0,10"/>
-
-                            <Button Content="Clear Layer" 
-                                    Command="{Binding ClearLayerCommand}"
-                                    Style="{StaticResource MenuButtonStyle}"
-                                    Height="35"
-                                    FontSize="14"
-                                    Margin="0,0,0,10"/>
-
-                            <Button Content="Auto-Tile Terrain" 
-                                    Command="{Binding AutoTileCommand}"
-                                    Style="{StaticResource MenuButtonStyle}"
-                                    Height="35"
-                                    FontSize="14"
-                                    Margin="0,0,0,10"
-                                    Visibility="{Binding AutoTileVisibility}"/>
-
-                            <Button Content="Balance Resources" 
-                                    Command="{Binding BalanceResourcesCommand}"
-                                    Style="{StaticResource MenuButtonStyle}"
-                                    Height="35"
-                                    FontSize="14"
-                                    Visibility="{Binding BalanceResourcesVisibility}"/>
-                        </StackPanel>
-
-                        <!-- Validation Results -->
-                        <Border Background="{DynamicResource Surface3Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="15"
-                                Margin="0,20,0,0"
-                                Visibility="{Binding ValidationResultsVisibility}">
-                            <StackPanel>
-                                <TextBlock Text="VALIDATION RESULTS" 
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
-
-                                <ItemsControl ItemsSource="{Binding ValidationResults}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       TextWrapping="Wrap"
-                                                       Margin="0,2">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Type}" Value="Error">
-                                                                <Setter Property="Foreground" Value="Red"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Type}" Value="Warning">
-                                                                <Setter Property="Foreground" Value="Orange"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Type}" Value="Info">
-                                                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                                <Run Text="• "/>
-                                                <Run Text="{Binding Message}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock Text="{Binding SelectedTile.Name}" 
+                                              Foreground="{DynamicResource ForegroundBrush}"
+                                              FontWeight="Bold"
+                                              Margin="0,0,0,5"/>
+                                    <TextBlock Text="{Binding SelectedTile.TerrainType}" 
+                                              Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
         </Grid>
 
         <!-- Status Bar -->
-        <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
-            <Grid Margin="20,5">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <TextBlock Text="Layer: " 
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding CurrentLayerStatus}" 
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"
-                               Margin="0,0,20,0"/>
+        <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" 
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <Grid Margin="5,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Tool: " 
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding CurrentToolStatus}" 
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"
-                               Margin="0,0,20,0"/>
-
-                    <TextBlock Text="{Binding StatusMessage}" 
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               FontStyle="Italic"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding MemoryUsage}" 
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               VerticalAlignment="Center"
-                               Margin="0,0,20,0"/>
-
-                    <TextBlock Text="{Binding CurrentTime}" 
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               FontSize="12"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" 
+                          Foreground="{DynamicResource ForegroundBrush}" 
+                          FontFamily="Consolas"
+                          Margin="5,0"/>
+                <TextBlock Grid.Column="2" Foreground="{DynamicResource ForegroundBrush}" 
+                          FontFamily="Consolas"
+                          Margin="5,0">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="X: {0}, Y: {1}">
+                            <Binding Path="MouseTileX"/>
+                            <Binding Path="MouseTileY"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
             </Grid>
         </Border>
     </Grid>

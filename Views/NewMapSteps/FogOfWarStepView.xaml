@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
-    
+
     <StackPanel MaxWidth="600">
         <TextBlock Text="FOG OF WAR SETTINGS" 
                    Foreground="{DynamicResource ForegroundBrush}" 
@@ -14,13 +14,13 @@
                    FontSize="32" 
                    FontWeight="Bold" 
                    Margin="0,0,0,30"/>
-        
+
         <TextBlock Text="Configure visibility and exploration mechanics" 
                    Foreground="{DynamicResource ForegroundSecondaryBrush}" 
                    FontFamily="Consolas"
                    FontSize="16" 
                    Margin="0,0,0,30"/>
-        
+
         <Border Background="{DynamicResource Surface2Brush}"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1"
@@ -43,13 +43,13 @@
                                    Margin="0,5,0,0"/>
                     </StackPanel>
                 </CheckBox>
-                
+
                 <Grid IsEnabled="{Binding ParentViewModel.FogOfWarEnabled}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    
+
                     <StackPanel Grid.Row="0" Margin="0,0,0,30">
                         <TextBlock Text="Shroud Type"
                                    Foreground="{DynamicResource ForegroundBrush}"
@@ -62,7 +62,7 @@
                                   Style="{StaticResource SettingsComboBoxStyle}"
                                   FontSize="16"
                                   Margin="0,0,0,10"/>
-                        
+
                         <Border Background="{DynamicResource BackgroundBrush}"
                                 BorderBrush="{DynamicResource BorderBrush}"
                                 BorderThickness="1"
@@ -81,7 +81,7 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                    
+
                     <StackPanel Grid.Row="1">
                         <TextBlock Text="Vision Penalty Range Multiplier"
                                    Foreground="{DynamicResource ForegroundBrush}"
@@ -89,26 +89,12 @@
                                    FontSize="16"
                                    FontWeight="Bold"
                                    Margin="0,0,0,8"/>
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="80"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider Grid.Column="0"
-                                    Value="{Binding ParentViewModel.VisionPenaltyMultiplier}"
-                                    Minimum="0.5"
-                                    Maximum="2.0"
-                                    TickFrequency="0.1"
-                                    IsSnapToTickEnabled="True"
-                                    Style="{StaticResource SettingsSliderStyle}"/>
-                            <TextBox Grid.Column="1"
-                                     Text="{Binding ParentViewModel.VisionPenaltyMultiplier, StringFormat={}{0:F1}}"
-                                     Style="{StaticResource SettingsTextBoxStyle}"
-                                     FontSize="16"
-                                     IsReadOnly="True"
-                                     Margin="10,0,0,0"/>
-                        </Grid>
-                        <TextBlock Text="Controls how far units can see in fog. Lower values reduce vision range."
+                        <ComboBox SelectedItem="{Binding ParentViewModel.VisionPenaltyMultiplierString}"
+                                  ItemsSource="{Binding ParentViewModel.VisionPenaltyMultipliers}"
+                                  Style="{StaticResource SettingsComboBoxStyle}"
+                                  FontSize="16"
+                                  Margin="0,0,0,10"/>
+                        <TextBlock Text="Controls how far units can see in fog. Higher multipliers mean greater reduction in unit visibility."
                                    Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                    FontFamily="Consolas"
                                    FontSize="14"

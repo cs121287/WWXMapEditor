@@ -1,44 +1,49 @@
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using Newtonsoft.Json;
 using WWXMapEditor.Models;
 
 namespace WWXMapEditor.Services
 {
     public class SettingsService
     {
-        private static SettingsService _instance;
-        public static SettingsService Instance => _instance ??= new SettingsService();
-
-        private readonly string _settingsPath;
+        private static SettingsService? _instance;
+        private static readonly object _lock = new object();
         private AppSettings _settings;
+        private readonly string _settingsPath;
+        private readonly ThemeService _themeService;
 
-        public AppSettings Settings => _settings ??= LoadSettings();
-
-        public event EventHandler<SettingsChangedEventArgs> SettingsChanged;
+        public static SettingsService Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new SettingsService();
+                        }
+                    }
+                }
+                return _instance;
+            }
+        }
 
         private SettingsService()
         {
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var appFolder = Path.Combine(appDataPath, "WWXMapEditor");
-
-            try
-            {
-                Directory.CreateDirectory(appFolder);
-                _settingsPath = Path.Combine(appFolder, "settings.json");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Fall back to using local folder if we can't create in AppData
-                var localFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
-                appFolder = Path.Combine(localFolder, "Settings");
-                Directory.CreateDirectory(appFolder);
-                _settingsPath = Path.Combine(appFolder, "settings.json");
-            }
+            _themeService = ThemeService.Instance;
+            var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WWXMapEditor");
+            Directory.CreateDirectory(appDataPath);
+            _settingsPath = Path.Combine(appDataPath, "settings.json");
+            _settings = LoadSettings();
         }
+
+        public AppSettings Settings => _settings;
 
         public AppSettings LoadSettings()
         {
@@ -47,162 +52,138 @@ namespace WWXMapEditor.Services
                 if (File.Exists(_settingsPath))
                 {
                     var json = File.ReadAllText(_settingsPath);
-                    var settings = JsonConvert.DeserializeObject<AppSettings>(json);
-
-                    // Validate settings
-                    if (settings != null && ValidateSettings(settings))
-                    {
-                        settings.IsFirstRun = false;
-                        _settings = settings;
-                        return settings;
-                    }
+                    _settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                }
+                else
+                {
+                    _settings = new AppSettings();
                 }
             }
             catch (Exception ex)
             {
-                // Log error
+                // Log error or handle it appropriately
                 System.Diagnostics.Debug.WriteLine($"Error loading settings: {ex.Message}");
+                _settings = new AppSettings();
             }
 
-            // Return default settings if file doesn't exist or is invalid
-            return new AppSettings { IsFirstRun = true };
+            return _settings;
+        }
+
+        public void SaveSettings(AppSettings settings)
+        {
+            try
+            {
+                _settings = settings;
+                var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(_settingsPath, json);
+            }
+            catch (Exception ex)
+            {
+                // Log error or handle it appropriately
+                System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<bool> SaveSettingsAsync(AppSettings settings)
         {
             try
             {
-                settings.LastModified = DateTime.UtcNow;
-                settings.IsFirstRun = false;
-
-                var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-                await File.WriteAllTextAsync(_settingsPath, json);
-
                 _settings = settings;
-                SettingsChanged?.Invoke(this, new SettingsChangedEventArgs(settings));
-
+                var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+                await File.WriteAllTextAsync(_settingsPath, json);
                 return true;
             }
             catch (Exception ex)
             {
+                // Log error or handle it appropriately
                 System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
                 return false;
             }
         }
 
-        public bool SaveSettings(AppSettings settings)
-        {
-            return SaveSettingsAsync(settings).GetAwaiter().GetResult();
-        }
-
-        private bool ValidateSettings(AppSettings settings)
-        {
-            // Perform validation to ensure settings are valid
-            if (settings == null) return false;
-
-            // Check required fields
-            if (string.IsNullOrEmpty(settings.Theme)) return false;
-            if (string.IsNullOrEmpty(settings.Language)) return false;
-            if (settings.AutoSaveInterval < 1) return false;
-            if (settings.GridSize < 8 || settings.GridSize > 256) return false;
-            if (settings.DefaultMapWidth < 1 || settings.DefaultMapHeight < 1) return false;
-            if (settings.MouseSensitivity <= 0) return false;
-
-            // Validate paths exist or can be created
-            var paths = new[]
-            {
-                settings.AutoSaveLocation,
-                settings.DefaultProjectDirectory,
-                settings.DefaultTilesetDirectory,
-                settings.DefaultExportDirectory,
-                settings.TemplatesDirectory,
-                settings.PluginDirectory
-            };
-
-            foreach (var path in paths)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        Directory.CreateDirectory(path);
-                    }
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public void ResetToDefaults()
-        {
-            _settings = new AppSettings { IsFirstRun = false };
-            SaveSettings(_settings);
-        }
-
         public void ApplyTheme()
         {
-            if (_settings == null) return;
-
-            switch (_settings.Theme)
-            {
-                case "Light":
-                    ThemeService.Instance.SetTheme(ThemeService.Theme.Light);
-                    break;
-                case "Dark":
-                    ThemeService.Instance.SetTheme(ThemeService.Theme.Dark);
-                    break;
-                case "Custom":
-                    if (System.Windows.Media.ColorConverter.ConvertFromString(_settings.CustomThemeColor) is System.Windows.Media.Color color)
-                    {
-                        ThemeService.Instance.SetCustomTheme(color);
-                    }
-                    break;
-            }
+            var theme = _settings.Theme == "Light" ? ThemeService.Theme.Light : ThemeService.Theme.Dark;
+            _themeService.SetTheme(theme);
         }
 
         public void ApplyUIScaling()
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            if (System.Windows.Application.Current?.MainWindow == null) return;
+
+            double scale = _settings.UIScaling switch
             {
-                if (_settings == null || System.Windows.Application.Current.MainWindow == null) return;
+                "75%" => 0.75,
+                "100%" => 1.0,
+                "125%" => 1.25,
+                "150%" => 1.5,
+                "200%" => 2.0,
+                _ => 1.0
+            };
 
-                var scaleFactor = _settings.UIScaling.TrimEnd('%');
-                if (double.TryParse(scaleFactor, out double scale))
+            // Apply scaling to all windows in the application
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                ApplyScalingToWindow(window, scale);
+            }
+
+            // Set up handler for new windows
+            System.Windows.Application.Current.Activated -= OnApplicationActivated;
+            System.Windows.Application.Current.Activated += OnApplicationActivated;
+        }
+
+        private void OnApplicationActivated(object? sender, EventArgs e)
+        {
+            // Apply scaling to any new windows
+            double scale = _settings.UIScaling switch
+            {
+                "75%" => 0.75,
+                "100%" => 1.0,
+                "125%" => 1.25,
+                "150%" => 1.5,
+                "200%" => 2.0,
+                _ => 1.0
+            };
+
+            foreach (Window window in System.Windows.Application.Current.Windows)
+            {
+                if (window.Tag?.ToString() != "Scaled")
                 {
-                    var scaleValue = scale / 100.0;
-                    var transform = new ScaleTransform(scaleValue, scaleValue);
-
-                    // Apply transform to the window's content, not the window itself
-                    var mainWindow = System.Windows.Application.Current.MainWindow;
-                    if (mainWindow.Content is FrameworkElement content)
-                    {
-                        content.LayoutTransform = transform;
-
-                        // Force layout update
-                        mainWindow.UpdateLayout();
-                    }
+                    ApplyScalingToWindow(window, scale);
+                    window.Tag = "Scaled";
                 }
-            });
+            }
+        }
+
+        private void ApplyScalingToWindow(Window window, double scale)
+        {
+            var transform = new ScaleTransform(scale, scale);
+            window.LayoutTransform = transform;
+
+            // Adjust window size to compensate for scaling
+            if (window.WindowState == WindowState.Normal)
+            {
+                window.Width = window.ActualWidth / scale;
+                window.Height = window.ActualHeight / scale;
+            }
         }
 
         public void ApplyAllSettings()
         {
             ApplyTheme();
             ApplyUIScaling();
+
+            // Apply other settings as needed
+            // For example, you might want to notify other parts of the application
+            // about settings changes
         }
-    }
 
-    public class SettingsChangedEventArgs : EventArgs
-    {
-        public AppSettings NewSettings { get; }
-
-        public SettingsChangedEventArgs(AppSettings newSettings)
+        public void ResetToDefaults()
         {
-            NewSettings = newSettings;
+            _settings = new AppSettings();
+            SaveSettings(_settings);
+            ApplyAllSettings();
         }
     }
 }

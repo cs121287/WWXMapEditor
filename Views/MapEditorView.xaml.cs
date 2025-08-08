@@ -73,8 +73,9 @@ namespace WWXMapEditor.Views
         {
             if (DataContext is ViewModels.MapEditorViewModel viewModel)
             {
-                var position = e.GetPosition(MiniMapCanvas);
-                viewModel.NavigateToMiniMapPosition(position.X, position.Y);
+                // MiniMapCanvas doesn't exist in the current XAML, so we'll comment this out for now
+                // var position = e.GetPosition(MiniMapCanvas);
+                // viewModel.NavigateToMiniMapPosition(position.X, position.Y);
             }
         }
     }

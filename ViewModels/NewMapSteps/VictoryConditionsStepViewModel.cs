@@ -2,11 +2,11 @@ namespace WWXMapEditor.ViewModels
 {
     public class VictoryConditionsStepViewModel : ViewModelBase
     {
-        private readonly NewMapDialogViewModel _parentViewModel;
+        private readonly NewMapViewModel _parentViewModel;
 
-        public NewMapDialogViewModel ParentViewModel => _parentViewModel;
+        public  NewMapViewModel ParentViewModel => _parentViewModel;
 
-        public VictoryConditionsStepViewModel(NewMapDialogViewModel parentViewModel)
+        public VictoryConditionsStepViewModel(NewMapViewModel parentViewModel)
         {
             _parentViewModel = parentViewModel;
         }
