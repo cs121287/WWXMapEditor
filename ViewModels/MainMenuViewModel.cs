@@ -4,14 +4,16 @@ using WWXMapEditor.Services;
 using WWXMapEditor.Models;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
+using System.Linq;
 
 namespace WWXMapEditor.ViewModels
 {
-    public class MainMenuViewModel : ViewModelBase
+    public class MainMenuViewModel : ViewModelBase, IDisposable
     {
         private readonly MainWindowViewModel _mainWindowViewModel;
         private string _currentTime = DateTime.Now.ToString("HH:mm");
-        private System.Windows.Threading.DispatcherTimer _timer;
+        private System.Windows.Threading.DispatcherTimer? _timer;
+        private bool _disposed = false;
 
         public string CurrentTime
         {
@@ -64,115 +66,259 @@ namespace WWXMapEditor.ViewModels
 
         private void LoadRecentMaps()
         {
-            // TODO: Load from saved recent maps
-            // For now, add some dummy data
-            RecentMaps.Add(new RecentMap { Name = "Battle of the Hills", LastModified = "2 hours ago", Size = "100x100", FilePath = "" });
-            RecentMaps.Add(new RecentMap { Name = "Desert Storm", LastModified = "Yesterday", Size = "50x50", FilePath = "" });
-            RecentMaps.Add(new RecentMap { Name = "Naval Assault", LastModified = "3 days ago", Size = "150x75", FilePath = "" });
+            try
+            {
+                RecentMaps.Clear();
+
+                // Load from settings service
+                var settings = SettingsService.Instance.Settings;
+                if (settings.RecentMaps != null && settings.RecentMaps.Any())
+                {
+                    foreach (var recentMapPath in settings.RecentMaps.Take(5))
+                    {
+                        if (!string.IsNullOrEmpty(recentMapPath) && System.IO.File.Exists(recentMapPath))
+                        {
+                            try
+                            {
+                                var fileInfo = new System.IO.FileInfo(recentMapPath);
+                                var mapService = new MapService();
+                                var result = mapService.LoadMap(recentMapPath);
+
+                                if (result.Success && result.Data != null)
+                                {
+                                    RecentMaps.Add(new RecentMap
+                                    {
+                                        Name = result.Data.Name,
+                                        FilePath = recentMapPath,
+                                        Size = $"{result.Data.Width}x{result.Data.Height}",
+                                        LastModified = GetRelativeTime(fileInfo.LastWriteTime)
+                                    });
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error loading recent map {recentMapPath}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+
+                // Add placeholder if no recent maps
+                if (RecentMaps.Count == 0)
+                {
+                    RecentMaps.Add(new RecentMap
+                    {
+                        Name = "No recent maps",
+                        LastModified = "",
+                        Size = "",
+                        FilePath = ""
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading recent maps: {ex.Message}");
+
+                // Ensure at least placeholder exists
+                if (RecentMaps.Count == 0)
+                {
+                    RecentMaps.Add(new RecentMap
+                    {
+                        Name = "No recent maps",
+                        LastModified = "",
+                        Size = "",
+                        FilePath = ""
+                    });
+                }
+            }
+        }
+
+        private string GetRelativeTime(DateTime dateTime)
+        {
+            var timeSpan = DateTime.Now - dateTime;
+
+            if (timeSpan.TotalMinutes < 1)
+                return "Just now";
+            if (timeSpan.TotalMinutes < 60)
+                return $"{(int)timeSpan.TotalMinutes} minute{((int)timeSpan.TotalMinutes != 1 ? "s" : "")} ago";
+            if (timeSpan.TotalHours < 24)
+                return $"{(int)timeSpan.TotalHours} hour{((int)timeSpan.TotalHours != 1 ? "s" : "")} ago";
+            if (timeSpan.TotalDays < 7)
+                return $"{(int)timeSpan.TotalDays} day{((int)timeSpan.TotalDays != 1 ? "s" : "")} ago";
+            if (timeSpan.TotalDays < 30)
+                return $"{(int)(timeSpan.TotalDays / 7)} week{((int)(timeSpan.TotalDays / 7) != 1 ? "s" : "")} ago";
+            if (timeSpan.TotalDays < 365)
+                return $"{(int)(timeSpan.TotalDays / 30)} month{((int)(timeSpan.TotalDays / 30) != 1 ? "s" : "")} ago";
+
+            return dateTime.ToShortDateString();
         }
 
         private void ExecuteCreateNewMap(object? parameter)
         {
+            Cleanup();
             _mainWindowViewModel.NavigateToNewMapCreation();
         }
 
         private void ExecuteOpenMap(object? parameter)
         {
-            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            try
             {
-                Filter = "WWX Map Files (*.wwxmap)|*.wwxmap|JSON Files (*.json)|*.json|All Files (*.*)|*.*",
-                DefaultExt = ".wwxmap",
-                Title = "Open Map"
-            };
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "WWX Map Files (*.wwxmap)|*.wwxmap|JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                    DefaultExt = ".wwxmap",
+                    Title = "Open Map",
+                    InitialDirectory = SettingsService.Instance.Settings.DefaultProjectDirectory
+                };
 
-            if (openFileDialog.ShowDialog() == true)
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var mapService = new MapService();
+                    var result = mapService.LoadMap(openFileDialog.FileName);
+
+                    if (result.Success && result.Data != null)
+                    {
+                        AddToRecentMaps(result.Data, openFileDialog.FileName);
+                        Cleanup();
+                        _mainWindowViewModel.NavigateToMapEditor(result.Data);
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"Failed to load map file:\n{result.ErrorMessage}",
+                            "Error Loading Map",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                var mapService = new MapService();
-                var map = mapService.LoadMap(openFileDialog.FileName);
-
-                if (map != null)
-                {
-                    _mainWindowViewModel.NavigateToMapEditor(map);
-
-                    // Add to recent maps
-                    AddToRecentMaps(map, openFileDialog.FileName);
-                }
-                else
-                {
-                    // TODO: Show error message
-                    System.Windows.MessageBox.Show("Failed to load map file.", "Error",
-                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                }
+                System.Windows.MessageBox.Show(
+                    $"An unexpected error occurred:\n{ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
 
         private void ExecuteOpenRecentMap(object? parameter)
         {
-            if (parameter is RecentMap recentMap && !string.IsNullOrEmpty(recentMap.FilePath))
+            try
             {
-                var mapService = new MapService();
-                var map = mapService.LoadMap(recentMap.FilePath);
-
-                if (map != null)
+                if (parameter is RecentMap recentMap && !string.IsNullOrEmpty(recentMap.FilePath))
                 {
-                    _mainWindowViewModel.NavigateToMapEditor(map);
-                }
-                else
-                {
-                    // Remove from recent maps if file no longer exists
-                    RecentMaps.Remove(recentMap);
+                    // Ignore placeholder
+                    if (recentMap.FilePath == "" && recentMap.Name == "No recent maps")
+                    {
+                        return;
+                    }
 
-                    System.Windows.MessageBox.Show("Map file no longer exists.", "Error",
-                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    var mapService = new MapService();
+                    var result = mapService.LoadMap(recentMap.FilePath);
+
+                    if (result.Success && result.Data != null)
+                    {
+                        AddToRecentMaps(result.Data, recentMap.FilePath);
+                        Cleanup();
+                        _mainWindowViewModel.NavigateToMapEditor(result.Data);
+                    }
+                    else
+                    {
+                        // Remove from recent maps if file no longer exists or is corrupted
+                        var settings = SettingsService.Instance.Settings;
+                        settings.RecentMaps.Remove(recentMap.FilePath);
+                        SettingsService.Instance.SaveSettings(settings);
+
+                        // Reload recent maps list
+                        LoadRecentMaps();
+
+                        System.Windows.MessageBox.Show(
+                            $"Cannot open map:\n{result.ErrorMessage}",
+                            "Error",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"An unexpected error occurred:\n{ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
 
         private void AddToRecentMaps(Map map, string filePath)
         {
-            // Check if already in recent maps
-            var existing = RecentMaps.FirstOrDefault(rm => rm.FilePath == filePath);
-            if (existing != null)
+            try
             {
-                RecentMaps.Remove(existing);
+                var settings = SettingsService.Instance.Settings;
+
+                // Remove if already exists
+                if (settings.RecentMaps.Contains(filePath))
+                {
+                    settings.RecentMaps.Remove(filePath);
+                }
+
+                // Add to beginning of list
+                settings.RecentMaps.Insert(0, filePath);
+
+                // Keep only the configured number of recent maps
+                while (settings.RecentMaps.Count > settings.RecentFilesCount)
+                {
+                    settings.RecentMaps.RemoveAt(settings.RecentMaps.Count - 1);
+                }
+
+                // Save settings
+                SettingsService.Instance.SaveSettings(settings);
+
+                // Reload the UI list
+                LoadRecentMaps();
             }
-
-            // Add to beginning of list
-            RecentMaps.Insert(0, new RecentMap
+            catch (Exception ex)
             {
-                Name = map.Name,
-                FilePath = filePath,
-                Size = $"{map.Width}x{map.Height}",
-                LastModified = "Just now"
-            });
-
-            // Keep only the 5 most recent maps
-            while (RecentMaps.Count > 5)
-            {
-                RecentMaps.RemoveAt(RecentMaps.Count - 1);
+                System.Diagnostics.Debug.WriteLine($"Error adding to recent maps: {ex.Message}");
             }
-
-            // TODO: Save recent maps to user settings
         }
 
         private void ExecuteSettings(object? parameter)
         {
+            Cleanup();
             _mainWindowViewModel.NavigateToSettings();
         }
 
         private void ExecuteAbout(object? parameter)
         {
+            Cleanup();
             _mainWindowViewModel.NavigateToAbout();
         }
 
         private void ExecuteExit(object? parameter)
         {
+            Cleanup();
             System.Windows.Application.Current.Shutdown();
         }
 
         public void Cleanup()
         {
-            _timer?.Stop();
+            if (!_disposed)
+            {
+                if (_timer != null)
+                {
+                    _timer.Stop();
+                    _timer.Tick -= Timer_Tick;
+                    _timer = null;
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
         }
     }
 }

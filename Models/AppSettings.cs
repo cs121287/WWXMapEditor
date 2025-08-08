@@ -15,6 +15,7 @@ namespace WWXMapEditor.Models
         public string AutoSaveLocation { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "AutoSave");
         public int RecentFilesCount { get; set; } = 10;
         public List<string> RecentFiles { get; set; } = new List<string>();
+        public List<string> RecentMaps { get; set; } = new List<string>(); // Added for recent maps functionality
 
         // Editor Settings
         public bool ShowGrid { get; set; } = true;

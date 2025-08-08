@@ -235,9 +235,33 @@ namespace WWXMapEditor.ViewModels
             // Initialize configuration steps
             ConfigurationSteps = new ObservableCollection<MapConfigurationStep>
             {
-                new MapConfigurationStep { Number = "1", Title = "Basic Information", IsActive = true, IsCompleted = false },
-                new MapConfigurationStep { Number = "2", Title = "Victory Conditions", IsActive = false, IsCompleted = false },
-                new MapConfigurationStep { Number = "3", Title = "Fog of War", IsActive = false, IsCompleted = false }
+                new MapConfigurationStep
+                {
+                    StepNumber = 1,
+                    Number = "1",
+                    Title = "Basic Information",
+                    Description = "Set the fundamental properties of your map",
+                    IsActive = true,
+                    IsCompleted = false
+                },
+                new MapConfigurationStep
+                {
+                    StepNumber = 2,
+                    Number = "2",
+                    Title = "Victory Conditions",
+                    Description = "Define how players can achieve victory",
+                    IsActive = false,
+                    IsCompleted = false
+                },
+                new MapConfigurationStep
+                {
+                    StepNumber = 3,
+                    Number = "3",
+                    Title = "Fog of War",
+                    Description = "Configure visibility and exploration settings",
+                    IsActive = false,
+                    IsCompleted = false
+                }
             };
 
             // Initialize step view models
@@ -388,38 +412,6 @@ namespace WWXMapEditor.ViewModels
 
             // Navigate to the map editor with the new map
             _mainWindowViewModel.NavigateToMapEditor(map);
-        }
-    }
-
-    public class MapConfigurationStep : ViewModelBase
-    {
-        private string _number = string.Empty;
-        private string _title = string.Empty;
-        private bool _isActive;
-        private bool _isCompleted;
-
-        public string Number
-        {
-            get => _number;
-            set => SetProperty(ref _number, value);
-        }
-
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
-
-        public bool IsActive
-        {
-            get => _isActive;
-            set => SetProperty(ref _isActive, value);
-        }
-
-        public bool IsCompleted
-        {
-            get => _isCompleted;
-            set => SetProperty(ref _isCompleted, value);
         }
     }
 }

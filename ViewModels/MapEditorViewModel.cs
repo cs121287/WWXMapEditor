@@ -8,19 +8,25 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using WWXMapEditor.Models;
 using WWXMapEditor.Services;
+using Microsoft.Win32;
 
 namespace WWXMapEditor.ViewModels
 {
-    public class MapEditorViewModel : ViewModelBase
+    public partial class MapEditorViewModel : ViewModelBase, IDisposable
     {
         private readonly MainWindowViewModel _mainWindowViewModel;
+        private readonly MapService _mapService;
+        private readonly MapValidationService _validationService;
         private Map _currentMap;
+        private string? _currentFilePath;
+        private bool _hasUnsavedChanges;
         private string _selectedTool = "Paint";
         private int _currentLayer = 0;
         private int _gridSize = 32;
         private double _zoomLevel = 100;
         private bool _showGrid = true;
         private bool _snapToGrid = true;
+        private bool _disposed = false;
 
         // New layer system properties
         private MapLayer _selectedLayer;
@@ -31,7 +37,7 @@ namespace WWXMapEditor.ViewModels
         private double _layerOpacity = 1.0;
         private bool _isDrawing = false;
         private System.Windows.Point _lastDrawPosition;
-        private TileData _selectedTile;
+        private TileData _selectedTileData;
         private string _selectedOwner = "Neutral";
         private bool _blockAircraft = true;
 
@@ -83,8 +89,8 @@ namespace WWXMapEditor.ViewModels
         private bool _isRulerToolSelected = false;
 
         // Timers
-        private readonly DispatcherTimer _autoSaveTimer;
-        private readonly DispatcherTimer _clockTimer;
+        private DispatcherTimer? _autoSaveTimer;
+        private DispatcherTimer? _clockTimer;
         private readonly UndoRedoManager _undoRedoManager;
 
         // Validation
@@ -116,619 +122,13 @@ namespace WWXMapEditor.ViewModels
         private bool _isFillToolActive = false;
         private bool _isEraserToolActive = false;
 
-        #region Properties
-
-        public Map CurrentMap
-        {
-            get => _currentMap;
-            set
-            {
-                if (SetProperty(ref _currentMap, value))
-                {
-                    UpdateMapProperties();
-                    InitializeMapCanvas();
-                }
-            }
-        }
-
-        public string MapName => CurrentMap?.Name ?? "Untitled Map";
-        public int MapWidth => CurrentMap?.Width ?? 50;
-        public int MapHeight => CurrentMap?.Height ?? 50;
-        public int NumberOfPlayers => CurrentMap?.NumberOfPlayers ?? 2;
-        public string DefaultTerrain => CurrentMap?.StartingTerrain ?? "Plains";
-
-        public string SelectedTool
-        {
-            get => _selectedTool;
-            set => SetProperty(ref _selectedTool, value);
-        }
-
-        public int CurrentLayer
-        {
-            get => _currentLayer;
-            set => SetProperty(ref _currentLayer, value);
-        }
-
-        public int GridSize
-        {
-            get => _gridSize;
-            set => SetProperty(ref _gridSize, value);
-        }
-
-        public double ZoomLevel
-        {
-            get => _zoomLevel;
-            set
-            {
-                if (SetProperty(ref _zoomLevel, value))
-                {
-                    ZoomScale = value / 100.0;
-                }
-            }
-        }
-
-        public double ZoomScale
-        {
-            get => _zoomScale;
-            set => SetProperty(ref _zoomScale, value);
-        }
-
-        public bool ShowGrid
-        {
-            get => _showGrid;
-            set
-            {
-                if (SetProperty(ref _showGrid, value))
-                {
-                    OnPropertyChanged(nameof(GridVisibility));
-                }
-            }
-        }
-
-        public bool SnapToGrid
-        {
-            get => _snapToGrid;
-            set => SetProperty(ref _snapToGrid, value);
-        }
-
-        public MapLayer SelectedLayer
-        {
-            get => _selectedLayer;
-            set
-            {
-                if (SetProperty(ref _selectedLayer, value))
-                {
-                    UpdateLayerUI();
-                    CurrentLayer = Layers.IndexOf(value);
-                }
-            }
-        }
-
-        public int BrushSize
-        {
-            get => _brushSize;
-            set
-            {
-                if (SetProperty(ref _brushSize, value))
-                {
-                    OnPropertyChanged(nameof(BrushSizeDisplay));
-                    UpdateHoverIndicator();
-                }
-            }
-        }
-
-        public string BrushSizeDisplay => $"{BrushSize}×{BrushSize} tiles";
-
-        public bool ShowCollision
-        {
-            get => _showCollision;
-            set => SetProperty(ref _showCollision, value);
-        }
-
-        public bool ShowCoordinates
-        {
-            get => _showCoordinates;
-            set
-            {
-                if (SetProperty(ref _showCoordinates, value))
-                {
-                    OnPropertyChanged(nameof(CoordinateDisplayVisibility));
-                }
-            }
-        }
-
-        public double LayerOpacity
-        {
-            get => _layerOpacity;
-            set => SetProperty(ref _layerOpacity, value);
-        }
-
-        public string SelectedOwner
-        {
-            get => _selectedOwner;
-            set => SetProperty(ref _selectedOwner, value);
-        }
-
-        public bool BlockAircraft
-        {
-            get => _blockAircraft;
-            set
-            {
-                if (SetProperty(ref _blockAircraft, value))
-                {
-                    OnPropertyChanged(nameof(AllowAircraft));
-                }
-            }
-        }
-
-        public bool AllowAircraft
-        {
-            get => !_blockAircraft;
-            set => BlockAircraft = !value;
-        }
-
-        // New properties for tile palette integration
-        public TilePaletteItem? SelectedTile
-        {
-            get => _selectedTilePaletteItem;
-            set => SetProperty(ref _selectedTilePaletteItem, value);
-        }
-
-        public int MouseTileX
-        {
-            get => _mouseTileX;
-            set => SetProperty(ref _mouseTileX, value);
-        }
-
-        public int MouseTileY
-        {
-            get => _mouseTileY;
-            set => SetProperty(ref _mouseTileY, value);
-        }
-
-        // New tool active state properties
-        public bool IsSelectToolActive
-        {
-            get => _isSelectToolActive;
-            set => SetProperty(ref _isSelectToolActive, value);
-        }
-
-        public bool IsBrushToolActive
-        {
-            get => _isBrushToolActive;
-            set => SetProperty(ref _isBrushToolActive, value);
-        }
-
-        public bool IsRectangleToolActive
-        {
-            get => _isRectangleToolActive;
-            set => SetProperty(ref _isRectangleToolActive, value);
-        }
-
-        public bool IsFillToolActive
-        {
-            get => _isFillToolActive;
-            set => SetProperty(ref _isFillToolActive, value);
-        }
-
-        public bool IsEraserToolActive
-        {
-            get => _isEraserToolActive;
-            set => SetProperty(ref _isEraserToolActive, value);
-        }
-
-        // UI State Properties
-        public string AutoSaveStatus
-        {
-            get => _autoSaveStatus;
-            set => SetProperty(ref _autoSaveStatus, value);
-        }
-
-        public Visibility AutoSaveVisibility
-        {
-            get => _autoSaveVisibility;
-            set => SetProperty(ref _autoSaveVisibility, value);
-        }
-
-        public string CoordinateDisplay
-        {
-            get => _coordinateDisplay;
-            set => SetProperty(ref _coordinateDisplay, value);
-        }
-
-        public string CurrentTime
-        {
-            get => _currentTime;
-            set => SetProperty(ref _currentTime, value);
-        }
-
-        public string MemoryUsage
-        {
-            get => _memoryUsage;
-            set => SetProperty(ref _memoryUsage, value);
-        }
-
-        public string StatusMessage
-        {
-            get => _statusMessage;
-            set => SetProperty(ref _statusMessage, value);
-        }
-
-        public double CanvasWidth
-        {
-            get => _canvasWidth;
-            set => SetProperty(ref _canvasWidth, value);
-        }
-
-        public double CanvasHeight
-        {
-            get => _canvasHeight;
-            set => SetProperty(ref _canvasHeight, value);
-        }
-
-        // Hover Indicator Properties
-        public double HoverIndicatorX
-        {
-            get => _hoverIndicatorX;
-            set => SetProperty(ref _hoverIndicatorX, value);
-        }
-
-        public double HoverIndicatorY
-        {
-            get => _hoverIndicatorY;
-            set => SetProperty(ref _hoverIndicatorY, value);
-        }
-
-        public double HoverIndicatorWidth
-        {
-            get => _hoverIndicatorWidth;
-            set => SetProperty(ref _hoverIndicatorWidth, value);
-        }
-
-        public double HoverIndicatorHeight
-        {
-            get => _hoverIndicatorHeight;
-            set => SetProperty(ref _hoverIndicatorHeight, value);
-        }
-
-        public Visibility HoverIndicatorVisibility
-        {
-            get => _hoverIndicatorVisibility;
-            set => SetProperty(ref _hoverIndicatorVisibility, value);
-        }
-
-        // Ruler Properties
-        public double RulerX1
-        {
-            get => _rulerX1;
-            set => SetProperty(ref _rulerX1, value);
-        }
-
-        public double RulerY1
-        {
-            get => _rulerY1;
-            set => SetProperty(ref _rulerY1, value);
-        }
-
-        public double RulerX2
-        {
-            get => _rulerX2;
-            set => SetProperty(ref _rulerX2, value);
-        }
-
-        public double RulerY2
-        {
-            get => _rulerY2;
-            set => SetProperty(ref _rulerY2, value);
-        }
-
-        public string RulerDistance
-        {
-            get => _rulerDistance;
-            set => SetProperty(ref _rulerDistance, value);
-        }
-
-        public double RulerTextX
-        {
-            get => _rulerTextX;
-            set => SetProperty(ref _rulerTextX, value);
-        }
-
-        public double RulerTextY
-        {
-            get => _rulerTextY;
-            set => SetProperty(ref _rulerTextY, value);
-        }
-
-        public Visibility RulerVisibility
-        {
-            get => _rulerVisibility;
-            set => SetProperty(ref _rulerVisibility, value);
-        }
-
-        // Mini-map Properties
-        public double MiniMapWidth
-        {
-            get => _miniMapWidth;
-            set => SetProperty(ref _miniMapWidth, value);
-        }
-
-        public double MiniMapHeight
-        {
-            get => _miniMapHeight;
-            set => SetProperty(ref _miniMapHeight, value);
-        }
-
-        public double ViewportX
-        {
-            get => _viewportX;
-            set => SetProperty(ref _viewportX, value);
-        }
-
-        public double ViewportY
-        {
-            get => _viewportY;
-            set => SetProperty(ref _viewportY, value);
-        }
-
-        public double ViewportWidth
-        {
-            get => _viewportWidth;
-            set => SetProperty(ref _viewportWidth, value);
-        }
-
-        public double ViewportHeight
-        {
-            get => _viewportHeight;
-            set => SetProperty(ref _viewportHeight, value);
-        }
-
-        public BitmapSource MiniMapImage
-        {
-            get => _miniMapImage;
-            set => SetProperty(ref _miniMapImage, value);
-        }
-
-        // Selected Tile Properties
-        public int SelectedTileX
-        {
-            get => _selectedTileX;
-            set => SetProperty(ref _selectedTileX, value);
-        }
-
-        public int SelectedTileY
-        {
-            get => _selectedTileY;
-            set => SetProperty(ref _selectedTileY, value);
-        }
-
-        public string SelectedTileTerrain
-        {
-            get => _selectedTileTerrain;
-            set => SetProperty(ref _selectedTileTerrain, value);
-        }
-
-        public string SelectedTileCollision
-        {
-            get => _selectedTileCollision;
-            set => SetProperty(ref _selectedTileCollision, value);
-        }
-
-        public string SelectedTileProperty
-        {
-            get => _selectedTileProperty;
-            set => SetProperty(ref _selectedTileProperty, value);
-        }
-
-        public string SelectedTileUnit
-        {
-            get => _selectedTileUnit;
-            set => SetProperty(ref _selectedTileUnit, value);
-        }
-
-        public Visibility SelectedTilePropertyVisibility
-        {
-            get => _selectedTilePropertyVisibility;
-            set => SetProperty(ref _selectedTilePropertyVisibility, value);
-        }
-
-        public Visibility SelectedTileUnitVisibility
-        {
-            get => _selectedTileUnitVisibility;
-            set => SetProperty(ref _selectedTileUnitVisibility, value);
-        }
-
-        // Tool Selection Properties
-        public bool IsPaintToolSelected
-        {
-            get => _isPaintToolSelected;
-            set
-            {
-                if (SetProperty(ref _isPaintToolSelected, value) && value)
-                {
-                    SelectedTool = "Paint";
-                    StatusMessage = "Paint tool selected";
-                    // Update new tool states
-                    IsBrushToolActive = true;
-                    IsSelectToolActive = false;
-                    IsRectangleToolActive = false;
-                    IsFillToolActive = false;
-                    IsEraserToolActive = false;
-                }
-            }
-        }
-
-        public bool IsEraserToolSelected
-        {
-            get => _isEraserToolSelected;
-            set
-            {
-                if (SetProperty(ref _isEraserToolSelected, value) && value)
-                {
-                    SelectedTool = "Eraser";
-                    StatusMessage = "Eraser tool selected";
-                    // Update new tool states
-                    IsEraserToolActive = true;
-                    IsBrushToolActive = false;
-                    IsSelectToolActive = false;
-                    IsRectangleToolActive = false;
-                    IsFillToolActive = false;
-                }
-            }
-        }
-
-        public bool IsSelectToolSelected
-        {
-            get => _isSelectToolSelected;
-            set
-            {
-                if (SetProperty(ref _isSelectToolSelected, value) && value)
-                {
-                    SelectedTool = "Select";
-                    StatusMessage = "Selection tool selected";
-                    // Update new tool states
-                    IsSelectToolActive = true;
-                    IsBrushToolActive = false;
-                    IsRectangleToolActive = false;
-                    IsFillToolActive = false;
-                    IsEraserToolActive = false;
-                }
-            }
-        }
-
-        public bool IsFillToolSelected
-        {
-            get => _isFillToolSelected;
-            set
-            {
-                if (SetProperty(ref _isFillToolSelected, value) && value)
-                {
-                    SelectedTool = "Fill";
-                    StatusMessage = "Fill tool selected";
-                    // Update new tool states
-                    IsFillToolActive = true;
-                    IsBrushToolActive = false;
-                    IsSelectToolActive = false;
-                    IsRectangleToolActive = false;
-                    IsEraserToolActive = false;
-                }
-            }
-        }
-
-        public bool IsRulerToolSelected
-        {
-            get => _isRulerToolSelected;
-            set
-            {
-                if (SetProperty(ref _isRulerToolSelected, value) && value)
-                {
-                    SelectedTool = "Ruler";
-                    StatusMessage = "Ruler tool selected";
-                    // Ruler doesn't map to new tool states
-                    IsBrushToolActive = false;
-                    IsSelectToolActive = false;
-                    IsRectangleToolActive = false;
-                    IsFillToolActive = false;
-                    IsEraserToolActive = false;
-                }
-            }
-        }
-
-        // Visibility Properties
-        public Visibility GridVisibility => ShowGrid ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility CoordinateDisplayVisibility => ShowCoordinates ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility BrushSizeVisibility => (CurrentLayer == 0 || CurrentLayer == 1) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility TilesetVisibility => (CurrentLayer == 0 || CurrentLayer == 2 || CurrentLayer == 3) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility AircraftOptionsVisibility => CurrentLayer == 1 ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility OwnershipVisibility => (CurrentLayer == 2 || CurrentLayer == 3) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility AutoTileVisibility => CurrentLayer == 0 ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility BalanceResourcesVisibility => CurrentLayer == 2 ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility ValidationResultsVisibility
-        {
-            get => _validationResultsVisibility;
-            set => SetProperty(ref _validationResultsVisibility, value);
-        }
-
-        // New visibility properties for integration
-        public Visibility IsBrushSettingsVisible =>
-            (SelectedTool == "Brush" || SelectedTool == "Paint" || SelectedTool == "Eraser") ? Visibility.Visible : Visibility.Collapsed;
-
-        public Visibility IsSelectedTileVisible =>
-            SelectedTile != null ? Visibility.Visible : Visibility.Collapsed;
-
-        public string TilesetHeader
-        {
-            get
-            {
-                switch (CurrentLayer)
-                {
-                    case 0: return "TERRAIN TILES";
-                    case 2: return "PROPERTIES";
-                    case 3: return "UNITS";
-                    default: return "TILES";
-                }
-            }
-        }
-
-        public string CurrentLayerStatus => SelectedLayer?.Name ?? "None";
-        public string CurrentToolStatus => SelectedTool;
-
-        // Background colors for tools
-        public System.Windows.Media.Brush PaintToolBackground => IsPaintToolSelected ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(70, 70, 70)) : System.Windows.Media.Brushes.Transparent;
-        public System.Windows.Media.Brush EraserToolBackground => IsEraserToolSelected ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(70, 70, 70)) : System.Windows.Media.Brushes.Transparent;
-        public System.Windows.Media.Brush SelectToolBackground => IsSelectToolSelected ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(70, 70, 70)) : System.Windows.Media.Brushes.Transparent;
-        public System.Windows.Media.Brush FillToolBackground => IsFillToolSelected ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(70, 70, 70)) : System.Windows.Media.Brushes.Transparent;
-        public System.Windows.Media.Brush RulerToolBackground => IsRulerToolSelected ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(70, 70, 70)) : System.Windows.Media.Brushes.Transparent;
-
-        // Undo/Redo
-        public bool CanUndo => _undoRedoManager?.CanUndo ?? false;
-        public bool CanRedo => _undoRedoManager?.CanRedo ?? false;
-
-        #endregion
-
-        // Commands - keeping all existing commands
-        public ICommand FileMenuCommand { get; }
-        public ICommand EditMenuCommand { get; }
-        public ICommand ViewMenuCommand { get; }
-        public ICommand ToolsMenuCommand { get; }
-        public ICommand HelpMenuCommand { get; }
-        public ICommand SaveCommand { get; }
-        public ICommand SaveAsCommand { get; }
-        public ICommand ExitCommand { get; }
-        public ICommand UndoCommand { get; }
-        public ICommand RedoCommand { get; }
-        public ICommand CutCommand { get; }
-        public ICommand CopyCommand { get; }
-        public ICommand PasteCommand { get; }
-        public ICommand ZoomInCommand { get; }
-        public ICommand ZoomOutCommand { get; }
-        public ICommand ResetZoomCommand { get; }
-        public ICommand ToggleGridCommand { get; }
-        public ICommand ToggleSnapCommand { get; }
-        public ICommand SelectToolCommand { get; }
-
-        // New commands
-        public ICommand TestMapCommand { get; }
-        public ICommand ExportCommand { get; }
-        public ICommand SelectAllCommand { get; }
-        public ICommand SelectPaintToolCommand { get; }
-        public ICommand SelectEraserToolCommand { get; }
-        public ICommand SelectFillToolCommand { get; }
-        public ICommand SelectRulerToolCommand { get; }
-        public ICommand SelectTileCommand { get; }
-        public ICommand ValidateMapCommand { get; }
-        public ICommand ClearLayerCommand { get; }
-        public ICommand AutoTileCommand { get; }
-        public ICommand BalanceResourcesCommand { get; }
-
-        // Additional commands for new functionality
-        public ICommand NewMapCommand { get; }
-        public ICommand OpenMapCommand { get; }
-        public ICommand AboutCommand { get; }
+        #region Constructor
 
         public MapEditorViewModel(MainWindowViewModel mainWindowViewModel, Map? map = null)
         {
             _mainWindowViewModel = mainWindowViewModel;
+            _mapService = new MapService();
+            _validationService = new MapValidationService();
 
             // Use the provided map or create a default one
             _currentMap = map ?? CreateDefaultMap();
@@ -761,55 +161,10 @@ namespace WWXMapEditor.ViewModels
             _undoRedoManager = new UndoRedoManager();
 
             // Initialize timers
-            _autoSaveTimer = new DispatcherTimer();
-            _autoSaveTimer.Interval = TimeSpan.FromMinutes(5);
-            _autoSaveTimer.Tick += OnAutoSave;
-            _autoSaveTimer.Start();
+            SetupTimers();
 
-            _clockTimer = new DispatcherTimer();
-            _clockTimer.Interval = TimeSpan.FromSeconds(1);
-            _clockTimer.Tick += OnClockTick;
-            _clockTimer.Start();
-
-            // Initialize commands - keeping all existing
-            FileMenuCommand = new RelayCommand(ExecuteFileMenu);
-            EditMenuCommand = new RelayCommand(ExecuteEditMenu);
-            ViewMenuCommand = new RelayCommand(ExecuteViewMenu);
-            ToolsMenuCommand = new RelayCommand(ExecuteToolsMenu);
-            HelpMenuCommand = new RelayCommand(ExecuteHelpMenu);
-            SaveCommand = new RelayCommand(ExecuteSave);
-            SaveAsCommand = new RelayCommand(ExecuteSaveAs);
-            ExitCommand = new RelayCommand(ExecuteExit);
-            UndoCommand = new RelayCommand(ExecuteUndo, _ => CanUndo);
-            RedoCommand = new RelayCommand(ExecuteRedo, _ => CanRedo);
-            CutCommand = new RelayCommand(ExecuteCut);
-            CopyCommand = new RelayCommand(ExecuteCopy);
-            PasteCommand = new RelayCommand(ExecutePaste);
-            ZoomInCommand = new RelayCommand(ExecuteZoomIn);
-            ZoomOutCommand = new RelayCommand(ExecuteZoomOut);
-            ResetZoomCommand = new RelayCommand(ExecuteResetZoom);
-            ToggleGridCommand = new RelayCommand(ExecuteToggleGrid);
-            ToggleSnapCommand = new RelayCommand(ExecuteToggleSnap);
-            SelectToolCommand = new RelayCommand(ExecuteSelectTool);
-
-            // Initialize new commands
-            TestMapCommand = new RelayCommand(ExecuteTestMap);
-            ExportCommand = new RelayCommand(ExecuteExport);
-            SelectAllCommand = new RelayCommand(ExecuteSelectAll);
-            SelectPaintToolCommand = new RelayCommand(_ => IsPaintToolSelected = true);
-            SelectEraserToolCommand = new RelayCommand(_ => IsEraserToolSelected = true);
-            SelectFillToolCommand = new RelayCommand(_ => IsFillToolSelected = true);
-            SelectRulerToolCommand = new RelayCommand(_ => IsRulerToolSelected = true);
-            SelectTileCommand = new RelayCommand(ExecuteSelectTile);
-            ValidateMapCommand = new RelayCommand(ExecuteValidateMap);
-            ClearLayerCommand = new RelayCommand(ExecuteClearLayer);
-            AutoTileCommand = new RelayCommand(ExecuteAutoTile);
-            BalanceResourcesCommand = new RelayCommand(ExecuteBalanceResources);
-
-            // Initialize additional commands
-            NewMapCommand = new RelayCommand(ExecuteNewMap);
-            OpenMapCommand = new RelayCommand(ExecuteOpenMap);
-            AboutCommand = new RelayCommand(ExecuteAbout);
+            // Initialize commands
+            InitializeCommands();
 
             // Apply settings
             ApplySettings();
@@ -826,6 +181,29 @@ namespace WWXMapEditor.ViewModels
             {
                 SelectTilePaletteItem(TilePalette[0]);
             }
+        }
+
+        #endregion
+
+        #region Initialization Methods
+
+        private void SetupTimers()
+        {
+            // Auto-save timer
+            var settings = SettingsService.Instance.Settings;
+            if (settings.AutoSaveEnabled && settings.AutoSaveInterval > 0)
+            {
+                _autoSaveTimer = new DispatcherTimer();
+                _autoSaveTimer.Interval = TimeSpan.FromMinutes(settings.AutoSaveInterval);
+                _autoSaveTimer.Tick += OnAutoSave;
+                _autoSaveTimer.Start();
+            }
+
+            // Clock timer
+            _clockTimer = new DispatcherTimer();
+            _clockTimer.Interval = TimeSpan.FromSeconds(1);
+            _clockTimer.Tick += OnClockTick;
+            _clockTimer.Start();
         }
 
         private void InitializeTilePalette()
@@ -879,12 +257,12 @@ namespace WWXMapEditor.ViewModels
             SelectedTile = tile;
 
             // Update the old tile data for compatibility
-            if (_selectedTile == null)
+            if (_selectedTileData == null)
             {
-                _selectedTile = new TileData();
+                _selectedTileData = new TileData();
             }
-            _selectedTile.Name = tile.Name;
-            _selectedTile.ImageSource = "/Assets/Terrain/" + tile.Name.ToLower() + ".png";
+            _selectedTileData.Name = tile.Name;
+            _selectedTileData.ImageSource = "/Assets/Terrain/" + tile.Name.ToLower() + ".png";
         }
 
         private Map CreateDefaultMap()
@@ -898,8 +276,7 @@ namespace WWXMapEditor.ViewModels
                 NumberOfPlayers = 2
             };
 
-            var mapService = new MapService();
-            return mapService.CreateNewMap(defaultProperties);
+            return _mapService.CreateNewMap(defaultProperties);
         }
 
         private void ApplySettings()
@@ -917,6 +294,7 @@ namespace WWXMapEditor.ViewModels
             OnPropertyChanged(nameof(MapHeight));
             OnPropertyChanged(nameof(NumberOfPlayers));
             OnPropertyChanged(nameof(DefaultTerrain));
+            OnPropertyChanged(nameof(WindowTitle));
         }
 
         private void InitializeMapCanvas()
@@ -972,364 +350,6 @@ namespace WWXMapEditor.ViewModels
 
             // Update mini-map
             UpdateMiniMap();
-        }
-
-        private void UpdateLayerUI()
-        {
-            if (SelectedLayer == null) return;
-
-            CurrentLayer = Layers.IndexOf(SelectedLayer);
-
-            // Update visibility bindings
-            OnPropertyChanged(nameof(BrushSizeVisibility));
-            OnPropertyChanged(nameof(TilesetVisibility));
-            OnPropertyChanged(nameof(AircraftOptionsVisibility));
-            OnPropertyChanged(nameof(OwnershipVisibility));
-            OnPropertyChanged(nameof(AutoTileVisibility));
-            OnPropertyChanged(nameof(BalanceResourcesVisibility));
-            OnPropertyChanged(nameof(TilesetHeader));
-            OnPropertyChanged(nameof(CurrentLayerStatus));
-
-            // Update available tiles based on layer
-            UpdateAvailableTiles();
-        }
-
-        private void UpdateAvailableTiles()
-        {
-            AvailableTiles.Clear();
-
-            switch (CurrentLayer)
-            {
-                case 0: // Terrain
-                    AvailableTiles.Add(new TileData { Name = "Plains", ImageSource = "/Assets/Terrain/plains.png" });
-                    AvailableTiles.Add(new TileData { Name = "Mountain", ImageSource = "/Assets/Terrain/mountain.png" });
-                    AvailableTiles.Add(new TileData { Name = "Forest", ImageSource = "/Assets/Terrain/forest.png" });
-                    AvailableTiles.Add(new TileData { Name = "Water", ImageSource = "/Assets/Terrain/water.png" });
-                    AvailableTiles.Add(new TileData { Name = "Sand", ImageSource = "/Assets/Terrain/sand.png" });
-                    break;
-
-                case 2: // Properties
-                    AvailableTiles.Add(new TileData { Name = "City", ImageSource = "/Assets/Properties/city.png" });
-                    AvailableTiles.Add(new TileData { Name = "Factory", ImageSource = "/Assets/Properties/factory.png" });
-                    AvailableTiles.Add(new TileData { Name = "Airport", ImageSource = "/Assets/Properties/airport.png" });
-                    AvailableTiles.Add(new TileData { Name = "Seaport", ImageSource = "/Assets/Properties/seaport.png" });
-                    AvailableTiles.Add(new TileData { Name = "HQ", ImageSource = "/Assets/Properties/hq.png" });
-                    break;
-
-                case 3: // Units
-                    AvailableTiles.Add(new TileData { Name = "Infantry", ImageSource = "/Assets/Units/infantry.png" });
-                    AvailableTiles.Add(new TileData { Name = "Tank", ImageSource = "/Assets/Units/tank.png" });
-                    AvailableTiles.Add(new TileData { Name = "Artillery", ImageSource = "/Assets/Units/artillery.png" });
-                    AvailableTiles.Add(new TileData { Name = "Fighter", ImageSource = "/Assets/Units/fighter.png" });
-                    AvailableTiles.Add(new TileData { Name = "Bomber", ImageSource = "/Assets/Units/bomber.png" });
-                    break;
-            }
-
-            // Select first tile if available
-            if (AvailableTiles.Count > 0)
-            {
-                _selectedTile = AvailableTiles[0];
-                _selectedTile.BorderBrush = System.Windows.Media.Brushes.Yellow;
-            }
-        }
-
-        private void UpdateAvailableOwners()
-        {
-            AvailableOwners.Clear();
-
-            if (CurrentLayer == 2) // Properties layer
-            {
-                AvailableOwners.Add("Neutral");
-            }
-
-            for (int i = 1; i <= NumberOfPlayers; i++)
-            {
-                AvailableOwners.Add($"Player {i}");
-            }
-
-            if (AvailableOwners.Count > 0 && !AvailableOwners.Contains(SelectedOwner))
-            {
-                SelectedOwner = AvailableOwners[0];
-            }
-        }
-
-        private void UpdateMapStatistics()
-        {
-            MapStatistics.Clear();
-
-            MapStatistics.Add(new MapStatistic { Label = "Total Tiles", Value = (MapWidth * MapHeight).ToString() });
-            MapStatistics.Add(new MapStatistic { Label = "Terrain Tiles", Value = MapTiles.Count(t => t.TerrainImage != null).ToString() });
-            MapStatistics.Add(new MapStatistic { Label = "Collision Tiles", Value = MapTiles.Count(t => t.CollisionVisibility == Visibility.Visible).ToString() });
-            MapStatistics.Add(new MapStatistic { Label = "Properties", Value = MapTiles.Count(t => t.PropertyImage != null).ToString() });
-            MapStatistics.Add(new MapStatistic { Label = "Units", Value = MapTiles.Count(t => t.UnitImage != null).ToString() });
-        }
-
-        private void UpdateMiniMap()
-        {
-            // TODO: Generate mini-map bitmap
-            // For now, create a placeholder
-            var bitmap = new WriteableBitmap(200, 200, 96, 96, PixelFormats.Bgr32, null);
-            MiniMapImage = bitmap;
-        }
-
-        private void UpdateHoverIndicator()
-        {
-            if (_hoverIndicatorVisibility == Visibility.Visible)
-            {
-                HoverIndicatorWidth = BrushSize * GridSize;
-                HoverIndicatorHeight = BrushSize * GridSize;
-            }
-        }
-
-        private string GetDefaultTerrainImage()
-        {
-            switch (DefaultTerrain?.ToLower())
-            {
-                case "plains": return "/Assets/Terrain/plains.png";
-                case "mountain": return "/Assets/Terrain/mountain.png";
-                case "forest": return "/Assets/Terrain/forest.png";
-                case "water": return "/Assets/Terrain/water.png";
-                case "sand": return "/Assets/Terrain/sand.png";
-                default: return "/Assets/Terrain/plains.png";
-            }
-        }
-
-        #region Command Implementations
-
-        // Keeping all existing command implementations
-        private void ExecuteFileMenu(object parameter) { }
-        private void ExecuteEditMenu(object parameter) { }
-        private void ExecuteViewMenu(object parameter) { }
-        private void ExecuteToolsMenu(object parameter) { }
-        private void ExecuteHelpMenu(object parameter) { }
-
-        private void ExecuteSave(object parameter)
-        {
-            // TODO: Implement save functionality
-            StatusMessage = "Map saved";
-            ShowAutoSaveNotification();
-        }
-
-        private void ExecuteSaveAs(object parameter)
-        {
-            // TODO: Implement save as functionality
-        }
-
-        private void ExecuteExit(object parameter)
-        {
-            _autoSaveTimer?.Stop();
-            _clockTimer?.Stop();
-            _mainWindowViewModel.NavigateToMainMenu();
-        }
-
-        private void ExecuteUndo(object parameter)
-        {
-            _undoRedoManager.Undo();
-            StatusMessage = "Action undone";
-        }
-
-        private void ExecuteRedo(object parameter)
-        {
-            _undoRedoManager.Redo();
-            StatusMessage = "Action redone";
-        }
-
-        private void ExecuteCut(object parameter)
-        {
-            // TODO: Implement cut functionality
-        }
-
-        private void ExecuteCopy(object parameter)
-        {
-            // TODO: Implement copy functionality
-            StatusMessage = "Selection copied";
-        }
-
-        private void ExecutePaste(object parameter)
-        {
-            // TODO: Implement paste functionality
-            StatusMessage = "Selection pasted";
-        }
-
-        private void ExecuteZoomIn(object parameter)
-        {
-            ZoomLevel = Math.Min(ZoomLevel * 1.2, 500);
-        }
-
-        private void ExecuteZoomOut(object parameter)
-        {
-            ZoomLevel = Math.Max(ZoomLevel / 1.2, 10);
-        }
-
-        private void ExecuteResetZoom(object parameter)
-        {
-            ZoomLevel = 100;
-        }
-
-        private void ExecuteToggleGrid(object parameter)
-        {
-            ShowGrid = !ShowGrid;
-        }
-
-        private void ExecuteToggleSnap(object parameter)
-        {
-            SnapToGrid = !SnapToGrid;
-        }
-
-        private void ExecuteSelectTool(object parameter)
-        {
-            if (parameter is string tool)
-            {
-                SelectedTool = tool;
-                StatusMessage = $"{tool} tool selected";
-
-                // Update tool active states
-                IsSelectToolActive = tool == "Select";
-                IsBrushToolActive = tool == "Brush" || tool == "Paint";
-                IsRectangleToolActive = tool == "Rectangle";
-                IsFillToolActive = tool == "Fill";
-                IsEraserToolActive = tool == "Eraser";
-
-                // Update old tool selection states
-                IsPaintToolSelected = tool == "Paint" || tool == "Brush";
-                IsEraserToolSelected = tool == "Eraser";
-                IsSelectToolSelected = tool == "Select";
-                IsFillToolSelected = tool == "Fill";
-                IsRulerToolSelected = tool == "Ruler";
-
-                // Notify about visibility changes
-                OnPropertyChanged(nameof(IsBrushSettingsVisible));
-            }
-        }
-
-        // New command implementations
-        private void ExecuteNewMap(object parameter)
-        {
-            _mainWindowViewModel.NavigateToNewMapCreation();
-        }
-
-        private void ExecuteOpenMap(object parameter)
-        {
-            // TODO: Implement open map functionality
-            StatusMessage = "Open map functionality not yet implemented";
-        }
-
-        private void ExecuteAbout(object parameter)
-        {
-            _mainWindowViewModel.NavigateToAbout();
-        }
-
-        private void ExecuteTestMap(object parameter)
-        {
-            StatusMessage = "Launching map test...";
-            // TODO: Implement map testing
-        }
-
-        private void ExecuteExport(object parameter)
-        {
-            StatusMessage = "Exporting map...";
-            // TODO: Implement map export
-        }
-
-        private void ExecuteSelectAll(object parameter)
-        {
-            StatusMessage = "All tiles selected";
-            // TODO: Implement select all
-        }
-
-        private void ExecuteSelectTile(object parameter)
-        {
-            if (parameter is TileData tile)
-            {
-                // Deselect previous tile
-                if (_selectedTile != null)
-                {
-                    _selectedTile.BorderBrush = System.Windows.Media.Brushes.Transparent;
-                }
-
-                // Select new tile
-                _selectedTile = tile;
-                _selectedTile.BorderBrush = System.Windows.Media.Brushes.Yellow;
-
-                // Add to recent tiles
-                if (!RecentTiles.Contains(tile))
-                {
-                    RecentTiles.Insert(0, tile);
-                    if (RecentTiles.Count > 5)
-                    {
-                        RecentTiles.RemoveAt(RecentTiles.Count - 1);
-                    }
-                }
-            }
-            else if (parameter is TilePaletteItem paletteItem)
-            {
-                SelectTilePaletteItem(paletteItem);
-
-                // Auto-switch to brush tool when selecting a tile
-                if (SelectedTool != "Brush" && SelectedTool != "Paint" && SelectedTool != "Fill")
-                {
-                    ExecuteSelectTool("Brush");
-                }
-            }
-        }
-
-        private void ExecuteValidateMap(object parameter)
-        {
-            ValidationResults.Clear();
-
-            // Check for HQ placement
-            bool player1HasHQ = false;
-            bool player2HasHQ = false;
-
-            // TODO: Implement actual validation logic
-
-            if (!player1HasHQ)
-            {
-                ValidationResults.Add(new ValidationResult
-                {
-                    Type = "Error",
-                    Message = "Player 1 needs at least one HQ"
-                });
-            }
-
-            if (NumberOfPlayers >= 2 && !player2HasHQ)
-            {
-                ValidationResults.Add(new ValidationResult
-                {
-                    Type = "Error",
-                    Message = "Player 2 needs at least one HQ"
-                });
-            }
-
-            if (ValidationResults.Count == 0)
-            {
-                ValidationResults.Add(new ValidationResult
-                {
-                    Type = "Info",
-                    Message = "Map validation passed!"
-                });
-            }
-
-            ValidationResultsVisibility = Visibility.Visible;
-            StatusMessage = $"Validation complete: {ValidationResults.Count} issues found";
-        }
-
-        private void ExecuteClearLayer(object parameter)
-        {
-            StatusMessage = $"Cleared {SelectedLayer.Name} layer";
-            // TODO: Implement clear layer
-        }
-
-        private void ExecuteAutoTile(object parameter)
-        {
-            StatusMessage = "Auto-tiling terrain...";
-            // TODO: Implement auto-tiling
-        }
-
-        private void ExecuteBalanceResources(object parameter)
-        {
-            StatusMessage = "Balancing resources...";
-            // TODO: Implement resource balancing
         }
 
         #endregion
@@ -1418,6 +438,39 @@ namespace WWXMapEditor.ViewModels
             // TODO: Implement mini-map navigation
         }
 
+        public void OnMapModified()
+        {
+            HasUnsavedChanges = true;
+            _undoRedoManager.RecordState();
+        }
+
+        public void Cleanup()
+        {
+            if (!_disposed)
+            {
+                if (_autoSaveTimer != null)
+                {
+                    _autoSaveTimer.Stop();
+                    _autoSaveTimer.Tick -= OnAutoSave;
+                    _autoSaveTimer = null;
+                }
+
+                if (_clockTimer != null)
+                {
+                    _clockTimer.Stop();
+                    _clockTimer.Tick -= OnClockTick;
+                    _clockTimer = null;
+                }
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+        }
+
         #endregion
 
         #region Private Methods
@@ -1430,17 +483,236 @@ namespace WWXMapEditor.ViewModels
             if (tileX < 0 || tileX >= MapWidth || tileY < 0 || tileY >= MapHeight)
                 return;
 
-            // TODO: Implement actual drawing logic based on current layer and tool
+            // Apply brush size
+            for (int bx = 0; bx < BrushSize; bx++)
+            {
+                for (int by = 0; by < BrushSize; by++)
+                {
+                    int targetX = tileX + bx;
+                    int targetY = tileY + by;
+
+                    if (targetX >= 0 && targetX < MapWidth && targetY >= 0 && targetY < MapHeight)
+                    {
+                        var tile = CurrentMap.Tiles[targetX, targetY];
+                        if (tile != null)
+                        {
+                            switch (SelectedTool)
+                            {
+                                case "Paint":
+                                case "Brush":
+                                    if (SelectedTile != null && CurrentLayer == 0)
+                                    {
+                                        tile.TerrainType = SelectedTile.TerrainType;
+                                        OnMapModified();
+                                    }
+                                    break;
+
+                                case "Eraser":
+                                    if (CurrentLayer == 0)
+                                    {
+                                        tile.TerrainType = DefaultTerrain;
+                                    }
+                                    else if (CurrentLayer == 2)
+                                    {
+                                        tile.Property = null;
+                                    }
+                                    else if (CurrentLayer == 3)
+                                    {
+                                        tile.Unit = null;
+                                    }
+                                    OnMapModified();
+                                    break;
+
+                                case "Fill":
+                                    // TODO: Implement flood fill
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
 
             UpdateMapStatistics();
         }
 
-        private void OnAutoSave(object sender, EventArgs e)
+        private void UpdateLayerUI()
         {
-            ExecuteSave(null);
+            if (SelectedLayer == null) return;
+
+            CurrentLayer = Layers.IndexOf(SelectedLayer);
+
+            // Update visibility bindings
+            OnPropertyChanged(nameof(BrushSizeVisibility));
+            OnPropertyChanged(nameof(TilesetVisibility));
+            OnPropertyChanged(nameof(AircraftOptionsVisibility));
+            OnPropertyChanged(nameof(OwnershipVisibility));
+            OnPropertyChanged(nameof(AutoTileVisibility));
+            OnPropertyChanged(nameof(BalanceResourcesVisibility));
+            OnPropertyChanged(nameof(TilesetHeader));
+            OnPropertyChanged(nameof(CurrentLayerStatus));
+
+            // Update available tiles based on layer
+            UpdateAvailableTiles();
         }
 
-        private void OnClockTick(object sender, EventArgs e)
+        private void UpdateAvailableTiles()
+        {
+            AvailableTiles.Clear();
+
+            switch (CurrentLayer)
+            {
+                case 0: // Terrain
+                    AvailableTiles.Add(new TileData { Name = "Plains", ImageSource = "/Assets/Terrain/plains.png" });
+                    AvailableTiles.Add(new TileData { Name = "Mountain", ImageSource = "/Assets/Terrain/mountain.png" });
+                    AvailableTiles.Add(new TileData { Name = "Forest", ImageSource = "/Assets/Terrain/forest.png" });
+                    AvailableTiles.Add(new TileData { Name = "Water", ImageSource = "/Assets/Terrain/water.png" });
+                    AvailableTiles.Add(new TileData { Name = "Sand", ImageSource = "/Assets/Terrain/sand.png" });
+                    break;
+
+                case 2: // Properties
+                    AvailableTiles.Add(new TileData { Name = "City", ImageSource = "/Assets/Properties/city.png" });
+                    AvailableTiles.Add(new TileData { Name = "Factory", ImageSource = "/Assets/Properties/factory.png" });
+                    AvailableTiles.Add(new TileData { Name = "Airport", ImageSource = "/Assets/Properties/airport.png" });
+                    AvailableTiles.Add(new TileData { Name = "Seaport", ImageSource = "/Assets/Properties/seaport.png" });
+                    AvailableTiles.Add(new TileData { Name = "HQ", ImageSource = "/Assets/Properties/hq.png" });
+                    break;
+
+                case 3: // Units
+                    AvailableTiles.Add(new TileData { Name = "Infantry", ImageSource = "/Assets/Units/infantry.png" });
+                    AvailableTiles.Add(new TileData { Name = "Tank", ImageSource = "/Assets/Units/tank.png" });
+                    AvailableTiles.Add(new TileData { Name = "Artillery", ImageSource = "/Assets/Units/artillery.png" });
+                    AvailableTiles.Add(new TileData { Name = "Fighter", ImageSource = "/Assets/Units/fighter.png" });
+                    AvailableTiles.Add(new TileData { Name = "Bomber", ImageSource = "/Assets/Units/bomber.png" });
+                    break;
+            }
+
+            // Select first tile if available
+            if (AvailableTiles.Count > 0)
+            {
+                _selectedTileData = AvailableTiles[0];
+                _selectedTileData.BorderBrush = System.Windows.Media.Brushes.Yellow;
+            }
+        }
+
+        private void UpdateAvailableOwners()
+        {
+            AvailableOwners.Clear();
+
+            if (CurrentLayer == 2) // Properties layer
+            {
+                AvailableOwners.Add("Neutral");
+            }
+
+            for (int i = 1; i <= NumberOfPlayers; i++)
+            {
+                AvailableOwners.Add($"Player {i}");
+            }
+
+            if (AvailableOwners.Count > 0 && !AvailableOwners.Contains(SelectedOwner))
+            {
+                SelectedOwner = AvailableOwners[0];
+            }
+        }
+
+        private void UpdateMapStatistics()
+        {
+            MapStatistics.Clear();
+
+            MapStatistics.Add(new MapStatistic { Label = "Total Tiles", Value = (MapWidth * MapHeight).ToString() });
+            MapStatistics.Add(new MapStatistic { Label = "Terrain Tiles", Value = MapTiles.Count(t => t.TerrainImage != null).ToString() });
+            MapStatistics.Add(new MapStatistic { Label = "Collision Tiles", Value = MapTiles.Count(t => t.CollisionVisibility == Visibility.Visible).ToString() });
+            MapStatistics.Add(new MapStatistic { Label = "Properties", Value = MapTiles.Count(t => t.PropertyImage != null).ToString() });
+            MapStatistics.Add(new MapStatistic { Label = "Units", Value = MapTiles.Count(t => t.UnitImage != null).ToString() });
+        }
+
+        private void UpdateMiniMap()
+        {
+            // TODO: Generate mini-map bitmap
+            // For now, create a placeholder
+            var bitmap = new WriteableBitmap(200, 200, 96, 96, PixelFormats.Bgr32, null);
+            MiniMapImage = bitmap;
+        }
+
+        private void UpdateHoverIndicator()
+        {
+            if (_hoverIndicatorVisibility == Visibility.Visible)
+            {
+                HoverIndicatorWidth = BrushSize * GridSize;
+                HoverIndicatorHeight = BrushSize * GridSize;
+            }
+        }
+
+        private string GetDefaultTerrainImage()
+        {
+            switch (DefaultTerrain?.ToLower())
+            {
+                case "plains": return "/Assets/Terrain/plains.png";
+                case "mountain": return "/Assets/Terrain/mountain.png";
+                case "forest": return "/Assets/Terrain/forest.png";
+                case "water": return "/Assets/Terrain/water.png";
+                case "sand": return "/Assets/Terrain/sand.png";
+                default: return "/Assets/Terrain/plains.png";
+            }
+        }
+
+        private void AddToRecentMaps(string filePath)
+        {
+            try
+            {
+                var settings = SettingsService.Instance.Settings;
+
+                // Remove if already exists
+                settings.RecentMaps.Remove(filePath);
+
+                // Add to beginning
+                settings.RecentMaps.Insert(0, filePath);
+
+                // Limit to configured count
+                while (settings.RecentMaps.Count > settings.RecentFilesCount)
+                {
+                    settings.RecentMaps.RemoveAt(settings.RecentMaps.Count - 1);
+                }
+
+                // Save settings
+                SettingsService.Instance.SaveSettings(settings);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating recent maps: {ex.Message}");
+            }
+        }
+
+        private void OnAutoSave(object? sender, EventArgs e)
+        {
+            if (HasUnsavedChanges && !string.IsNullOrEmpty(CurrentFilePath))
+            {
+                ExecuteAutoSave();
+            }
+        }
+
+        private void ExecuteAutoSave()
+        {
+            try
+            {
+                var settings = SettingsService.Instance.Settings;
+                var autoSavePath = System.IO.Path.Combine(
+                    settings.AutoSaveLocation,
+                    $"{CurrentMap.Name}_autosave_{DateTime.Now:yyyyMMdd_HHmmss}.wwxmap"
+                );
+
+                var result = _mapService.SaveMap(CurrentMap, autoSavePath);
+                if (result.Success)
+                {
+                    ShowAutoSaveNotification();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Auto-save failed: {ex.Message}");
+            }
+        }
+
+        private void OnClockTick(object? sender, EventArgs e)
         {
             CurrentTime = DateTime.Now.ToString("HH:mm:ss");
 
@@ -1454,6 +726,7 @@ namespace WWXMapEditor.ViewModels
         {
             AutoSaveStatus = "Auto-saved";
             AutoSaveVisibility = Visibility.Visible;
+            StatusMessage = $"Auto-saved at {DateTime.Now:HH:mm:ss}";
 
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(3);
@@ -1466,232 +739,70 @@ namespace WWXMapEditor.ViewModels
         }
 
         #endregion
-    }
 
-    #region Helper Classes
+        #region Additional Command Implementations
 
-    public class MapLayer : ViewModelBase
-    {
-        private string _number = "";
-        private string _name = "";
-        private bool _isActive;
-
-        public string Number
+        private void ExecuteValidateMap(object? parameter)
         {
-            get => _number;
-            set => SetProperty(ref _number, value);
-        }
+            ValidationResults.Clear();
 
-        public string Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
+            var result = _validationService.ValidateMap(CurrentMap);
 
-        public bool IsActive
-        {
-            get => _isActive;
-            set => SetProperty(ref _isActive, value);
-        }
-    }
-
-    public class TileData : ViewModelBase
-    {
-        private string _name = "";
-        private string _imageSource = "";
-        private System.Windows.Media.Brush _borderBrush = System.Windows.Media.Brushes.Transparent;
-        private System.Windows.Media.Brush _background = System.Windows.Media.Brushes.White;
-
-        public string Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-
-        public string ImageSource
-        {
-            get => _imageSource;
-            set => SetProperty(ref _imageSource, value);
-        }
-
-        public System.Windows.Media.Brush BorderBrush
-        {
-            get => _borderBrush;
-            set => SetProperty(ref _borderBrush, value);
-        }
-
-        public System.Windows.Media.Brush Background
-        {
-            get => _background;
-            set => SetProperty(ref _background, value);
-        }
-    }
-
-    public class MapTile : ViewModelBase
-    {
-        private double _x;
-        private double _y;
-        private double _width;
-        private double _height;
-        private string _terrainImage = "";
-        private double _terrainOpacity = 1.0;
-        private double _collisionOpacity = 0.5;
-        private Visibility _collisionVisibility = Visibility.Collapsed;
-        private string _propertyImage = "";
-        private double _propertyOpacity = 1.0;
-        private Visibility _propertyVisibility = Visibility.Collapsed;
-        private string _unitImage = "";
-        private double _unitOpacity = 1.0;
-        private Visibility _unitVisibility = Visibility.Collapsed;
-        private Visibility _selectionVisibility = Visibility.Collapsed;
-
-        public double X
-        {
-            get => _x;
-            set => SetProperty(ref _x, value);
-        }
-
-        public double Y
-        {
-            get => _y;
-            set => SetProperty(ref _y, value);
-        }
-
-        public double Width
-        {
-            get => _width;
-            set => SetProperty(ref _width, value);
-        }
-
-        public double Height
-        {
-            get => _height;
-            set => SetProperty(ref _height, value);
-        }
-
-        public string TerrainImage
-        {
-            get => _terrainImage;
-            set => SetProperty(ref _terrainImage, value);
-        }
-
-        public double TerrainOpacity
-        {
-            get => _terrainOpacity;
-            set => SetProperty(ref _terrainOpacity, value);
-        }
-
-        public double CollisionOpacity
-        {
-            get => _collisionOpacity;
-            set => SetProperty(ref _collisionOpacity, value);
-        }
-
-        public Visibility CollisionVisibility
-        {
-            get => _collisionVisibility;
-            set => SetProperty(ref _collisionVisibility, value);
-        }
-
-        public string PropertyImage
-        {
-            get => _propertyImage;
-            set => SetProperty(ref _propertyImage, value);
-        }
-
-        public double PropertyOpacity
-        {
-            get => _propertyOpacity;
-            set => SetProperty(ref _propertyOpacity, value);
-        }
-
-        public Visibility PropertyVisibility
-        {
-            get => _propertyVisibility;
-            set => SetProperty(ref _propertyVisibility, value);
-        }
-
-        public string UnitImage
-        {
-            get => _unitImage;
-            set => SetProperty(ref _unitImage, value);
-        }
-
-        public double UnitOpacity
-        {
-            get => _unitOpacity;
-            set => SetProperty(ref _unitOpacity, value);
-        }
-
-        public Visibility UnitVisibility
-        {
-            get => _unitVisibility;
-            set => SetProperty(ref _unitVisibility, value);
-        }
-
-        public Visibility SelectionVisibility
-        {
-            get => _selectionVisibility;
-            set => SetProperty(ref _selectionVisibility, value);
-        }
-    }
-
-    public class GridLine
-    {
-        public double X1 { get; set; }
-        public double Y1 { get; set; }
-        public double X2 { get; set; }
-        public double Y2 { get; set; }
-    }
-
-    public class MapStatistic
-    {
-        public string Label { get; set; } = "";
-        public string Value { get; set; } = "";
-    }
-
-    public class ValidationResult
-    {
-        public string Type { get; set; } = "";
-        public string Message { get; set; } = "";
-    }
-
-    // Simple UndoRedoManager implementation
-    public class UndoRedoManager
-    {
-        private readonly Stack<ICommand> _undoStack = new Stack<ICommand>();
-        private readonly Stack<ICommand> _redoStack = new Stack<ICommand>();
-
-        public bool CanUndo => _undoStack.Count > 0;
-        public bool CanRedo => _redoStack.Count > 0;
-
-        public void Undo()
-        {
-            if (CanUndo)
+            if (result.Errors.Any())
             {
-                var command = _undoStack.Pop();
-                // TODO: Implement undo logic
-                _redoStack.Push(command);
+                foreach (var error in result.Errors)
+                {
+                    ValidationResults.Add(new ValidationResult
+                    {
+                        Type = "Error",
+                        Message = error.Message
+                    });
+                }
             }
-        }
 
-        public void Redo()
-        {
-            if (CanRedo)
+            if (result.Warnings.Any())
             {
-                var command = _redoStack.Pop();
-                // TODO: Implement redo logic
-                _undoStack.Push(command);
+                foreach (var warning in result.Warnings)
+                {
+                    ValidationResults.Add(new ValidationResult
+                    {
+                        Type = "Warning",
+                        Message = warning.Message
+                    });
+                }
             }
+
+            if (ValidationResults.Count == 0)
+            {
+                ValidationResults.Add(new ValidationResult
+                {
+                    Type = "Info",
+                    Message = "Map validation passed!"
+                });
+            }
+
+            ValidationResultsVisibility = Visibility.Visible;
+            StatusMessage = $"Validation complete: {ValidationResults.Count} issues found";
         }
 
-        public void ExecuteCommand(ICommand command)
+        private void ExecuteClearLayer(object? parameter)
         {
-            // TODO: Implement command execution
-            _undoStack.Push(command);
-            _redoStack.Clear();
+            StatusMessage = $"Cleared {SelectedLayer.Name} layer";
+            // TODO: Implement clear layer
         }
-    }
 
-    #endregion
+        private void ExecuteAutoTile(object? parameter)
+        {
+            StatusMessage = "Auto-tiling terrain...";
+            // TODO: Implement auto-tiling
+        }
+
+        private void ExecuteBalanceResources(object? parameter)
+        {
+            StatusMessage = "Balancing resources...";
+            // TODO: Implement resource balancing
+        }
+
+        #endregion
+    }
 }

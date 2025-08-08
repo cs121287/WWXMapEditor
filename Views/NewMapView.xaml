@@ -1,4 +1,4 @@
-<UserControl x:Class="WWXMapEditor.Views.NewMapView"
+﻿<UserControl x:Class="WWXMapEditor.Views.NewMapView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,302 +6,312 @@
              xmlns:local="clr-namespace:WWXMapEditor.Views"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
-    
+
+    <UserControl.Resources>
+        <!-- Local Converters if main ones are not available -->
+        <BooleanToVisibilityConverter x:Key="LocalBoolToVisConverter"/>
+    </UserControl.Resources>
+
     <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Header -->
         <Border Grid.Row="0" 
                 Background="{DynamicResource Surface2Brush}"
-                Padding="30,20">
+                Padding="{StaticResource MarginXLarge}">
             <StackPanel>
                 <TextBlock Text="CREATE NEW MAP" 
-                           Foreground="{DynamicResource ForegroundBrush}" 
-                           FontFamily="Consolas"
-                           FontSize="36" 
-                           FontWeight="Bold" 
-                           HorizontalAlignment="Center"/>
+                           Style="{StaticResource HeaderTextStyle}"/>
                 <TextBlock Text="Configure your new map settings" 
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}" 
-                           FontFamily="Consolas"
-                           FontSize="16" 
+                           Style="{StaticResource SubtitleTextStyle}"
                            HorizontalAlignment="Center"
                            Margin="0,10,0,0"/>
             </StackPanel>
         </Border>
-        
+
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="300" MinWidth="250" MaxWidth="400"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
+
             <!-- Steps Panel -->
             <Border Grid.Column="0" 
                     Background="{DynamicResource SurfaceBrush}"
                     BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,0,1,0">
-                <StackPanel Margin="20">
-                    <TextBlock Text="CONFIGURATION STEPS" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontFamily="Consolas"
-                               FontSize="16" 
-                               FontWeight="Bold" 
-                               Margin="0,0,0,20"/>
-                    
-                    <ItemsControl ItemsSource="{Binding ConfigurationSteps}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="15,10" 
-                                        Margin="0,5"
-                                        Background="{DynamicResource Surface2Brush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="40"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <Border Grid.Column="0"
-                                                Width="30" Height="30"
-                                                Background="{DynamicResource Surface3Brush}"
-                                                CornerRadius="15">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                            <Setter Property="Background" Value="{DynamicResource ForegroundBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            
-                                            <TextBlock Text="{Binding Number}" 
-                                                       HorizontalAlignment="Center" 
-                                                       VerticalAlignment="Center"
-                                                       FontFamily="Consolas"
-                                                       FontWeight="Bold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="{StaticResource MarginLarge}">
+                        <TextBlock Text="CONFIGURATION STEPS" 
+                                   Foreground="{DynamicResource ForegroundBrush}" 
+                                   FontFamily="Consolas"
+                                   FontSize="{StaticResource FontSizeLarge}" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,20"/>
+
+                        <ItemsControl ItemsSource="{Binding ConfigurationSteps}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border>
+                                        <Border.Triggers>
+                                            <EventTrigger RoutedEvent="Border.Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         From="0" To="1" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Border.Triggers>
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource StepItemStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0">
+                                                <Border.Style>
+                                                    <Style TargetType="Border" BasedOn="{StaticResource StepNumberCircleStyle}">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource ForegroundBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                        
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="{Binding Title}"
-                                                   VerticalAlignment="Center"
-                                                   Margin="10,0,0,0"
-                                                   FontFamily="Consolas"
-                                                   FontSize="14">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
-                                                            <Setter Property="FontWeight" Value="Bold"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+                                                </Border.Style>
+
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Number}" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center"
+                                                               FontFamily="Consolas"
+                                                               FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="✓" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center"
+                                                               FontFamily="Segoe UI"
+                                                               FontWeight="Bold"
+                                                               FontSize="16"
+                                                               Foreground="{DynamicResource BackgroundBrush}"
+                                                               Visibility="{Binding IsCompleted, Converter={StaticResource LocalBoolToVisConverter}}"/>
+                                                </Grid>
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" 
+                                                        VerticalAlignment="Center"
+                                                        Margin="10,0,0,0">
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="{StaticResource FontSizeMedium}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
+                                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding Description}"
+                                                           FontFamily="Consolas"
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           TextWrapping="Wrap"
+                                                           Margin="0,2,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
+                                                                    <Setter Property="Opacity" Value="0.8"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
             </Border>
-            
+
             <!-- Content Area -->
             <Border Grid.Column="1" 
-                    Background="{DynamicResource BackgroundBrush}"
-                    Padding="40,30">
-                <ContentControl Content="{Binding CurrentStepContent}"/>
+                    Background="{DynamicResource BackgroundBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Scrollable Content -->
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto" 
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <ContentControl Content="{Binding CurrentStepContent}"
+                                            Margin="40,30"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            MaxWidth="800"/>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- Validation Message -->
+                    <Border Grid.Row="1"
+                            x:Name="ValidationMessageBorder"
+                            Background="#FF5252"
+                            Margin="40,0,40,20"
+                            Padding="15,10"
+                            CornerRadius="{StaticResource CornerRadiusMedium}"
+                            HorizontalAlignment="Stretch"
+                            Visibility="Collapsed">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ValidationMessage.Length, FallbackValue=0, TargetNullValue=0}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="⚠"
+                                       Foreground="White"
+                                       FontSize="20"
+                                       FontFamily="Segoe UI"
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ValidationMessage}"
+                                       Foreground="White"
+                                       FontFamily="Consolas"
+                                       FontSize="{StaticResource FontSizeMedium}"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
-        
+
         <!-- Footer -->
         <Border Grid.Row="2" 
                 Background="{DynamicResource SurfaceBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="0,1,0,0"
-                Padding="30,20">
-            <Grid>
+                BorderThickness="0,1,0,0">
+            <Grid Margin="{StaticResource MarginXLarge}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Column="0"
-                           Text="{Binding ProgressText}"
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                           FontFamily="Consolas"
-                           VerticalAlignment="Center"/>
-                
-                <Button Grid.Column="2"
-                        Content="PREVIOUS"
-                        Command="{Binding PreviousCommand}"
-                        Visibility="{Binding PreviousButtonVisibility}"
-                        Width="120"
-                        Margin="0,0,10,0">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-                            <Setter Property="BorderThickness" Value="1"/>
-                            <Setter Property="Height" Value="40"/>
-                            <Setter Property="FontFamily" Value="Consolas"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Cursor" Value="Hand"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="4">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.5"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                
-                <Button Grid.Column="3"
-                        Content="{Binding NextButtonText}"
-                        Command="{Binding NextCommand}"
-                        Width="120"
-                        IsDefault="True">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                            <Setter Property="BorderThickness" Value="1"/>
-                            <Setter Property="Height" Value="40"/>
-                            <Setter Property="FontFamily" Value="Consolas"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Cursor" Value="Hand"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="4">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                    <Setter Property="Opacity" Value="0.9"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                    <Setter Property="Opacity" Value="0.8"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.5"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                
-                <Button Content="CANCEL"
-                        HorizontalAlignment="Right"
-                        Command="{Binding CancelCommand}"
-                        Width="120"
-                        Margin="0,0,260,0">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-                            <Setter Property="BorderThickness" Value="1"/>
-                            <Setter Property="Height" Value="40"/>
-                            <Setter Property="FontFamily" Value="Consolas"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Cursor" Value="Hand"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="4">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+
+                <!-- Left side - Progress and Cancel -->
+                <StackPanel Grid.Column="0" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ProgressText}"
+                               Style="{StaticResource StatusBarTextStyle}"
+                               FontSize="{StaticResource FontSizeMedium}"
+                               Margin="0,0,30,0"/>
+
+                    <Button Content="CANCEL"
+                            Command="{Binding CancelCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"/>
+                </StackPanel>
+
+                <!-- Right side - Navigation buttons -->
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="PREVIOUS"
+                            Command="{Binding PreviousCommand}"
+                            Visibility="{Binding PreviousButtonVisibility}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Margin="0,0,10,0"/>
+
+                    <Button x:Name="NextButton"
+                            Content="{Binding NextButtonText}"
+                            Command="{Binding NextCommand}"
+                            IsDefault="True">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NextButtonText}" Value="CREATE MAP">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <SolidColorBrush Color="#4CAF50"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Triggers>
+                            <EventTrigger RoutedEvent="Button.Loaded">
+                                <EventTrigger.Conditions>
+                                    <Condition Property="Content" Value="CREATE MAP"/>
+                                </EventTrigger.Conditions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0.8" To="1" Duration="0:0:0.5"
+                                                         AutoReverse="True"
+                                                         RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

@@ -7,6 +7,28 @@ namespace WWXMapEditor.Views
         public NewMapView()
         {
             InitializeComponent();
+
+            // Set up validation message visibility binding
+            this.DataContextChanged += (s, e) =>
+            {
+                if (DataContext is ViewModels.NewMapViewModel viewModel)
+                {
+                    viewModel.PropertyChanged += (sender, args) =>
+                    {
+                        if (args.PropertyName == nameof(viewModel.ValidationMessage))
+                        {
+                            if (string.IsNullOrWhiteSpace(viewModel.ValidationMessage))
+                            {
+                                ValidationMessageBorder.Visibility = System.Windows.Visibility.Collapsed;
+                            }
+                            else
+                            {
+                                ValidationMessageBorder.Visibility = System.Windows.Visibility.Visible;
+                            }
+                        }
+                    };
+                }
+            };
         }
     }
 }
