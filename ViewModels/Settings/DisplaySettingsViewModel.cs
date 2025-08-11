@@ -7,7 +7,7 @@ namespace WWXMapEditor.ViewModels.Settings
         private bool _startInFullscreen = true;
         private bool _rememberWindowPosition = true;
         private string _multiMonitorBehavior = "Primary monitor";
-        private string _uiScaling = "75%";
+        private string _uiScaling = "100%";
         private string _fontSize = "Medium";
         private bool _showTooltips = true;
         private int _tooltipDelay = 500;

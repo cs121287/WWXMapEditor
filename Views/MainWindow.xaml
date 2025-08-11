@@ -5,13 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WWXMapEditor.Views"
         mc:Ignorable="d"
-        Title="WWX Map Editor"
+        Title="{Binding WindowTitle}" 
+        Height="1080" 
+        Width="1920"
+        MinHeight="720"
+        MinWidth="1280"
+        WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        WindowStyle="SingleBorderWindow"
-        Background="{DynamicResource BackgroundBrush}"
-        Icon="/Resources/Images/Icons/app.ico">
+        Background="{DynamicResource BackgroundBrush}">
 
-    <Grid x:Name="MainContent">
-        <ContentControl Content="{Binding CurrentView}"/>
+    <Grid>
+        <!-- Main Menu View - Shows when no other view is active -->
+        <local:MainMenuView x:Name="MainMenu" 
+                            Visibility="{Binding MainMenuVisibility}"/>
+
+        <!-- Content Container for other views -->
+        <ContentControl Content="{Binding CurrentView}" 
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"/>
     </Grid>
 </Window>

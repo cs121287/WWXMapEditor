@@ -4,126 +4,734 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
-    
-    <StackPanel MaxWidth="600">
-        <TextBlock Text="BASIC INFORMATION" 
-                   Foreground="{DynamicResource ForegroundBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="32" 
-                   FontWeight="Bold" 
-                   Margin="0,0,0,30"/>
-        
-        <TextBlock Text="Let's start with the basic details of your map" 
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="16" 
-                   Margin="0,0,0,30"/>
-        
-        <!-- Map Name -->
-        <TextBlock Text="Map Name"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,8"/>
-        <TextBox Text="{Binding ParentViewModel.MapName}"
-                 Style="{StaticResource SettingsTextBoxStyle}"
-                 FontSize="16"
-                 Margin="0,0,0,25"/>
-        
-        <!-- Map Description -->
-        <TextBlock Text="Map Description"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,8"/>
-        <TextBox Text="{Binding ParentViewModel.MapDescription}"
-                 Style="{StaticResource SettingsTextBoxStyle}"
-                 FontSize="16"
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 Height="100"
-                 VerticalScrollBarVisibility="Auto"
-                 Margin="0,0,0,25"/>
-        
-        <!-- Map Size -->
-        <TextBlock Text="Map Size"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,8"/>
-        <Grid Margin="0,0,0,25">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="Width (tiles)"
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                           FontFamily="Consolas"
-                           FontSize="14"
-                           Margin="0,0,0,5"/>
-                <TextBox Text="{Binding ParentViewModel.MapWidth}"
-                         Style="{StaticResource SettingsTextBoxStyle}"
-                         FontSize="16"/>
-            </StackPanel>
-            
-            <TextBlock Grid.Column="1" Text="×"
-                       Foreground="{DynamicResource ForegroundBrush}"
-                       FontFamily="Consolas"
-                       FontSize="20"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Margin="0,20,0,0"/>
-            
-            <StackPanel Grid.Column="2">
-                <TextBlock Text="Height (tiles)"
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                           FontFamily="Consolas"
-                           FontSize="14"
-                           Margin="0,0,0,5"/>
-                <TextBox Text="{Binding ParentViewModel.MapHeight}"
-                         Style="{StaticResource SettingsTextBoxStyle}"
-                         FontSize="16"/>
-            </StackPanel>
-        </Grid>
-        
-        <TextBlock Text="Map size must be between 10×10 and 500×500 tiles"
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                   FontFamily="Consolas"
-                   FontSize="12"
-                   FontStyle="Italic"
-                   Margin="0,0,0,25"/>
-        
-        <!-- Starting Terrain -->
-        <TextBlock Text="Starting Terrain"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,8"/>
-        <ComboBox SelectedItem="{Binding ParentViewModel.SelectedTerrain}"
-                  ItemsSource="{Binding ParentViewModel.TerrainTypes}"
-                  Style="{StaticResource SettingsComboBoxStyle}"
-                  FontSize="16"
-                  Margin="0,0,0,25"/>
-        
-        <!-- Number of Players -->
-        <TextBlock Text="Number of Players"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   Margin="0,0,0,8"/>
-        <ComboBox SelectedItem="{Binding ParentViewModel.NumberOfPlayers}"
-                  ItemsSource="{Binding ParentViewModel.PlayerCountOptions}"
-                  Style="{StaticResource SettingsComboBoxStyle}"
-                  FontSize="16"/>
-    </StackPanel>
+             d:DesignHeight="600" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5"/>
+            <ThicknessAnimation Storyboard.TargetProperty="Margin" From="50,0,0,0" To="0,0,0,0" Duration="0:0:0.5">
+                <ThicknessAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+        </Storyboard>
+
+        <!-- Terrain Type Strings -->
+        <sys:String x:Key="TerrainPlains">Plains</sys:String>
+        <sys:String x:Key="TerrainMountain">Mountain</sys:String>
+        <sys:String x:Key="TerrainForest">Forest</sys:String>
+        <sys:String x:Key="TerrainSand">Sand</sys:String>
+        <sys:String x:Key="TerrainSea">Sea</sys:String>
+
+        <!-- Player Count Options -->
+        <sys:Int32 x:Key="Players2">2</sys:Int32>
+        <sys:Int32 x:Key="Players3">3</sys:Int32>
+        <sys:Int32 x:Key="Players4">4</sys:Int32>
+        <sys:Int32 x:Key="Players5">5</sys:Int32>
+        <sys:Int32 x:Key="Players6">6</sys:Int32>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel - Map Name and Description -->
+        <Border Grid.Column="0" Margin="20,0,10,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header with Icon -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" 
+                            Width="60" Height="60"
+                            Background="{DynamicResource AccentBrush}"
+                            CornerRadius="30"
+                            Margin="0,0,15,0">
+                        <TextBlock Text="📝" 
+                                   FontSize="28"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="MAP IDENTITY" 
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Text="Give your map a unique name and description" 
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Content -->
+                <StackPanel Grid.Row="1">
+                    <!-- Map Name Input with Animation -->
+                    <Border Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20"
+                            Margin="0,0,0,15">
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                        To="#00D4AA" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                        Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Map Name"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,10"/>
+
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding ParentViewModel.MapName, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     FontSize="18"
+                                     Height="45"
+                                     VerticalContentAlignment="Center"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Text="{Binding ParentViewModel.MapName.Length, StringFormat='Characters: {0}/50'}"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,5,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Map Description Input -->
+                    <Border Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Map Description"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,10"/>
+
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding ParentViewModel.MapDescription, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     FontSize="14"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     Height="120"
+                                     VerticalScrollBarVisibility="Auto"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Text="Optional: Provide details about your map's theme or objectives"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="11"
+                                       FontStyle="Italic"
+                                       Margin="0,5,0,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Center Divider -->
+        <Border Grid.Column="1" 
+                Width="1"
+                Background="{DynamicResource BorderBrush}"
+                Margin="20,40"
+                Opacity="0.3"/>
+
+        <!-- Right Panel - Map Configuration -->
+        <Border Grid.Column="2" Margin="10,0,20,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header with Icon -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" 
+                            Width="60" Height="60"
+                            Background="{DynamicResource AccentBrush}"
+                            CornerRadius="30"
+                            Margin="0,0,15,0">
+                        <TextBlock Text="⚙️" 
+                                   FontSize="28"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="MAP CONFIGURATION" 
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Text="Configure size, terrain, and player settings" 
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Configuration Content -->
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Map Size Configuration -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20"
+                            Margin="0,0,0,15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Width"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontFamily="Consolas"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Slider Grid.Column="0"
+                                            Value="{Binding ParentViewModel.MapWidth}"
+                                            Minimum="10"
+                                            Maximum="200"
+                                            TickFrequency="10"
+                                            IsSnapToTickEnabled="True"
+                                            Margin="0,0,10,0"/>
+                                    <Border Grid.Column="1"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="4"
+                                            Padding="10,5"
+                                            MinWidth="50">
+                                        <TextBlock Text="{Binding ParentViewModel.MapWidth}"
+                                                   Foreground="{DynamicResource BackgroundBrush}"
+                                                   FontFamily="Consolas"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1" Text="×"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="20"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="0,15,0,0"/>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Height"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontFamily="Consolas"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Slider Grid.Column="0"
+                                            Value="{Binding ParentViewModel.MapHeight}"
+                                            Minimum="10"
+                                            Maximum="200"
+                                            TickFrequency="10"
+                                            IsSnapToTickEnabled="True"
+                                            Margin="0,0,10,0"/>
+                                    <Border Grid.Column="1"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="4"
+                                            Padding="10,5"
+                                            MinWidth="50">
+                                        <TextBlock Text="{Binding ParentViewModel.MapHeight}"
+                                                   Foreground="{DynamicResource BackgroundBrush}"
+                                                   FontFamily="Consolas"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Terrain Type Selection -->
+                    <Border Grid.Row="1"
+                            Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20"
+                            Margin="0,0,0,15">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Starting Terrain"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,10"/>
+
+                            <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                                <!-- Plains Option -->
+                                <RadioButton GroupName="TerrainType"
+                                             IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainPlains}}"
+                                             Margin="0,0,15,10">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource SurfaceBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="6"
+                                                    Padding="15,10"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0"
+                                                            Width="20" Height="20"
+                                                            Background="#90EE90"
+                                                            CornerRadius="3"
+                                                            Margin="0,0,10,0"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="Plains"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="13"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- Mountain Option -->
+                                <RadioButton GroupName="TerrainType"
+                                             IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainMountain}}"
+                                             Margin="0,0,15,10">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource SurfaceBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="6"
+                                                    Padding="15,10"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0"
+                                                            Width="20" Height="20"
+                                                            Background="#8B8989"
+                                                            CornerRadius="3"
+                                                            Margin="0,0,10,0"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="Mountain"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="13"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- Forest Option -->
+                                <RadioButton GroupName="TerrainType"
+                                             IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainForest}}"
+                                             Margin="0,0,15,10">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource SurfaceBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="6"
+                                                    Padding="15,10"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0"
+                                                            Width="20" Height="20"
+                                                            Background="#228B22"
+                                                            CornerRadius="3"
+                                                            Margin="0,0,10,0"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="Forest"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="13"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Player Count -->
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Number of Players"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,10"/>
+
+                            <UniformGrid Grid.Row="1" Rows="1" Columns="5">
+                                <!-- 2 Players -->
+                                <RadioButton GroupName="PlayerCount"
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players2}}"
+                                             Margin="0,0,5,0">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="8"
+                                                    Height="50"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <TextBlock Text="2"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="20"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Players"
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="10"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Bottom"
+                                                               Margin="0,0,0,5"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- 3 Players -->
+                                <RadioButton GroupName="PlayerCount"
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players3}}"
+                                             Margin="0,0,5,0">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="8"
+                                                    Height="50"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <TextBlock Text="3"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="20"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Players"
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="10"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Bottom"
+                                                               Margin="0,0,0,5"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- 4 Players -->
+                                <RadioButton GroupName="PlayerCount"
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players4}}"
+                                             Margin="0,0,5,0">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="8"
+                                                    Height="50"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <TextBlock Text="4"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="20"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Players"
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="10"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Bottom"
+                                                               Margin="0,0,0,5"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- 5 Players -->
+                                <RadioButton GroupName="PlayerCount"
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players5}}"
+                                             Margin="0,0,5,0">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="8"
+                                                    Height="50"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <TextBlock Text="5"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="20"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Players"
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="10"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Bottom"
+                                                               Margin="0,0,0,5"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+
+                                <!-- 6 Players -->
+                                <RadioButton GroupName="PlayerCount"
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players6}}">
+                                    <RadioButton.Template>
+                                        <ControlTemplate TargetType="RadioButton">
+                                            <Border x:Name="border"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="2"
+                                                    CornerRadius="8"
+                                                    Height="50"
+                                                    Cursor="Hand">
+                                                <Grid>
+                                                    <TextBlock Text="6"
+                                                               Foreground="{DynamicResource ForegroundBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="20"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Players"
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="10"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Bottom"
+                                                               Margin="0,0,0,5"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </RadioButton.Template>
+                                </RadioButton>
+                            </UniformGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

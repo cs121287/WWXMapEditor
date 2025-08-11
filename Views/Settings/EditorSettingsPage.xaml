@@ -6,33 +6,34 @@
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800">
-    
+
     <StackPanel>
         <TextBlock Text="EDITOR SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
-                   FontSize="24" 
+                   FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
-                   Margin="0,0,0,20"/>
-        
+                   Margin="{DynamicResource MarginLarge}"/>
+
         <!-- Grid Section -->
         <GroupBox Header="Grid" Style="{StaticResource SettingsGroupBoxStyle}">
             <StackPanel>
                 <CheckBox Content="Show grid" 
                           IsChecked="{Binding ShowGrid}" 
                           Style="{StaticResource SettingsCheckBoxStyle}"/>
-                
-                <Grid Margin="0,10,0,0">
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Grid color:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <Rectangle Grid.Column="1"
                                Width="50" Height="25" 
                                Fill="{Binding GridColor}" 
@@ -45,52 +46,55 @@
                         </Rectangle.InputBindings>
                     </Rectangle>
                 </Grid>
-                
-                <Grid Margin="0,10,0,0">
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Grid opacity:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <Slider Grid.Column="1" 
                             Minimum="0" 
                             Maximum="100" 
                             Value="{Binding GridOpacity}"
                             IsEnabled="{Binding ShowGrid}"
-                            Margin="0,0,10,0"/>
-                    
+                            Margin="{DynamicResource MarginMedium}"/>
+
                     <TextBlock Grid.Column="2" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                Width="40">
                         <TextBlock.Text>
                             <Binding Path="GridOpacity" StringFormat="{}{0}%"/>
                         </TextBlock.Text>
                     </TextBlock>
                 </Grid>
-                
+
                 <CheckBox Content="Snap to grid" 
                           IsChecked="{Binding SnapToGrid}" 
                           IsEnabled="{Binding ShowGrid}"
                           Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10,0,0"/>
-                
-                <Grid Margin="0,10,0,0">
+                          Margin="{DynamicResource MarginMedium}"/>
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Grid size (pixels):" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <ComboBox Grid.Column="1" 
                               SelectedItem="{Binding GridSize}" 
                               ItemsSource="{Binding GridSizes}"
@@ -102,7 +106,7 @@
                 </Grid>
             </StackPanel>
         </GroupBox>
-        
+
         <!-- Canvas Section -->
         <GroupBox Header="Canvas" Style="{StaticResource SettingsGroupBoxStyle}">
             <StackPanel>
@@ -115,27 +119,29 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock Text="Default map width:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,5"
+                               Margin="{DynamicResource MarginSmall}"
                                Grid.Row="0"/>
-                    
+
                     <TextBox Grid.Column="1" 
                              Grid.Row="0"
                              Text="{Binding DefaultMapWidth}" 
                              Style="{StaticResource SettingsTextBoxStyle}"
                              Width="100"
                              HorizontalAlignment="Left"
-                             Margin="0,0,0,5"/>
-                    
+                             Margin="{DynamicResource MarginSmall}"/>
+
                     <TextBlock Text="Default map height:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"
+                               Margin="{DynamicResource MarginSmall}"
                                Grid.Row="1"/>
-                    
+
                     <TextBox Grid.Column="1" 
                              Grid.Row="1"
                              Text="{Binding DefaultMapHeight}" 
@@ -143,18 +149,19 @@
                              Width="100"
                              HorizontalAlignment="Left"/>
                 </Grid>
-                
-                <Grid Margin="0,10,0,0">
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Background color:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <Rectangle Grid.Column="1"
                                Width="50" Height="25" 
                                Fill="{Binding CanvasBackgroundColor}" 
@@ -167,36 +174,37 @@
                         </Rectangle.InputBindings>
                     </Rectangle>
                 </Grid>
-                
+
                 <CheckBox Content="Show tile coordinates" 
                           IsChecked="{Binding ShowTileCoordinates}" 
                           Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10,0,0"/>
-                
+                          Margin="{DynamicResource MarginMedium}"/>
+
                 <CheckBox Content="Show rulers" 
                           IsChecked="{Binding ShowRulers}" 
                           Style="{StaticResource SettingsCheckBoxStyle}"/>
             </StackPanel>
         </GroupBox>
-        
+
         <!-- Performance Section -->
         <GroupBox Header="Performance" Style="{StaticResource SettingsGroupBoxStyle}">
             <StackPanel>
                 <CheckBox Content="Hardware acceleration" 
                           IsChecked="{Binding HardwareAcceleration}" 
                           Style="{StaticResource SettingsCheckBoxStyle}"/>
-                
-                <Grid Margin="0,10,0,0">
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Undo history limit:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <ComboBox Grid.Column="1" 
                               SelectedItem="{Binding UndoHistoryLimit}" 
                               ItemsSource="{Binding UndoHistoryLimits}"
@@ -204,18 +212,19 @@
                               Width="150"
                               HorizontalAlignment="Left"/>
                 </Grid>
-                
-                <Grid Margin="0,10,0,0">
+
+                <Grid Margin="{DynamicResource MarginMedium}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="Texture quality:" 
                                Foreground="White" 
+                               FontSize="{DynamicResource FontSizeMedium}"
                                VerticalAlignment="Center"
-                               Margin="0,0,10,0"/>
-                    
+                               Margin="{DynamicResource MarginMedium}"/>
+
                     <ComboBox Grid.Column="1" 
                               SelectedItem="{Binding TextureQuality}" 
                               ItemsSource="{Binding TextureQualities}"
@@ -223,11 +232,11 @@
                               Width="150"
                               HorizontalAlignment="Left"/>
                 </Grid>
-                
+
                 <CheckBox Content="Enable smooth zooming" 
                           IsChecked="{Binding SmoothZooming}" 
                           Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10,0,0"/>
+                          Margin="{DynamicResource MarginMedium}"/>
             </StackPanel>
         </GroupBox>
     </StackPanel>

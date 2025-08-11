@@ -18,6 +18,8 @@ namespace WWXMapEditor.ViewModels
         private string _progressText = "Step 1 of 4";
         private string _nextButtonText = "NEXT";
         private Visibility _previousButtonVisibility = Visibility.Collapsed;
+        private bool _isInitialSetup = false;
+        private Visibility _skipButtonVisibility = Visibility.Visible;
 
         // Settings properties
         private string _theme = "Dark";
@@ -92,6 +94,25 @@ namespace WWXMapEditor.ViewModels
         {
             get => _previousButtonVisibility;
             set => SetProperty(ref _previousButtonVisibility, value);
+        }
+
+        public bool IsInitialSetup
+        {
+            get => _isInitialSetup;
+            set
+            {
+                if (SetProperty(ref _isInitialSetup, value))
+                {
+                    // Hide skip button during initial setup to ensure configuration is completed
+                    SkipButtonVisibility = value ? Visibility.Collapsed : Visibility.Visible;
+                }
+            }
+        }
+
+        public Visibility SkipButtonVisibility
+        {
+            get => _skipButtonVisibility;
+            set => SetProperty(ref _skipButtonVisibility, value);
         }
 
         #endregion
@@ -403,7 +424,7 @@ namespace WWXMapEditor.ViewModels
                 "Extra Large (200x200)"
             };
             TextureQualities = new ObservableCollection<string> { "Low", "Medium", "High", "Ultra" };
-            UIScalingOptions = new ObservableCollection<string> { "75%", "100%", "125%", "150%", "200%" };
+            UIScalingOptions = new ObservableCollection<string> { "50%", "75%", "100%", "125%", "150%", "175%", "200%" };
             GridSizeOptions = new ObservableCollection<int> { 8, 16, 24, 32, 48, 64 };
             AutoSaveIntervalOptions = new ObservableCollection<int> { 1, 3, 5, 10, 15, 30 };
 
@@ -508,6 +529,32 @@ namespace WWXMapEditor.ViewModels
 
         private void UpdateFileLocationsSummary()
         {
+            // Set default directories if empty
+            if (string.IsNullOrEmpty(DefaultProjectDirectory))
+            {
+                DefaultProjectDirectory = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "WWXMapEditor",
+                    "Projects"
+                );
+            }
+            if (string.IsNullOrEmpty(DefaultTilesetDirectory))
+            {
+                DefaultTilesetDirectory = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "WWXMapEditor",
+                    "Tilesets"
+                );
+            }
+            if (string.IsNullOrEmpty(AutoSaveLocation))
+            {
+                AutoSaveLocation = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "WWXMapEditor",
+                    "AutoSave"
+                );
+            }
+
             FileLocationsSummary = $"• Projects: {DefaultProjectDirectory}\n" +
                                    $"• Tilesets: {DefaultTilesetDirectory}\n" +
                                    $"• Auto-save: {AutoSaveLocation}";
@@ -526,6 +573,14 @@ namespace WWXMapEditor.ViewModels
             // Update the settings and apply UI scaling without saving to disk
             var tempSettings = _settingsService.Settings;
             tempSettings.UIScaling = UIScaling;
+
+            // Convert percentage to double for UiScale
+            string scaleStr = UIScaling.Replace("%", "");
+            if (double.TryParse(scaleStr, out double scalePercent))
+            {
+                tempSettings.UiScale = scalePercent / 100.0;
+            }
+
             _settingsService.ApplyUIScaling();
         }
 
@@ -567,14 +622,18 @@ namespace WWXMapEditor.ViewModels
 
         private async void ExecuteFinish(object? parameter)
         {
-            // Save configuration and navigate to main menu
+            // Save configuration and navigate to main menu or close window
             SaveConfiguration();
         }
 
         private void ExecuteSkip(object? parameter)
         {
-            // Navigate to main menu without saving
-            _mainWindowViewModel.NavigateToMainMenu();
+            if (!IsInitialSetup)
+            {
+                // Navigate to main menu without saving
+                _mainWindowViewModel.NavigateToMainMenu();
+            }
+            // Skip is disabled during initial setup
         }
 
         private void ExecuteBrowseProjectDirectory(object? parameter)
@@ -637,8 +696,20 @@ namespace WWXMapEditor.ViewModels
                     // Apply theme and settings
                     SettingsService.Instance.ApplyAllSettings();
 
-                    // Navigate to main menu
-                    _mainWindowViewModel.NavigateToMainMenu();
+                    if (IsInitialSetup)
+                    {
+                        // If this is initial setup, close the configuration window
+                        // The main window will be shown by App.xaml.cs
+                        var configWindow = System.Windows.Application.Current.Windows
+                            .Cast<Window>()
+                            .FirstOrDefault(w => w.Title?.Contains("Initial Configuration") == true);
+                        configWindow?.Close();
+                    }
+                    else
+                    {
+                        // Navigate to main menu if not initial setup
+                        _mainWindowViewModel.NavigateToMainMenu();
+                    }
                 }
                 else
                 {
@@ -667,9 +738,26 @@ namespace WWXMapEditor.ViewModels
             settings.AutoSaveEnabled = AutoSaveEnabled;
             settings.StartInFullscreen = StartInFullscreen;
             settings.UIScaling = UIScaling;
-            settings.DefaultProjectDirectory = DefaultProjectDirectory;
-            settings.DefaultTilesetDirectory = DefaultTilesetDirectory;
-            settings.AutoSaveLocation = AutoSaveLocation;
+
+            // Convert percentage to double for UiScale
+            string scaleStr = UIScaling.Replace("%", "");
+            if (double.TryParse(scaleStr, out double scalePercent))
+            {
+                settings.UiScale = scalePercent / 100.0;
+            }
+
+            // Ensure directories are set
+            settings.DefaultProjectDirectory = string.IsNullOrEmpty(DefaultProjectDirectory) ?
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Projects") :
+                DefaultProjectDirectory;
+
+            settings.DefaultTilesetDirectory = string.IsNullOrEmpty(DefaultTilesetDirectory) ?
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Tilesets") :
+                DefaultTilesetDirectory;
+
+            settings.AutoSaveLocation = string.IsNullOrEmpty(AutoSaveLocation) ?
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "AutoSave") :
+                AutoSaveLocation;
 
             // Parse DefaultMapSize to set width and height
             switch (DefaultMapSize)
@@ -696,7 +784,20 @@ namespace WWXMapEditor.ViewModels
                     break;
             }
 
+            // Mark as not first run after successful configuration
             settings.IsFirstRun = false;
+
+            // Create directories if they don't exist
+            try
+            {
+                System.IO.Directory.CreateDirectory(settings.DefaultProjectDirectory);
+                System.IO.Directory.CreateDirectory(settings.DefaultTilesetDirectory);
+                System.IO.Directory.CreateDirectory(settings.AutoSaveLocation);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error creating directories: {ex.Message}");
+            }
         }
     }
 

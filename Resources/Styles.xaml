@@ -2,20 +2,61 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:System="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Base Values for Consistent Sizing -->
+    <!-- Base Values for 100% Scaling -->
+    <System:Double x:Key="BaseFontSizeSmall">12</System:Double>
+    <System:Double x:Key="BaseFontSizeMedium">14</System:Double>
+    <System:Double x:Key="BaseFontSizeLarge">16</System:Double>
+    <System:Double x:Key="BaseFontSizeXLarge">18</System:Double>
+    <System:Double x:Key="BaseFontSizeXXLarge">24</System:Double>
+    <System:Double x:Key="BaseFontSizeTitle">32</System:Double>
+    <System:Double x:Key="BaseFontSizeHeader">36</System:Double>
+    <System:Double x:Key="BaseFontSizeMenu">24</System:Double>
+
+    <System:Double x:Key="BaseButtonWidth">400</System:Double>
+    <System:Double x:Key="BaseButtonHeight">60</System:Double>
+    <System:Double x:Key="BaseEditorButtonSize">40</System:Double>
+    <System:Double x:Key="BaseToolbarButtonSize">36</System:Double>
+    <System:Double x:Key="BaseStepCircleSize">30</System:Double>
+
+    <!-- Scaled Values (dynamically updated) -->
     <System:Double x:Key="FontSizeSmall">12</System:Double>
     <System:Double x:Key="FontSizeMedium">14</System:Double>
     <System:Double x:Key="FontSizeLarge">16</System:Double>
     <System:Double x:Key="FontSizeXLarge">18</System:Double>
+    <System:Double x:Key="FontSizeXXLarge">24</System:Double>
     <System:Double x:Key="FontSizeTitle">32</System:Double>
     <System:Double x:Key="FontSizeHeader">36</System:Double>
     <System:Double x:Key="FontSizeMenu">24</System:Double>
 
+    <System:Double x:Key="ScaledButtonWidth">400</System:Double>
+    <System:Double x:Key="ScaledButtonHeight">60</System:Double>
+    <System:Double x:Key="ScaledEditorButtonSize">40</System:Double>
+    <System:Double x:Key="ScaledToolbarButtonSize">36</System:Double>
+    <System:Double x:Key="ScaledStepCircleSize">30</System:Double>
+
+    <!-- Base Thickness Values -->
+    <Thickness x:Key="BaseMarginSmall">5</Thickness>
+    <Thickness x:Key="BaseMarginMedium">10</Thickness>
+    <Thickness x:Key="BaseMarginLarge">20</Thickness>
+    <Thickness x:Key="BaseMarginXLarge">30</Thickness>
+    <Thickness x:Key="BasePaddingSmall">5</Thickness>
+    <Thickness x:Key="BasePaddingMedium">10</Thickness>
+    <Thickness x:Key="BasePaddingLarge">15</Thickness>
+    <Thickness x:Key="BasePaddingXLarge">30,25</Thickness>
+
+    <!-- Scaled Thickness Values (dynamically updated) -->
     <Thickness x:Key="MarginSmall">5</Thickness>
     <Thickness x:Key="MarginMedium">10</Thickness>
     <Thickness x:Key="MarginLarge">20</Thickness>
     <Thickness x:Key="MarginXLarge">30</Thickness>
+    <Thickness x:Key="PaddingSmall">5</Thickness>
+    <Thickness x:Key="PaddingMedium">10</Thickness>
+    <Thickness x:Key="PaddingLarge">15</Thickness>
+    <Thickness x:Key="PaddingXLarge">30,25</Thickness>
+    <Thickness x:Key="ButtonMargin">0,10</Thickness>
+    <Thickness x:Key="ButtonPadding">15,8</Thickness>
 
+    <!-- Corner Radius Values (not scaled) -->
     <CornerRadius x:Key="CornerRadiusSmall">3</CornerRadius>
     <CornerRadius x:Key="CornerRadiusMedium">4</CornerRadius>
     <CornerRadius x:Key="CornerRadiusLarge">8</CornerRadius>
@@ -25,7 +66,7 @@
     <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeHeader}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
     </Style>
@@ -33,20 +74,20 @@
     <Style x:Key="TitleTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
     </Style>
 
     <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeLarge}"/>
     </Style>
 
     <Style x:Key="LabelTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeLarge}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
     </Style>
@@ -54,17 +95,17 @@
     <Style x:Key="DescriptionTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
     <!-- Menu Button Style (Preserved from original) -->
     <Style x:Key="MenuButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="400"/>
-        <Setter Property="Height" Value="60"/>
-        <Setter Property="Margin" Value="0,10"/>
+        <Setter Property="Width" Value="{DynamicResource ScaledButtonWidth}"/>
+        <Setter Property="Height" Value="{DynamicResource ScaledButtonHeight}"/>
+        <Setter Property="Margin" Value="{DynamicResource ButtonMargin}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMenu}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMenu}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
@@ -96,8 +137,8 @@
 
     <!-- Map Editor Button Style (Preserved from original) -->
     <Style x:Key="EditorButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="40"/>
-        <Setter Property="Height" Value="40"/>
+        <Setter Property="Width" Value="{DynamicResource ScaledEditorButtonSize}"/>
+        <Setter Property="Height" Value="{DynamicResource ScaledEditorButtonSize}"/>
         <Setter Property="Margin" Value="2"/>
         <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
@@ -133,11 +174,11 @@
         <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ScaledEditorButtonSize}"/>
         <Setter Property="MinWidth" Value="120"/>
-        <Setter Property="Padding" Value="15,8"/>
+        <Setter Property="Padding" Value="{DynamicResource ButtonPadding}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -173,11 +214,11 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ScaledEditorButtonSize}"/>
         <Setter Property="MinWidth" Value="120"/>
-        <Setter Property="Padding" Value="15,8"/>
+        <Setter Property="Padding" Value="{DynamicResource ButtonPadding}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -212,10 +253,10 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Margin" Value="0,0,0,20"/>
-        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginLarge}"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingMedium}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeLarge}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -253,9 +294,9 @@
     <Style x:Key="SettingsCheckBoxStyle" TargetType="CheckBox">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="FontWeight" Value="Normal"/>
-        <Setter Property="Margin" Value="0,5"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginSmall}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
@@ -263,9 +304,9 @@
     <Style x:Key="SettingsRadioButtonStyle" TargetType="RadioButton">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="FontWeight" Value="Normal"/>
-        <Setter Property="Margin" Value="0,5"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginSmall}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
@@ -275,8 +316,8 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
-        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingSmall}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -342,8 +383,8 @@
         <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="CaretBrush" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
-        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingSmall}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
@@ -353,7 +394,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}"/>
-        <Setter Property="Padding" Value="30,25"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingXLarge}"/>
     </Style>
 
     <Style x:Key="SectionPanelStyle" TargetType="Border">
@@ -361,14 +402,14 @@
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}"/>
-        <Setter Property="Padding" Value="15"/>
-        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginMedium}"/>
     </Style>
 
     <!-- Step Item Style (New) -->
     <Style x:Key="StepItemStyle" TargetType="Border">
-        <Setter Property="Padding" Value="15,10"/>
-        <Setter Property="Margin" Value="0,5"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginSmall}"/>
         <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -376,8 +417,8 @@
     </Style>
 
     <Style x:Key="StepNumberCircleStyle" TargetType="Border">
-        <Setter Property="Width" Value="30"/>
-        <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="{DynamicResource ScaledStepCircleSize}"/>
+        <Setter Property="Height" Value="{DynamicResource ScaledStepCircleSize}"/>
         <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusRound}"/>
     </Style>
@@ -385,35 +426,35 @@
     <!-- Error Panel Style (New) -->
     <Style x:Key="ErrorPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="#FF5252"/>
-        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}"/>
     </Style>
 
     <!-- Warning Panel Style (New) -->
     <Style x:Key="WarningPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="#FFC107"/>
-        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}"/>
     </Style>
 
     <!-- Success Panel Style (New) -->
     <Style x:Key="SuccessPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="#4CAF50"/>
-        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}"/>
     </Style>
 
     <!-- Info Panel Style (New) -->
     <Style x:Key="InfoPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="#2196F3"/>
-        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="Padding" Value="{DynamicResource PaddingLarge}"/>
         <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}"/>
     </Style>
 
     <!-- Toolbar Button Style (New) -->
     <Style x:Key="ToolbarButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="36"/>
-        <Setter Property="Height" Value="36"/>
+        <Setter Property="Width" Value="{DynamicResource ScaledToolbarButtonSize}"/>
+        <Setter Property="Height" Value="{DynamicResource ScaledToolbarButtonSize}"/>
         <Setter Property="Margin" Value="2"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -450,9 +491,9 @@
     <Style x:Key="StatusBarTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Margin" Value="5,0"/>
+        <Setter Property="Margin" Value="{DynamicResource MarginSmall}"/>
     </Style>
 
     <!-- Tab Control Style (New) -->
@@ -467,8 +508,8 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="FontFamily" Value="Consolas"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeMedium}"/>
-        <Setter Property="Padding" Value="15,8"/>
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
+        <Setter Property="Padding" Value="{DynamicResource ButtonPadding}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>

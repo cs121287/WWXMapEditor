@@ -1,118 +1,448 @@
-<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.VictoryConditionsStepView"
+﻿<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.VictoryConditionsStepView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
-    
-    <StackPanel MaxWidth="600">
-        <TextBlock Text="VICTORY CONDITIONS" 
-                   Foreground="{DynamicResource ForegroundBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="32" 
-                   FontWeight="Bold" 
-                   Margin="0,0,0,30"/>
-        
-        <TextBlock Text="Choose how players can achieve victory on this map" 
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="16" 
-                   Margin="0,0,0,30"/>
-        
-        <Border Background="{DynamicResource Surface2Brush}"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="4"
-                Padding="30,25">
-            <StackPanel>
+             d:DesignHeight="600" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <Storyboard x:Key="CardHoverIn">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                             To="1.05" Duration="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                             To="1.05" Duration="0:0:0.2"/>
+        </Storyboard>
+        <Storyboard x:Key="CardHoverOut">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                             To="1.0" Duration="0:0:0.2"/>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                             To="1.0" Duration="0:0:0.2"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="40,20,40,30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" 
+                    Width="80" Height="80"
+                    Background="{DynamicResource AccentBrush}"
+                    CornerRadius="40"
+                    Margin="0,0,20,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="10"/>
+                </Border.Effect>
+                <TextBlock Text="🏆" 
+                           FontSize="40"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="VICTORY CONDITIONS" 
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           FontFamily="Consolas"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Margin="0,0,0,5"/>
+                <TextBlock Text="Select one or more ways for players to achieve victory on this battlefield" 
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                           FontFamily="Consolas"
+                           FontSize="14"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Victory Condition Cards -->
+        <Grid Grid.Row="1" Margin="40,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Elimination Victory Card -->
+            <Border Grid.Column="0" Margin="10">
                 <CheckBox IsChecked="{Binding ParentViewModel.EliminationVictory}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Elimination Victory" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="18"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="Win by defeating all enemy forces. Classic deathmatch-style gameplay."
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
+                          Style="{x:Null}">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="CardBorder"
+                                    Background="{DynamicResource Surface2Brush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    Cursor="Hand"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                    </TransformGroup>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Checkbox Indicator -->
+                                    <Border Grid.Row="0" 
+                                            Height="4"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="2,2,0,0"
+                                            Visibility="Collapsed"
+                                            x:Name="CheckIndicator"/>
+
+                                    <!-- Icon -->
+                                    <Border Grid.Row="1" 
+                                            Width="80" Height="80"
+                                            Background="{DynamicResource Surface3Brush}"
+                                            CornerRadius="40"
+                                            Margin="0,20,0,0">
+                                        <TextBlock Text="⚔️" 
+                                                   FontSize="40"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="2"
+                                               Text="ELIMINATION"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Margin="10,10,10,0"/>
+
+                                    <!-- Description -->
+                                    <TextBlock Grid.Row="3"
+                                               Text="Defeat all enemy forces"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               TextAlignment="Center"
+                                               Margin="15,5,15,20"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CheckIndicator" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverIn}"/>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverOut}"/>
+                                </EventTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
                 </CheckBox>
-                
-                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
-                
+            </Border>
+
+            <!-- Capture Objectives Card -->
+            <Border Grid.Column="1" Margin="10">
                 <CheckBox IsChecked="{Binding ParentViewModel.CaptureObjectivesVictory}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Capture Objectives" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="18"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="Win by controlling strategic points on the map for a certain duration."
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
+                          Style="{x:Null}">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="CardBorder"
+                                    Background="{DynamicResource Surface2Brush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    Cursor="Hand"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                    </TransformGroup>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Checkbox Indicator -->
+                                    <Border Grid.Row="0" 
+                                            Height="4"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="2,2,0,0"
+                                            Visibility="Collapsed"
+                                            x:Name="CheckIndicator"/>
+
+                                    <!-- Icon -->
+                                    <Border Grid.Row="1" 
+                                            Width="80" Height="80"
+                                            Background="{DynamicResource Surface3Brush}"
+                                            CornerRadius="40"
+                                            Margin="0,20,0,0">
+                                        <TextBlock Text="🚩" 
+                                                   FontSize="40"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="2"
+                                               Text="CAPTURE"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Margin="10,10,10,0"/>
+
+                                    <!-- Description -->
+                                    <TextBlock Grid.Row="3"
+                                               Text="Control strategic points"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               TextAlignment="Center"
+                                               Margin="15,5,15,20"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CheckIndicator" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverIn}"/>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverOut}"/>
+                                </EventTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
                 </CheckBox>
-                
-                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
-                
+            </Border>
+
+            <!-- Survival Victory Card -->
+            <Border Grid.Column="2" Margin="10">
                 <CheckBox IsChecked="{Binding ParentViewModel.SurvivalVictory}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Survival Victory" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="18"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="Win by surviving for a specified amount of time against waves of enemies."
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
+                          Style="{x:Null}">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="CardBorder"
+                                    Background="{DynamicResource Surface2Brush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    Cursor="Hand"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                    </TransformGroup>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Checkbox Indicator -->
+                                    <Border Grid.Row="0" 
+                                            Height="4"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="2,2,0,0"
+                                            Visibility="Collapsed"
+                                            x:Name="CheckIndicator"/>
+
+                                    <!-- Icon -->
+                                    <Border Grid.Row="1" 
+                                            Width="80" Height="80"
+                                            Background="{DynamicResource Surface3Brush}"
+                                            CornerRadius="40"
+                                            Margin="0,20,0,0">
+                                        <TextBlock Text="🛡️" 
+                                                   FontSize="40"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="2"
+                                               Text="SURVIVAL"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Margin="10,10,10,0"/>
+
+                                    <!-- Description -->
+                                    <TextBlock Grid.Row="3"
+                                               Text="Survive for set duration"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               TextAlignment="Center"
+                                               Margin="15,5,15,20"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CheckIndicator" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverIn}"/>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverOut}"/>
+                                </EventTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
                 </CheckBox>
-                
-                <Separator Margin="0,15" Background="{DynamicResource BorderBrush}"/>
-                
+            </Border>
+
+            <!-- Economic Victory Card -->
+            <Border Grid.Column="3" Margin="10">
                 <CheckBox IsChecked="{Binding ParentViewModel.EconomicVictory}"
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="0,10">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Economic Victory" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="18"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="Win by reaching economic milestones, such as resource accumulation."
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
+                          Style="{x:Null}">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Border x:Name="CardBorder"
+                                    Background="{DynamicResource Surface2Brush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    Cursor="Hand"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                    </TransformGroup>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="100"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Checkbox Indicator -->
+                                    <Border Grid.Row="0" 
+                                            Height="4"
+                                            Background="{DynamicResource AccentBrush}"
+                                            CornerRadius="2,2,0,0"
+                                            Visibility="Collapsed"
+                                            x:Name="CheckIndicator"/>
+
+                                    <!-- Icon -->
+                                    <Border Grid.Row="1" 
+                                            Width="80" Height="80"
+                                            Background="{DynamicResource Surface3Brush}"
+                                            CornerRadius="40"
+                                            Margin="0,20,0,0">
+                                        <TextBlock Text="💰" 
+                                                   FontSize="40"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="2"
+                                               Text="ECONOMIC"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Margin="10,10,10,0"/>
+
+                                    <!-- Description -->
+                                    <TextBlock Grid.Row="3"
+                                               Text="Reach resource goals"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               TextAlignment="Center"
+                                               Margin="15,5,15,20"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CardBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CardBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="CheckIndicator" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverIn}"/>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard Storyboard="{StaticResource CardHoverOut}"/>
+                                </EventTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
                 </CheckBox>
+            </Border>
+        </Grid>
+
+        <!-- Info Panel -->
+        <Border Grid.Row="2" 
+                Background="{DynamicResource Surface2Brush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="40,20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="ℹ️" 
+                           FontSize="20"
+                           Margin="0,0,10,0"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="Select at least one victory condition. Players can win by achieving any selected condition."
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                           FontFamily="Consolas"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
-        
-        <TextBlock Text="At least one victory condition must be selected"
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                   FontFamily="Consolas"
-                   FontSize="14"
-                   FontStyle="Italic"
-                   Margin="0,20,0,0"
-                   TextWrapping="Wrap"/>
-    </StackPanel>
+    </Grid>
 </UserControl>

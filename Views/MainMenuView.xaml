@@ -6,56 +6,242 @@
              xmlns:local="clr-namespace:WWXMapEditor.Views"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
-    
-    <Grid Background="{DynamicResource BackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <!-- Title -->
-        <TextBlock Grid.Row="0" 
-                   Text="WWX MAP EDITOR" 
-                   FontFamily="Consolas"
-                   FontSize="72"
-                   FontWeight="Bold"
-                   Foreground="{DynamicResource ForegroundBrush}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Margin="0,100,0,0"/>
-        
-        <!-- Menu Items -->
-        <StackPanel Grid.Row="1" 
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Margin="0,50">
-            
-            <Button Content="NEW MAP" 
-                    Style="{StaticResource MenuButtonStyle}"
-                    Command="{Binding NewMapCommand}"/>
-            
-            <Button Content="LOAD MAP" 
-                    Style="{StaticResource MenuButtonStyle}"
-                    Command="{Binding LoadMapCommand}"/>
-            
-            <Button Content="SETTINGS" 
-                    Style="{StaticResource MenuButtonStyle}"
-                    Command="{Binding SettingsCommand}"/>
-            
-            <Button Content="EXIT" 
-                    Style="{StaticResource MenuButtonStyle}"
-                    Command="{Binding ExitCommand}"/>
-        </StackPanel>
-        
-        <!-- Version Info -->
-        <TextBlock Grid.Row="2" 
-                   Text="Version 1.0.0" 
-                   FontFamily="Consolas"
-                   FontSize="16"
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Bottom"
-                   Margin="0,0,0,20"/>
+
+    <Grid>
+        <!-- Animated Background Pattern -->
+        <Grid.Background>
+            <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" Opacity="0.05">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <GeometryDrawing Brush="{DynamicResource BackgroundBrush}"
+                                         Geometry="M0,0 L100,0 L100,100 L0,100 Z"/>
+                        <GeometryDrawing Geometry="M 0,50 L 50,0 L 100,50 L 50,100 Z">
+                            <GeometryDrawing.Pen>
+                                <Pen Brush="{DynamicResource AccentBrush}" Thickness="0.5"/>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                        <GeometryDrawing Geometry="M 25,25 L 75,25 L 75,75 L 25,75 Z">
+                            <GeometryDrawing.Pen>
+                                <Pen Brush="{DynamicResource AccentBrush}" Thickness="0.5"/>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Grid.Background>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header Section -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource Surface2Brush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="{DynamicResource PaddingXLarge}">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="WWX MAP EDITOR" 
+                               Style="{StaticResource HeaderTextStyle}"
+                               FontSize="{DynamicResource FontSizeTitle}"
+                               Margin="{DynamicResource MarginMedium}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.3" BlurRadius="5"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="Strategic Map Creation Tool" 
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"
+                               FontSize="{DynamicResource FontSizeXLarge}"
+                               Opacity="0.8"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Main Menu Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Center Menu Panel -->
+                <Border Grid.Column="1" 
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource SurfaceBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Margin="{DynamicResource MarginXLarge}"
+                        Padding="{DynamicResource PaddingXLarge}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Direction="270" ShadowDepth="10" Opacity="0.3" BlurRadius="20"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+                        <!-- Menu Title -->
+                        <TextBlock Text="MAIN MENU" 
+                                   Style="{StaticResource TitleTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   Margin="{DynamicResource MarginLarge}"
+                                   FontSize="{DynamicResource FontSizeMenu}"/>
+
+                        <!-- Menu Buttons -->
+                        <Button Content="NEW MAP" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="NewMapCreation">
+                            <Button.ToolTip>
+                                <ToolTip Content="Create a new map from scratch"/>
+                            </Button.ToolTip>
+                        </Button>
+
+                        <Button Content="LOAD MAP" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="LoadMap">
+                            <Button.ToolTip>
+                                <ToolTip Content="Load an existing map for editing"/>
+                            </Button.ToolTip>
+                        </Button>
+
+                        <Button Content="RECENT MAPS" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                IsEnabled="False">
+                            <Button.ToolTip>
+                                <ToolTip Content="Quick access to recently edited maps"/>
+                            </Button.ToolTip>
+                        </Button>
+
+                        <Separator Margin="{DynamicResource MarginLarge}" 
+                                   Background="{DynamicResource BorderBrush}" 
+                                   Height="1"/>
+
+                        <Button Content="SETTINGS" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="Settings">
+                            <Button.ToolTip>
+                                <ToolTip Content="Configure editor settings and preferences"/>
+                            </Button.ToolTip>
+                        </Button>
+
+                        <Button Content="ABOUT" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="About">
+                            <Button.ToolTip>
+                                <ToolTip Content="Information about WWX Map Editor"/>
+                            </Button.ToolTip>
+                        </Button>
+
+                        <Button Content="EXIT" 
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DataContext.ExitCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <Button.ToolTip>
+                                <ToolTip Content="Exit the application"/>
+                            </Button.ToolTip>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Left Side Info Panel -->
+                <Border Grid.Column="0" 
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Background="{DynamicResource Surface2Brush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="{DynamicResource PaddingXLarge}"
+                        Margin="{DynamicResource MarginXLarge}"
+                        MaxWidth="350">
+                    <StackPanel>
+                        <TextBlock Text="Quick Tips" 
+                                   Style="{StaticResource TitleTextStyle}"
+                                   FontSize="{DynamicResource FontSizeXLarge}"
+                                   Margin="{DynamicResource MarginMedium}"/>
+                        <TextBlock Style="{StaticResource DescriptionTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="{DynamicResource FontSizeMedium}">
+                            &#8226; Use keyboard shortcuts for faster editing<LineBreak/>
+                            &#8226; Enable auto-save to prevent data loss<LineBreak/>
+                            &#8226; Grid snapping helps with precise placement<LineBreak/>
+                            &#8226; Press F1 for help at any time
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Right Side Stats Panel -->
+                <Border Grid.Column="2" 
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        Background="{DynamicResource Surface2Brush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerRadiusLarge}"
+                        Padding="{DynamicResource PaddingXLarge}"
+                        Margin="{DynamicResource MarginXLarge}"
+                        MaxWidth="350">
+                    <StackPanel>
+                        <TextBlock Text="Editor Stats" 
+                                   Style="{StaticResource TitleTextStyle}"
+                                   FontSize="{DynamicResource FontSizeXLarge}"
+                                   Margin="{DynamicResource MarginMedium}"/>
+                        <TextBlock Style="{StaticResource DescriptionTextStyle}"
+                                   FontSize="{DynamicResource FontSizeMedium}">
+                            <Run Text="Maps Created: "/>
+                            <Run Text="0" FontWeight="Bold"/><LineBreak/>
+                            <Run Text="Total Edit Time: "/>
+                            <Run Text="0h 0m" FontWeight="Bold"/><LineBreak/>
+                            <Run Text="Last Session: "/>
+                            <Run Text="New User" FontWeight="Bold"/><LineBreak/>
+                            <Run Text="Version: "/>
+                            <Run Text="1.0.0" FontWeight="Bold"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" 
+                    Background="{DynamicResource Surface2Brush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="{DynamicResource PaddingLarge}">
+                <Grid>
+                    <TextBlock Text="&#169; 2025 WWX Map Editor - User: cs121287" 
+                               Style="{StaticResource DescriptionTextStyle}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               FontSize="{DynamicResource FontSizeSmall}"/>
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Theme: " 
+                                   Style="{StaticResource DescriptionTextStyle}"
+                                   VerticalAlignment="Center"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                        <RadioButton Content="Dark" 
+                                     IsChecked="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}"
+                                     GroupName="ThemeSelection"
+                                     Margin="{DynamicResource MarginSmall}"
+                                     VerticalAlignment="Center"
+                                     FontSize="{DynamicResource FontSizeSmall}"
+                                     Foreground="{DynamicResource ForegroundBrush}"/>
+                        <RadioButton Content="Light" 
+                                     IsChecked="{Binding DataContext.IsLightTheme, RelativeSource={RelativeSource AncestorType=Window}}"
+                                     GroupName="ThemeSelection"
+                                     Margin="{DynamicResource MarginSmall}"
+                                     VerticalAlignment="Center"
+                                     FontSize="{DynamicResource FontSizeSmall}"
+                                     Foreground="{DynamicResource ForegroundBrush}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

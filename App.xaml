@@ -4,7 +4,7 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:WWXMapEditor"
              xmlns:converters="clr-namespace:WWXMapEditor.Converters"
-             StartupUri="MainWindow.xaml">
+             StartupUri="/Views/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,10 +17,15 @@
 
             <!-- Converters -->
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-
-            <!-- Inverse Boolean to Visibility Converter -->
             <converters:BooleanToInverseVisibilityConverter x:Key="BooleanToInverseVisibilityConverter"/>
+            <converters:StringComparisonConverter x:Key="StringComparisonConverter"/>
+            <converters:IntComparisonConverter x:Key="IntComparisonConverter"/>
+            <converters:TerrainColorConverter x:Key="TerrainColorConverter"/>
+            <converters:IndexToStepNumberConverter x:Key="IndexToStepNumberConverter"/>
+            <converters:BooleanToIndexConverter x:Key="BooleanToIndexConverter"/>
+
+            <!-- Built-in WPF Converter -->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- Global Values -->
             <System:Double x:Key="MinWindowWidth">1280</System:Double>
