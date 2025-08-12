@@ -13,13 +13,14 @@ namespace WWXMapEditor.ViewModels
         private readonly MainWindowViewModel _mainWindowViewModel;
         private int _currentStepIndex = 0;
         private object _currentStepContent = null!;
-        private string _progressText = "Step 1 of 3";
+        private string _progressText = "Step 1 of 4";
         private string _nextButtonText = "NEXT";
         private Visibility _previousButtonVisibility = Visibility.Collapsed;
         private string _validationMessage = "";
 
         // Step ViewModels
         private readonly BasicInformationStepViewModel _basicInfoViewModel;
+        private readonly PlayerSelectStepViewModel _playerSelectViewModel;
         private readonly VictoryConditionsStepViewModel _victoryConditionsViewModel;
         private readonly FogOfWarStepViewModel _fogOfWarViewModel;
 
@@ -29,11 +30,23 @@ namespace WWXMapEditor.ViewModels
         private int _mapWidth = 50;
         private int _mapHeight = 50;
         private string _selectedTerrain = "Plains";
+
+        // Player selection (moved from Basic Information to Player Select step)
         private int _numberOfPlayers = 2;
+
+        // Country selection per player (Random by default)
+        private string _player1Country = "Random";
+        private string _player2Country = "Random";
+        private string _player3Country = "Random";
+        private string _player4Country = "Random";
+
+        // Victory conditions
         private bool _eliminationVictory = true;
         private bool _captureObjectivesVictory = false;
         private bool _survivalVictory = false;
         private bool _economicVictory = false;
+
+        // Fog of war
         private bool _fogOfWarEnabled = true;
         private string _shroudType = "Black";
         private double _visionPenaltyMultiplier = 1.0;
@@ -99,6 +112,10 @@ namespace WWXMapEditor.ViewModels
 
                 if (SetProperty(ref _numberOfPlayers, value))
                 {
+                    // Ensure countries beyond the player count are reset to Random
+                    if (_numberOfPlayers < 4 && Player4Country != "Random") Player4Country = "Random";
+                    if (_numberOfPlayers < 3 && Player3Country != "Random") Player3Country = "Random";
+
                     // Reset/Enforce alliances according to rules when count changes
                     EnforceAllianceConstraints(changedPlayerIndex: 0);
                 }
@@ -112,6 +129,31 @@ namespace WWXMapEditor.ViewModels
 
         public int NumberOfPlayersMin => 2;
         public int NumberOfPlayersMax => 4;
+
+        // Player countries (bind to PlayerSelect step)
+        public string Player1Country
+        {
+            get => _player1Country;
+            set => SetProperty(ref _player1Country, value);
+        }
+
+        public string Player2Country
+        {
+            get => _player2Country;
+            set => SetProperty(ref _player2Country, value);
+        }
+
+        public string Player3Country
+        {
+            get => _player3Country;
+            set => SetProperty(ref _player3Country, value);
+        }
+
+        public string Player4Country
+        {
+            get => _player4Country;
+            set => SetProperty(ref _player4Country, value);
+        }
 
         public bool Player2IsAlly
         {
@@ -311,7 +353,7 @@ namespace WWXMapEditor.ViewModels
             ShroudTypes = new ObservableCollection<string> { "Black", "Grey" };
             VisionPenaltyMultipliers = new ObservableCollection<string> { "Default (1x)", "2x", "3x" };
 
-            // Initialize configuration steps
+            // Initialize configuration steps (now 4 steps, adding Player Select)
             ConfigurationSteps = new ObservableCollection<MapConfigurationStep>
             {
                 new MapConfigurationStep
@@ -328,8 +370,8 @@ namespace WWXMapEditor.ViewModels
                 {
                     StepNumber = 2,
                     Number = "2",
-                    Title = "Victory Conditions",
-                    Description = "Define how players can achieve victory",
+                    Title = "Player Select",
+                    Description = "Choose number of players and assign countries",
                     IsActive = false,
                     IsCompleted = false,
                     IsLast = false
@@ -338,6 +380,16 @@ namespace WWXMapEditor.ViewModels
                 {
                     StepNumber = 3,
                     Number = "3",
+                    Title = "Victory Conditions",
+                    Description = "Define how players can achieve victory",
+                    IsActive = false,
+                    IsCompleted = false,
+                    IsLast = false
+                },
+                new MapConfigurationStep
+                {
+                    StepNumber = 4,
+                    Number = "4",
                     Title = "Fog of War",
                     Description = "Configure visibility and exploration settings",
                     IsActive = false,
@@ -348,6 +400,7 @@ namespace WWXMapEditor.ViewModels
 
             // Initialize step view models
             _basicInfoViewModel = new BasicInformationStepViewModel(this);
+            _playerSelectViewModel = new PlayerSelectStepViewModel(this);
             _victoryConditionsViewModel = new VictoryConditionsStepViewModel(this);
             _fogOfWarViewModel = new FogOfWarStepViewModel(this);
 
@@ -451,17 +504,37 @@ namespace WWXMapEditor.ViewModels
             // Clear validation message when changing steps
             ValidationMessage = "";
 
+            // Use FrameworkElement to set DataContext to avoid design-time type resolution issues
             switch (CurrentStepIndex)
             {
                 case 0:
-                    CurrentStepContent = new BasicInformationStepView { DataContext = _basicInfoViewModel };
-                    break;
+                    {
+                        System.Windows.FrameworkElement view = new BasicInformationStepView();
+                        view.DataContext = _basicInfoViewModel;
+                        CurrentStepContent = view;
+                        break;
+                    }
                 case 1:
-                    CurrentStepContent = new VictoryConditionsStepView { DataContext = _victoryConditionsViewModel };
-                    break;
+                    {
+                        System.Windows.FrameworkElement view = new PlayerSelectStepView();
+                        view.DataContext = _playerSelectViewModel;
+                        CurrentStepContent = view;
+                        break;
+                    }
                 case 2:
-                    CurrentStepContent = new FogOfWarStepView { DataContext = _fogOfWarViewModel };
-                    break;
+                    {
+                        System.Windows.FrameworkElement view = new VictoryConditionsStepView();
+                        view.DataContext = _victoryConditionsViewModel;
+                        CurrentStepContent = view;
+                        break;
+                    }
+                case 3:
+                    {
+                        System.Windows.FrameworkElement view = new FogOfWarStepView();
+                        view.DataContext = _fogOfWarViewModel;
+                        CurrentStepContent = view;
+                        break;
+                    }
             }
         }
 
@@ -495,13 +568,18 @@ namespace WWXMapEditor.ViewModels
         {
             switch (CurrentStepIndex)
             {
-                case 0: // Basic Information
-                    // Enforce player count rules before allowing next
+                case 0: // Basic Information (player count moved out)
+                    return !string.IsNullOrWhiteSpace(MapName) &&
+                           MapWidth >= 10 && MapWidth <= 500 &&
+                           MapHeight >= 10 && MapHeight <= 500;
+
+                case 1: // Player Select
+                    // Enforce player count and alliance rules here
                     if (NumberOfPlayers < 2 || NumberOfPlayers > 4)
                         return false;
 
                     if (NumberOfPlayers == 2 && Player2IsAlly)
-                        return false; // should never happen due to enforcement
+                        return false;
 
                     if (NumberOfPlayers == 3 && Player2IsAlly && Player3IsAlly)
                         return false;
@@ -509,14 +587,13 @@ namespace WWXMapEditor.ViewModels
                     if (NumberOfPlayers == 4 && NumberOfPlayersEnemiesCount < 1)
                         return false;
 
-                    return !string.IsNullOrWhiteSpace(MapName) &&
-                           MapWidth >= 10 && MapWidth <= 500 &&
-                           MapHeight >= 10 && MapHeight <= 500;
+                    // Countries can be Random or any; no additional validation required
+                    return true;
 
-                case 1: // Victory Conditions
+                case 2: // Victory Conditions
                     return EliminationVictory || CaptureObjectivesVictory || SurvivalVictory || EconomicVictory;
 
-                case 2: // Fog of War - Last step
+                case 3: // Fog of War - Last step
                     return true;
 
                 default:

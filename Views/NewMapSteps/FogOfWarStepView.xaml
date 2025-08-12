@@ -5,166 +5,209 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
 
-    <Grid>
+    <UserControl.Resources>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+        <conv:StringComparisonConverter x:Key="StringComparisonConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Section text styles -->
+        <Style x:Key="SectionKicker" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Opacity" Value="0.95"/>
+        </Style>
+        <Style x:Key="SectionSub" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Opacity" Value="0.9"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <!-- Settings-like card style -->
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#AA000000" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Settings-style: left column (cards) + right column (preview) -->
+    <Grid Margin="12,4,12,4">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left Panel - Settings -->
-        <Border Grid.Column="0" 
-                Background="{DynamicResource Surface2Brush}"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="0,0,1,0">
-            <Grid Margin="40,30">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <!-- LEFT: Settings cards -->
+        <StackPanel Grid.Column="0" Margin="8,0,8,0">
+            <!-- Header -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- Header -->
-                <Grid Grid.Row="0" Margin="0,0,0,30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" 
-                            Width="60" Height="60"
-                            Background="{DynamicResource AccentBrush}"
-                            CornerRadius="30"
-                            Margin="0,0,15,0">
-                        <TextBlock Text="🌫️" 
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=28}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                    </Border>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="FOG OF WAR" 
-                                   Foreground="{DynamicResource ForegroundBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,5"/>
-                        <TextBlock Text="Configure visibility settings" 
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"/>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Main Toggle -->
-                <Border Grid.Row="1"
-                        Background="{DynamicResource SurfaceBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="20"
-                        Margin="0,0,0,20">
-                    <CheckBox IsChecked="{Binding ParentViewModel.FogOfWarEnabled}">
-                        <CheckBox.Template>
-                            <ControlTemplate TargetType="CheckBox">
-                                <Grid Cursor="Hand">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                                        <TextBlock Text="Enable Fog of War"
-                                                   Foreground="{DynamicResource ForegroundBrush}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                                                   FontWeight="Bold"/>
-                                        <TextBlock Text="Limits visibility to explored areas"
-                                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
-                                                   Margin="0,5,0,0"/>
-                                    </StackPanel>
-
-                                    <!-- Toggle Switch -->
-                                    <Border Grid.Column="2"
-                                            x:Name="ToggleBackground"
-                                            Width="60" Height="30"
-                                            Background="{DynamicResource Surface3Brush}"
-                                            CornerRadius="15">
-                                        <Canvas>
-                                            <Ellipse x:Name="ToggleCircle"
-                                                     Width="26" Height="26"
-                                                     Fill="{DynamicResource ForegroundBrush}"
-                                                     Canvas.Left="2"
-                                                     Canvas.Top="2">
-                                                <Ellipse.RenderTransform>
-                                                    <TranslateTransform x:Name="ToggleTransform" X="0"/>
-                                                </Ellipse.RenderTransform>
-                                            </Ellipse>
-                                        </Canvas>
-                                    </Border>
-                                </Grid>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter TargetName="ToggleBackground" Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                        <Trigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="ToggleTransform"
-                                                                     Storyboard.TargetProperty="X"
-                                                                     To="30" Duration="0:0:0.2"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </Trigger.EnterActions>
-                                        <Trigger.ExitActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="ToggleTransform"
-                                                                     Storyboard.TargetProperty="X"
-                                                                     To="0" Duration="0:0:0.2"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </Trigger.ExitActions>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </CheckBox.Template>
-                    </CheckBox>
+                <Border Grid.Column="0" 
+                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
+                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
+                        Background="{DynamicResource AccentBrush}"
+                        CornerRadius="28"
+                        Margin="0,0,12,0">
+                    <TextBlock Text="🌫️"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
                 </Border>
 
-                <!-- Settings -->
-                <StackPanel Grid.Row="2"
-                            IsEnabled="{Binding ParentViewModel.FogOfWarEnabled}">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="FOG OF WAR" Style="{StaticResource SectionKicker}">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                    <TextBlock Text="Configure visibility settings"
+                               Style="{StaticResource SectionSub}">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
 
-                    <!-- Shroud Type -->
+            <!-- Master toggle card -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <CheckBox IsChecked="{Binding ParentViewModel.FogOfWarEnabled}">
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid Cursor="Hand">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                    <TextBlock Text="Enable Fog of War"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontFamily="Consolas"
+                                               FontWeight="Bold">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
+                                    <TextBlock Text="Limits visibility to explored areas"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                               FontFamily="Consolas"
+                                               Margin="0,5,0,0">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <!-- Toggle -->
+                                <Border Grid.Column="1"
+                                        x:Name="ToggleBackground"
+                                        Background="{DynamicResource Surface3Brush}"
+                                        CornerRadius="15">
+                                    <Border.Width>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="60"/>
+                                    </Border.Width>
+                                    <Border.Height>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
+                                    </Border.Height>
+                                    <Canvas>
+                                        <Ellipse x:Name="ToggleCircle"
+                                                 Fill="{DynamicResource ForegroundBrush}"
+                                                 Canvas.Left="2" Canvas.Top="2">
+                                            <Ellipse.Width>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
+                                            </Ellipse.Width>
+                                            <Ellipse.Height>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
+                                            </Ellipse.Height>
+                                            <Ellipse.RenderTransform>
+                                                <TranslateTransform x:Name="ToggleTransform" X="0"/>
+                                            </Ellipse.RenderTransform>
+                                        </Ellipse>
+                                    </Canvas>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="ToggleBackground" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="30" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+            </Border>
+
+            <!-- Shroud type card -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
                     <TextBlock Text="Shroud Type"
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                FontWeight="Bold"
-                               Margin="0,0,0,15"/>
+                               Margin="0,0,0,12">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
 
-                    <Grid Margin="0,0,0,30">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Black Shroud Option -->
+                        <!-- Black -->
                         <RadioButton Grid.Column="0"
                                      GroupName="ShroudType"
-                                     IsChecked="{Binding ParentViewModel.ShroudType, Converter={StaticResource StringComparisonConverter}, ConverterParameter=Black}"
-                                     Margin="0,0,5,0">
+                                     Margin="0,0,6,0"
+                                     IsChecked="{Binding ParentViewModel.ShroudType, Converter={StaticResource StringComparisonConverter}, ConverterParameter=Black}">
                             <RadioButton.Template>
                                 <ControlTemplate TargetType="RadioButton">
                                     <Border x:Name="border"
@@ -175,7 +218,8 @@
                                             Padding="15"
                                             Cursor="Hand">
                                         <StackPanel>
-                                            <Border Width="40" Height="40"
+                                            <Border Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
+                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                     Background="Black"
                                                     CornerRadius="4"
                                                     Margin="0,0,0,10"
@@ -183,17 +227,23 @@
                                             <TextBlock Text="Black"
                                                        Foreground="{DynamicResource ForegroundBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                                        FontWeight="Bold"
-                                                       HorizontalAlignment="Center"/>
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.FontSize>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                                                </TextBlock.FontSize>
+                                            </TextBlock>
                                             <TextBlock Text="Unexplored"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                        HorizontalAlignment="Center"
-                                                       Margin="0,2,0,0"/>
+                                                       Margin="0,2,0,0">
+                                                <TextBlock.FontSize>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="10"/>
+                                                </TextBlock.FontSize>
+                                            </TextBlock>
                                         </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
@@ -206,11 +256,11 @@
                             </RadioButton.Template>
                         </RadioButton>
 
-                        <!-- Grey Shroud Option -->
+                        <!-- Grey -->
                         <RadioButton Grid.Column="1"
                                      GroupName="ShroudType"
-                                     IsChecked="{Binding ParentViewModel.ShroudType, Converter={StaticResource StringComparisonConverter}, ConverterParameter=Grey}"
-                                     Margin="5,0,0,0">
+                                     Margin="6,0,0,0"
+                                     IsChecked="{Binding ParentViewModel.ShroudType, Converter={StaticResource StringComparisonConverter}, ConverterParameter=Grey}">
                             <RadioButton.Template>
                                 <ControlTemplate TargetType="RadioButton">
                                     <Border x:Name="border"
@@ -221,7 +271,8 @@
                                             Padding="15"
                                             Cursor="Hand">
                                         <StackPanel>
-                                            <Border Width="40" Height="40"
+                                            <Border Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
+                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                     Background="Gray"
                                                     CornerRadius="4"
                                                     Margin="0,0,0,10"
@@ -229,17 +280,23 @@
                                             <TextBlock Text="Grey"
                                                        Foreground="{DynamicResource ForegroundBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                                        FontWeight="Bold"
-                                                       HorizontalAlignment="Center"/>
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.FontSize>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                                                </TextBlock.FontSize>
+                                            </TextBlock>
                                             <TextBlock Text="Explored"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                        HorizontalAlignment="Center"
-                                                       Margin="0,2,0,0"/>
+                                                       Margin="0,2,0,0">
+                                                <TextBlock.FontSize>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="10"/>
+                                                </TextBlock.FontSize>
+                                            </TextBlock>
                                         </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
@@ -252,217 +309,268 @@
                             </RadioButton.Template>
                         </RadioButton>
                     </Grid>
+                </StackPanel>
+            </Border>
 
-                    <!-- Vision Range Multiplier -->
+            <!-- Vision penalty card -->
+            <Border Style="{StaticResource CardBorderStyle}"
+                    IsEnabled="{Binding ParentViewModel.FogOfWarEnabled}">
+                <StackPanel>
                     <TextBlock Text="Vision Range Penalty"
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                FontWeight="Bold"
-                               Margin="0,0,0,15"/>
+                               Margin="0,0,0,12">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+
+                    <Slider Value="{Binding ParentViewModel.VisionPenaltyMultiplier}"
+                            Minimum="1" Maximum="3"
+                            TickFrequency="0.5"
+                            IsSnapToTickEnabled="True"
+                            Margin="0,0,0,10"/>
 
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                        <Slider Grid.Row="0"
-                                Value="{Binding ParentViewModel.VisionPenaltyMultiplier}"
-                                Minimum="1"
-                                Maximum="3"
-                                TickFrequency="0.5"
-                                IsSnapToTickEnabled="True"
-                                Margin="0,0,0,10"/>
+                        <TextBlock Grid.Column="0" Text="Low"
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   HorizontalAlignment="Left">
+                            <TextBlock.FontSize>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                            </TextBlock.FontSize>
+                        </TextBlock>
 
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ParentViewModel.VisionPenaltyMultiplier, StringFormat='{}{0:F1}x'}"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontFamily="Consolas"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center">
+                            <TextBlock.FontSize>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                            </TextBlock.FontSize>
+                        </TextBlock>
 
-                            <TextBlock Grid.Column="0"
-                                       Text="Low"
-                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                       HorizontalAlignment="Left"/>
-
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding ParentViewModel.VisionPenaltyMultiplier, StringFormat='{}{0:F1}x'}"
-                                       Foreground="{DynamicResource AccentBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="2"
-                                       Text="High"
-                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                       HorizontalAlignment="Right"/>
-                        </Grid>
+                        <TextBlock Grid.Column="2" Text="High"
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   HorizontalAlignment="Right">
+                            <TextBlock.FontSize>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                            </TextBlock.FontSize>
+                        </TextBlock>
                     </Grid>
                 </StackPanel>
-            </Grid>
-        </Border>
+            </Border>
+        </StackPanel>
 
-        <!-- Right Panel - Visual Preview -->
-        <Grid Grid.Column="1">
+        <!-- Divider -->
+        <Border Grid.Column="1" Width="1" Margin="12,12" Opacity="0.22"
+                Background="{DynamicResource BorderBrush}"/>
+
+        <!-- RIGHT: Preview -->
+        <Grid Grid.Column="2" Margin="8,0,8,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Preview Header -->
-            <Border Grid.Row="0"
-                    Background="{DynamicResource Surface3Brush}"
-                    Padding="30,20">
+            <!-- Preview header -->
+            <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,12">
                 <TextBlock Text="PREVIEW"
                            Foreground="{DynamicResource ForegroundBrush}"
                            FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                            FontWeight="Bold"
-                           HorizontalAlignment="Center"/>
+                           HorizontalAlignment="Center">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
             </Border>
 
-            <!-- Interactive Preview -->
-            <Grid Grid.Row="1" Margin="40">
-                <Border Background="{DynamicResource BackgroundBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="2"
-                        CornerRadius="8">
-                    <Grid>
-                        <!-- Minimap Preview -->
-                        <Canvas x:Name="PreviewCanvas"
-                                Width="400" Height="400"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                            <Canvas.Background>
-                                <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                    <DrawingBrush.Drawing>
-                                        <GeometryDrawing Brush="{DynamicResource Surface2Brush}">
-                                            <GeometryDrawing.Geometry>
-                                                <RectangleGeometry Rect="0,0,20,20"/>
-                                            </GeometryDrawing.Geometry>
-                                        </GeometryDrawing>
-                                    </DrawingBrush.Drawing>
-                                </DrawingBrush>
-                            </Canvas.Background>
+            <!-- Preview content -->
+            <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <!-- Minimap Preview -->
+                    <Canvas x:Name="PreviewCanvas"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <Canvas.Width>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="400"/>
+                        </Canvas.Width>
+                        <Canvas.Height>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="400"/>
+                        </Canvas.Height>
+                        <Canvas.Background>
+                            <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <GeometryDrawing Brush="{DynamicResource Surface2Brush}">
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry Rect="0,0,20,20"/>
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Canvas.Background>
 
-                            <!-- Fog Effect Overlay -->
-                            <Grid Width="400" Height="400">
-                                <Grid.OpacityMask>
-                                    <RadialGradientBrush Center="0.5,0.5" RadiusX="0.3" RadiusY="0.3">
-                                        <GradientStop Color="Transparent" Offset="0"/>
-                                        <GradientStop Color="Black" Offset="1"/>
-                                    </RadialGradientBrush>
-                                </Grid.OpacityMask>
-                                <Rectangle Fill="Black" 
-                                           Visibility="{Binding ParentViewModel.FogOfWarEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            </Grid>
+                        <!-- Fog Effect Overlay -->
+                        <Grid>
+                            <Grid.Width>
+                                <Binding ElementName="PreviewCanvas" Path="Width"/>
+                            </Grid.Width>
+                            <Grid.Height>
+                                <Binding ElementName="PreviewCanvas" Path="Height"/>
+                            </Grid.Height>
+                            <Grid.OpacityMask>
+                                <RadialGradientBrush Center="0.5,0.5" RadiusX="0.3" RadiusY="0.3">
+                                    <GradientStop Color="Transparent" Offset="0"/>
+                                    <GradientStop Color="Black" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Grid.OpacityMask>
+                            <Rectangle Fill="Black" 
+                                       Visibility="{Binding ParentViewModel.FogOfWarEnabled, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        </Grid>
 
-                            <!-- Unit Indicator -->
-                            <Ellipse Width="30" Height="30"
-                                     Fill="{DynamicResource AccentBrush}"
-                                     Canvas.Left="185"
-                                     Canvas.Top="185">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="5"/>
-                                </Ellipse.Effect>
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard RepeatBehavior="Forever">
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                 From="0.5" To="1" Duration="0:0:1"
-                                                                 AutoReverse="True"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
-                            </Ellipse>
-                        </Canvas>
+                        <!-- Unit Indicator -->
+                        <Ellipse Fill="{DynamicResource AccentBrush}">
+                            <Ellipse.Width>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
+                            </Ellipse.Width>
+                            <Ellipse.Height>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
+                            </Ellipse.Height>
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="5"/>
+                            </Ellipse.Effect>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.5" To="1" Duration="0:0:1"
+                                                             AutoReverse="True"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform>
+                                    <TranslateTransform.X>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="185"/>
+                                    </TranslateTransform.X>
+                                    <TranslateTransform.Y>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="185"/>
+                                    </TranslateTransform.Y>
+                                </TranslateTransform>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                    </Canvas>
 
-                        <!-- Legend -->
-                        <Border Background="{DynamicResource Surface2Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                Padding="15"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                Margin="20">
-                            <StackPanel>
-                                <TextBlock Text="LEGEND"
-                                           Foreground="{DynamicResource ForegroundBrush}"
+                    <!-- Legend -->
+                    <Border Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="15"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="20">
+                        <StackPanel>
+                            <TextBlock Text="LEGEND"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,10">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Ellipse Grid.Row="0" Grid.Column="0"
+                                         Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                         Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                         Fill="{DynamicResource AccentBrush}"
+                                         Margin="0,0,10,5"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1"
+                                           Text="Unit Position"
+                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                            FontFamily="Consolas"
-                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
+                                           Margin="0,0,0,5">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
 
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                                <Rectangle Grid.Row="1" Grid.Column="0"
+                                           Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                           Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                           Fill="Black"
+                                           Opacity="0.8"
+                                           Margin="0,0,10,5"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1"
+                                           Text="Fog of War"
+                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                           FontFamily="Consolas"
+                                           Margin="0,0,0,5">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
 
-                                    <Ellipse Grid.Row="0" Grid.Column="0"
-                                             Width="12" Height="12"
-                                             Fill="{DynamicResource AccentBrush}"
-                                             Margin="0,0,10,5"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1"
-                                               Text="Unit Position"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                               FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               Margin="0,0,0,5"/>
-
-                                    <Rectangle Grid.Row="1" Grid.Column="0"
-                                               Width="12" Height="12"
-                                               Fill="Black"
-                                               Opacity="0.8"
-                                               Margin="0,0,10,5"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1"
-                                               Text="Fog of War"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                               FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               Margin="0,0,0,5"/>
-
-                                    <Rectangle Grid.Row="2" Grid.Column="0"
-                                               Width="12" Height="12"
-                                               Fill="Transparent"
-                                               Stroke="{DynamicResource BorderBrush}"
-                                               StrokeThickness="1"
-                                               Margin="0,0,10,0"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1"
-                                               Text="Visible Area"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                               FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
+                                <Rectangle Grid.Row="2" Grid.Column="0"
+                                           Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                           Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
+                                           Fill="Transparent"
+                                           Stroke="{DynamicResource BorderBrush}"
+                                           StrokeThickness="1"
+                                           Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1"
+                                           Text="Visible Area"
+                                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                           FontFamily="Consolas">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

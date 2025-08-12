@@ -5,10 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
 
     <UserControl.Resources>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+
+        <!-- Hover animation (kept) -->
         <Storyboard x:Key="CardHoverIn">
             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
                              To="1.05" Duration="0:0:0.2"/>
@@ -17,133 +21,188 @@
             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
                              To="1.0" Duration="0:0:0.2"/>
         </Storyboard>
+
+        <!-- Section header styles to match Settings -->
+        <Style x:Key="SectionKicker" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Opacity" Value="0.95"/>
+        </Style>
+        <Style x:Key="SectionSub" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Opacity" Value="0.9"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <!-- Info bar style -->
+        <Style x:Key="InfoCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#AA000000" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <!-- Settings-style layout: header, card grid, info bar -->
+    <Grid Margin="12,4,12,4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Grid Grid.Row="0" Margin="40,20,40,30">
+        <Grid Grid.Row="0" Margin="8,0,8,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" 
-                    Width="80" Height="80"
+                    Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=64}"
+                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=64}"
                     Background="{DynamicResource AccentBrush}"
-                    CornerRadius="40"
-                    Margin="0,0,20,0">
+                    CornerRadius="32"
+                    Margin="0,0,14,0">
                 <Border.Effect>
                     <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="10"/>
                 </Border.Effect>
                 <TextBlock Text="🏆" 
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                            HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="34"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="VICTORY CONDITIONS" 
                            Foreground="{DynamicResource ForegroundBrush}"
                            FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=28}"
                            FontWeight="Bold"
-                           Margin="0,0,0,5"/>
+                           Margin="0,0,0,4">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="24"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
                 <TextBlock Text="Select one or more ways for players to achieve victory on this battlefield" 
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                           FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"/>
+                           Style="{StaticResource SectionSub}">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
             </StackPanel>
         </Grid>
 
-        <!-- Victory Condition Cards -->
-        <Grid Grid.Row="1" Margin="40,0">
+        <!-- Cards -->
+        <Grid Grid.Row="1" Margin="8,0,8,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Elimination Victory Card -->
-            <Border Grid.Column="0" Margin="10">
+            <!-- Utility: a style for the card borders to align with settings -->
+            <Grid.Resources>
+                <Style x:Key="VictoryCardBorder" TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <Setter Property="CornerRadius" Value="12"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.12" BlurRadius="8"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </TransformGroup>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Grid.Resources>
+
+            <!-- Elimination -->
+            <Border Grid.Column="0" Margin="8">
                 <CheckBox IsChecked="{Binding ParentViewModel.EliminationVictory}"
                           Style="{x:Null}">
                     <CheckBox.Template>
                         <ControlTemplate TargetType="CheckBox">
-                            <Border x:Name="CardBorder"
-                                    Background="{DynamicResource Surface2Brush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="2"
-                                    CornerRadius="12"
-                                    Cursor="Hand"
-                                    RenderTransformOrigin="0.5,0.5">
-                                <Border.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                    </TransformGroup>
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
-                                </Border.Effect>
+                            <Border x:Name="CardBorder" Style="{StaticResource VictoryCardBorder}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="4"/>
                                         <RowDefinition Height="100"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Checkbox Indicator -->
-                                    <Border Grid.Row="0" 
+                                    <Border Grid.Row="0" x:Name="CheckIndicator"
                                             Height="4"
                                             Background="{DynamicResource AccentBrush}"
                                             CornerRadius="2,2,0,0"
-                                            Visibility="Collapsed"
-                                            x:Name="CheckIndicator"/>
+                                            Visibility="Collapsed"/>
 
-                                    <!-- Icon -->
                                     <Border Grid.Row="1" 
-                                            Width="80" Height="80"
+                                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
+                                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="40"
-                                            Margin="0,20,0,0">
+                                            Margin="0,20,0,0"
+                                            HorizontalAlignment="Center">
                                         <TextBlock Text="⚔️" 
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                    HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.FontSize>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="40"/>
+                                            </TextBlock.FontSize>
+                                        </TextBlock>
                                     </Border>
 
-                                    <!-- Title -->
                                     <TextBlock Grid.Row="2"
                                                Text="ELIMINATION"
                                                Foreground="{DynamicResource ForegroundBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Margin="10,10,10,0"/>
+                                               Margin="10,10,10,0">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
 
-                                    <!-- Description -->
                                     <TextBlock Grid.Row="3"
                                                Text="Defeat all enemy forces"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               TextWrapping="Wrap"
                                                TextAlignment="Center"
-                                               Margin="15,5,15,20"/>
+                                               TextWrapping="Wrap"
+                                               Margin="15,5,15,20">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -164,77 +223,69 @@
                 </CheckBox>
             </Border>
 
-            <!-- Capture Objectives Card -->
-            <Border Grid.Column="1" Margin="10">
+            <!-- Capture -->
+            <Border Grid.Column="1" Margin="8">
                 <CheckBox IsChecked="{Binding ParentViewModel.CaptureObjectivesVictory}"
                           Style="{x:Null}">
                     <CheckBox.Template>
                         <ControlTemplate TargetType="CheckBox">
-                            <Border x:Name="CardBorder"
-                                    Background="{DynamicResource Surface2Brush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="2"
-                                    CornerRadius="12"
-                                    Cursor="Hand"
-                                    RenderTransformOrigin="0.5,0.5">
-                                <Border.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                    </TransformGroup>
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
-                                </Border.Effect>
+                            <Border x:Name="CardBorder" Style="{StaticResource VictoryCardBorder}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="4"/>
                                         <RowDefinition Height="100"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Checkbox Indicator -->
-                                    <Border Grid.Row="0" 
+                                    <Border Grid.Row="0" x:Name="CheckIndicator"
                                             Height="4"
                                             Background="{DynamicResource AccentBrush}"
                                             CornerRadius="2,2,0,0"
-                                            Visibility="Collapsed"
-                                            x:Name="CheckIndicator"/>
+                                            Visibility="Collapsed"/>
 
-                                    <!-- Icon -->
                                     <Border Grid.Row="1" 
-                                            Width="80" Height="80"
+                                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
+                                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="40"
-                                            Margin="0,20,0,0">
+                                            Margin="0,20,0,0"
+                                            HorizontalAlignment="Center">
                                         <TextBlock Text="🚩" 
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                    HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.FontSize>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="40"/>
+                                            </TextBlock.FontSize>
+                                        </TextBlock>
                                     </Border>
 
-                                    <!-- Title -->
                                     <TextBlock Grid.Row="2"
                                                Text="CAPTURE"
                                                Foreground="{DynamicResource ForegroundBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Margin="10,10,10,0"/>
+                                               Margin="10,10,10,0">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
 
-                                    <!-- Description -->
                                     <TextBlock Grid.Row="3"
                                                Text="Control strategic points"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               TextWrapping="Wrap"
                                                TextAlignment="Center"
-                                               Margin="15,5,15,20"/>
+                                               TextWrapping="Wrap"
+                                               Margin="15,5,15,20">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -255,77 +306,69 @@
                 </CheckBox>
             </Border>
 
-            <!-- Survival Victory Card -->
-            <Border Grid.Column="2" Margin="10">
+            <!-- Survival -->
+            <Border Grid.Column="2" Margin="8">
                 <CheckBox IsChecked="{Binding ParentViewModel.SurvivalVictory}"
                           Style="{x:Null}">
                     <CheckBox.Template>
                         <ControlTemplate TargetType="CheckBox">
-                            <Border x:Name="CardBorder"
-                                    Background="{DynamicResource Surface2Brush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="2"
-                                    CornerRadius="12"
-                                    Cursor="Hand"
-                                    RenderTransformOrigin="0.5,0.5">
-                                <Border.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                    </TransformGroup>
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
-                                </Border.Effect>
+                            <Border x:Name="CardBorder" Style="{StaticResource VictoryCardBorder}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="4"/>
                                         <RowDefinition Height="100"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Checkbox Indicator -->
-                                    <Border Grid.Row="0" 
+                                    <Border Grid.Row="0" x:Name="CheckIndicator"
                                             Height="4"
                                             Background="{DynamicResource AccentBrush}"
                                             CornerRadius="2,2,0,0"
-                                            Visibility="Collapsed"
-                                            x:Name="CheckIndicator"/>
+                                            Visibility="Collapsed"/>
 
-                                    <!-- Icon -->
                                     <Border Grid.Row="1" 
-                                            Width="80" Height="80"
+                                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
+                                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="40"
-                                            Margin="0,20,0,0">
+                                            Margin="0,20,0,0"
+                                            HorizontalAlignment="Center">
                                         <TextBlock Text="🛡️" 
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                    HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.FontSize>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="40"/>
+                                            </TextBlock.FontSize>
+                                        </TextBlock>
                                     </Border>
 
-                                    <!-- Title -->
                                     <TextBlock Grid.Row="2"
                                                Text="SURVIVAL"
                                                Foreground="{DynamicResource ForegroundBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Margin="10,10,10,0"/>
+                                               Margin="10,10,10,0">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
 
-                                    <!-- Description -->
                                     <TextBlock Grid.Row="3"
                                                Text="Survive for set duration"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               TextWrapping="Wrap"
                                                TextAlignment="Center"
-                                               Margin="15,5,15,20"/>
+                                               TextWrapping="Wrap"
+                                               Margin="15,5,15,20">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -346,77 +389,69 @@
                 </CheckBox>
             </Border>
 
-            <!-- Economic Victory Card -->
-            <Border Grid.Column="3" Margin="10">
+            <!-- Economic -->
+            <Border Grid.Column="3" Margin="8">
                 <CheckBox IsChecked="{Binding ParentViewModel.EconomicVictory}"
                           Style="{x:Null}">
                     <CheckBox.Template>
                         <ControlTemplate TargetType="CheckBox">
-                            <Border x:Name="CardBorder"
-                                    Background="{DynamicResource Surface2Brush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="2"
-                                    CornerRadius="12"
-                                    Cursor="Hand"
-                                    RenderTransformOrigin="0.5,0.5">
-                                <Border.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                    </TransformGroup>
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8"/>
-                                </Border.Effect>
+                            <Border x:Name="CardBorder" Style="{StaticResource VictoryCardBorder}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="4"/>
                                         <RowDefinition Height="100"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Checkbox Indicator -->
-                                    <Border Grid.Row="0" 
+                                    <Border Grid.Row="0" x:Name="CheckIndicator"
                                             Height="4"
                                             Background="{DynamicResource AccentBrush}"
                                             CornerRadius="2,2,0,0"
-                                            Visibility="Collapsed"
-                                            x:Name="CheckIndicator"/>
+                                            Visibility="Collapsed"/>
 
-                                    <!-- Icon -->
                                     <Border Grid.Row="1" 
-                                            Width="80" Height="80"
+                                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
+                                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=80}"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="40"
-                                            Margin="0,20,0,0">
+                                            Margin="0,20,0,0"
+                                            HorizontalAlignment="Center">
                                         <TextBlock Text="💰" 
-                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
                                                    HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.FontSize>
+                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="40"/>
+                                            </TextBlock.FontSize>
+                                        </TextBlock>
                                     </Border>
 
-                                    <!-- Title -->
                                     <TextBlock Grid.Row="2"
                                                Text="ECONOMIC"
                                                Foreground="{DynamicResource ForegroundBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Margin="10,10,10,0"/>
+                                               Margin="10,10,10,0">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
 
-                                    <!-- Description -->
                                     <TextBlock Grid.Row="3"
                                                Text="Reach resource goals"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
-                                               TextWrapping="Wrap"
                                                TextAlignment="Center"
-                                               Margin="15,5,15,20"/>
+                                               TextWrapping="Wrap"
+                                               Margin="15,5,15,20">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -438,24 +473,24 @@
             </Border>
         </Grid>
 
-        <!-- Info Panel -->
-        <Border Grid.Row="2" 
-                Background="{DynamicResource Surface2Brush}"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="0,1,0,0"
-                Padding="40,20">
+        <!-- Info Bar -->
+        <Border Grid.Row="2" Style="{StaticResource InfoCardStyle}" Margin="8,8,8,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="ℹ️" 
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                           Margin="0,0,10,0"
-                           VerticalAlignment="Center"/>
+                <TextBlock Text="ℹ️" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="20"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
                 <TextBlock Text="Select at least one victory condition. Players can win by achieving any selected condition."
                            Foreground="{DynamicResource ForegroundSecondaryBrush}"
                            FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
             </StackPanel>
         </Border>
     </Grid>

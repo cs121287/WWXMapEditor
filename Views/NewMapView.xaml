@@ -9,417 +9,567 @@
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
+    <!-- Resources brought in to match Main Menu look and button feel -->
     <UserControl.Resources>
+        <!-- Converters used locally -->
         <BooleanToVisibilityConverter x:Key="LocalBoolToVisConverter"/>
+        <!-- Note: BooleanToInverseVisibilityConverter is expected at app-level as before -->
 
-        <!-- Step Animation -->
-        <Storyboard x:Key="StepTransition">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity" 
-                             From="0" To="1" Duration="0:0:0.3"/>
-            <ThicknessAnimation Storyboard.TargetProperty="Margin" 
-                                From="50,0,0,0" To="0,0,0,0" Duration="0:0:0.3">
-                <ThicknessAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut"/>
-                </ThicknessAnimation.EasingFunction>
-            </ThicknessAnimation>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+
+        <!-- Fallback base style (so BasedOn resolves even if app-level doesn't define it) -->
+        <Style x:Key="MenuButtonStyle" TargetType="Button"/>
+
+        <!-- Overlay colors and brushes (matching Main Menu) -->
+        <Color x:Key="Aurora1">#4400E58A</Color>
+        <Color x:Key="Aurora2">#4420A4FF</Color>
+        <Color x:Key="Aurora3">#44B770FF</Color>
+
+        <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
+
+        <!-- Assets used by the grunge button -->
+        <ImageBrush x:Key="SlatOpacityMaskBrush"
+                    ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/slat_mask.png"
+                    Stretch="Fill"/>
+        <ImageBrush x:Key="SelectionTextureBrush"
+                    ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/selection_texture.png"
+                    TileMode="Tile"
+                    ViewportUnits="Absolute"
+                    Viewport="0,0,24,24"
+                    Stretch="Fill"/>
+
+        <!-- Text styles to mirror Main Menu -->
+        <Style x:Key="HeaderTitleText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style x:Key="HeaderSubText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+            <Setter Property="Opacity" Value="0.9"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <!-- Main Menu button look -->
+        <Style x:Key="GrungeMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
+            <Setter Property="Width">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="420"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="52"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="Background" Value="#E0101010"/>
+            <Setter Property="BorderBrush" Value="#77FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="18,6"/>
+            <Setter Property="Margin" Value="0,8,0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <!-- Subtle slant -->
+                            <Grid.RenderTransform>
+                                <SkewTransform AngleX="-6"/>
+                            </Grid.RenderTransform>
+
+                            <!-- Base slab with torn-edge mask -->
+                            <Border x:Name="SlabBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <Border.OpacityMask>
+                                    <StaticResource ResourceKey="SlatOpacityMaskBrush"/>
+                                </Border.OpacityMask>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#CC000000" Opacity="0.45"/>
+                                </Border.Effect>
+                            </Border>
+
+                            <!-- Divider scratches -->
+                            <Grid IsHitTestVisible="False">
+                                <Rectangle Height="1" VerticalAlignment="Top" Fill="#33FFFFFF" Margin="12,6,12,0"/>
+                                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#22FFFFFF" Margin="12,0,12,6"/>
+                            </Grid>
+
+                            <!-- Textured pale-green selection fill that grows from left -->
+                            <Grid x:Name="SelectFill" Opacity="0.0" ClipToBounds="True">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform x:Name="SelectScale" ScaleX="0" ScaleY="1"/>
+                                </Grid.RenderTransform>
+                                <Grid.RenderTransformOrigin>0,0.5</Grid.RenderTransformOrigin>
+                                <Rectangle Fill="{StaticResource MenuHighlightBrush}" Opacity="1"/>
+                                <Rectangle Fill="{StaticResource SelectionTextureBrush}" Opacity="0.35"/>
+                            </Grid>
+
+                            <!-- Pointer wedge on the right -->
+                            <Path x:Name="PointerWedge"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Margin="8,0,8,0"
+                                  Fill="{DynamicResource AccentBrush}"
+                                  Stroke="#88222222"
+                                  StrokeThickness="0.8"
+                                  Data="M 0,0 L 12,6 L 0,12 Z"
+                                  Opacity="0">
+                                <Path.RenderTransform>
+                                    <TranslateTransform x:Name="WedgeTx" X="12" Y="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+
+                            <!-- Content -->
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SelectFill" Property="Opacity" Value="1.0"/>
+                                <Setter TargetName="PointerWedge" Property="Opacity" Value="0.9"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="0" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="0" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="12" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#99FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="SlabBorder" Property="Background" Value="#F0181818"/>
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#BBFFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Entrance animation for the board -->
+        <Storyboard x:Key="BoardEntrance">
+            <DoubleAnimation Storyboard.TargetName="BoardSlideTx"
+                             Storyboard.TargetProperty="X"
+                             From="100" To="0"
+                             Duration="0:0:0.28">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase Amplitude="0.6" EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
         </Storyboard>
     </UserControl.Resources>
 
     <Grid>
-        <Grid.Background>
-            <DrawingBrush TileMode="Tile" Viewport="0,0,50,50" ViewportUnits="Absolute" Opacity="0.03">
-                <DrawingBrush.Drawing>
-                    <GeometryDrawing Brush="{DynamicResource ForegroundBrush}">
-                        <GeometryDrawing.Geometry>
-                            <GeometryGroup>
-                                <LineGeometry StartPoint="0,0" EndPoint="50,50"/>
-                                <LineGeometry StartPoint="50,0" EndPoint="0,50"/>
-                            </GeometryGroup>
-                        </GeometryDrawing.Geometry>
-                    </GeometryDrawing>
-                </DrawingBrush.Drawing>
-            </DrawingBrush>
-        </Grid.Background>
+        <!-- BACKGROUND LAYERS (like Main Menu) -->
+        <Grid x:Name="BackgroundRoot">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="BgParallax" X="0" Y="0"/>
+            </Grid.RenderTransform>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- Fullscreen artwork -->
+            <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/Background.png"
+                   Stretch="UniformToFill"
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
 
-            <!-- Header -->
-            <Border Grid.Row="0">
-                <Border.Background>
+            <!-- Dark vignette -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.95" RadiusY="0.95">
+                        <GradientStop Color="#00000000" Offset="0.0"/>
+                        <GradientStop Color="#D0000000" Offset="1.0"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Gentle aurora overlay -->
+            <Rectangle Opacity="0.30" IsHitTestVisible="False">
+                <Rectangle.Fill>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#2D2D30" Offset="0"/>
-                        <GradientStop Color="#252526" Offset="1"/>
+                        <GradientStop x:Name="Aur1" Color="{StaticResource Aurora1}" Offset="0"/>
+                        <GradientStop x:Name="Aur2" Color="{StaticResource Aurora2}" Offset="0.5"/>
+                        <GradientStop x:Name="Aur3" Color="{StaticResource Aurora3}" Offset="1"/>
                     </LinearGradientBrush>
-                </Border.Background>
-                <Grid Margin="40,30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                </Rectangle.Fill>
+                <Rectangle.RenderTransform>
+                    <TranslateTransform x:Name="AurMove" X="0" Y="0"/>
+                </Rectangle.RenderTransform>
+            </Rectangle>
 
-                    <Border Grid.Column="0"
-                            Width="60" Height="60"
-                            Background="{DynamicResource AccentBrush}"
-                            CornerRadius="30"
-                            Margin="0,0,20,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="10"/>
-                        </Border.Effect>
-                        <TextBlock Text="🗺️" 
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=30}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                    </Border>
+            <!-- Subtle scanlines -->
+            <Rectangle Opacity="0.05" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,3,3" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="#00000000" Geometry="M0,0 L3,0 L3,3 L0,3 Z"/>
+                                <GeometryDrawing Brush="#20FFFFFF" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Rectangle.Fill>
+            </Rectangle>
 
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="CREATE NEW MAP" 
+            <!-- Dust motes -->
+            <Canvas IsHitTestVisible="False" Opacity="0.18">
+                <Ellipse Width="3" Height="3" Fill="#FFFFFFFF" Canvas.Left="200" Canvas.Top="300">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                                     From="200" To="800" Duration="0:0:25" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                                     From="300" To="150" Duration="0:0:25" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="0.5" Duration="0:0:6" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                <Ellipse Width="2" Height="2" Fill="#FFFFFFFF" Canvas.Left="900" Canvas.Top="700">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                                     From="900" To="1200" Duration="0:0:22" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                                     From="700" To="500" Duration="0:0:22" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="0.4" Duration="0:0:5" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+            </Canvas>
+        </Grid>
+
+        <!-- FOREGROUND -->
+        <DockPanel LastChildFill="True">
+            <!-- Header (title and subtitle only) -->
+            <Border DockPanel.Dock="Top"
+                    Background="#00000000"
+                    Padding="28,24,28,12">
+                <StackPanel>
+                    <TextBlock Text="CREATE NEW MAP"
+                               Style="{StaticResource HeaderTitleText}">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="28"/>
+                        </TextBlock.FontSize>
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="Design your battlefield with custom settings and victory conditions"
+                               Style="{StaticResource HeaderSubText}"
+                               Margin="2,4,0,0">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Footer with navigation buttons and step counter -->
+            <!-- IMPORTANT: Footer must come BEFORE the content in the DockPanel to ensure it docks at the bottom,
+                 because LastChildFill=True makes the last child fill remaining space. -->
+            <Grid DockPanel.Dock="Bottom" Margin="28,0,28,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="← RETURN TO MAIN MENU"
+                            Style="{StaticResource GrungeMenuButton}"
+                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=260}"
+                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}"
+                            FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
+                            Command="{Binding CancelCommand}"/>
+
+                    <Border Background="{DynamicResource Surface2Brush}"
+                            CornerRadius="20"
+                            Padding="15,8"
+                            Margin="18,0,0,0">
+                        <TextBlock Text="{Binding ProgressText}"
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=32}"
                                    FontWeight="Bold">
-                            <TextBlock.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.1" BlurRadius="3"/>
-                            </TextBlock.Effect>
+                            <TextBlock.FontSize>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                            </TextBlock.FontSize>
                         </TextBlock>
-                        <TextBlock Text="Design your battlefield with custom settings and victory conditions" 
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   FontFamily="Consolas"
-                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                    </Border>
+                </StackPanel>
 
-            <!-- Progress Bar -->
-            <Border Grid.Row="1" 
-                    Background="{DynamicResource SurfaceBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,1,0,1">
-                <Grid Margin="40,20">
-                    <ItemsControl ItemsSource="{Binding ConfigurationSteps}"
-                                  HorizontalAlignment="Center">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Width="300" Margin="10,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="← PREVIOUS"
+                            Style="{StaticResource GrungeMenuButton}"
+                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=200}"
+                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}"
+                            FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
+                            Command="{Binding PreviousCommand}"
+                            Visibility="{Binding PreviousButtonVisibility}"
+                            Margin="0,0,10,0"/>
 
-                                    <Border Grid.Row="0"
-                                            x:Name="StepCircle"
-                                            Width="50" Height="50"
-                                            CornerRadius="25"
-                                            HorizontalAlignment="Center">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
-                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-                                                <Setter Property="BorderThickness" Value="2"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                        <Setter Property="Background">
-                                                            <Setter.Value>
-                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                                    <GradientStop Color="#4CAF50" Offset="0"/>
-                                                                    <GradientStop Color="#45a049" Offset="1"/>
-                                                                </LinearGradientBrush>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                        <Setter Property="BorderBrush" Value="#4CAF50"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.2" BlurRadius="8"/>
-                                        </Border.Effect>
-
-                                        <Grid>
-                                            <TextBlock Text="{Binding Number}" 
-                                                       HorizontalAlignment="Center" 
-                                                       VerticalAlignment="Center"
-                                                       FontFamily="Consolas"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                       FontWeight="Bold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                                <Setter Property="Foreground" Value="White"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <TextBlock Text="✓" 
-                                                       HorizontalAlignment="Center" 
-                                                       VerticalAlignment="Center"
-                                                       FontFamily="Segoe UI"
-                                                       FontWeight="Bold"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                                       Foreground="White"
-                                                       Visibility="{Binding IsCompleted, Converter={StaticResource LocalBoolToVisConverter}}"/>
-                                        </Grid>
-                                    </Border>
-
-                                    <Line Grid.Row="0"
-                                          X1="50" Y1="25"
-                                          X2="250" Y2="25"
-                                          Stroke="{DynamicResource BorderBrush}"
-                                          StrokeThickness="2"
-                                          StrokeDashArray="5,3"
-                                          Margin="25,0,-25,0"
-                                          HorizontalAlignment="Right"
-                                          Visibility="{Binding IsLast, Converter={StaticResource BooleanToInverseVisibilityConverter}, FallbackValue=Visible}"/>
-
-                                    <TextBlock Grid.Row="1"
-                                               Text="{Binding Title}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,10,0,5"
-                                               FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                                               FontWeight="Bold">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                        <Setter Property="Foreground" Value="#4CAF50"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-
-                                    <TextBlock Grid.Row="2"
-                                               Text="{Binding Description}"
-                                               HorizontalAlignment="Center"
-                                               TextAlignment="Center"
-                                               TextWrapping="Wrap"
-                                               FontFamily="Consolas"
-                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
-                                                <Setter Property="Opacity" Value="0.8"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                        <Setter Property="Opacity" Value="1"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-            </Border>
-
-            <!-- Content -->
-            <Border Grid.Row="2" Background="{DynamicResource BackgroundBrush}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0">
-                        <ContentControl x:Name="StepContentControl"
-                                        Content="{Binding CurrentStepContent}"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Margin="20"/>
-                    </Grid>
-
-                    <Border Grid.Row="1"
-                            x:Name="ValidationMessageBorder"
-                            Margin="40,0,40,20"
-                            Padding="20,15"
-                            CornerRadius="8"
-                            HorizontalAlignment="Center"
-                            MinWidth="400">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#FF5252" Offset="0"/>
-                                <GradientStop Color="#FF1744" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Border.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.3" BlurRadius="10"/>
-                        </Border.Effect>
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                    <!-- Next/Create button with special gradient when creating -->
+                    <Button x:Name="NextButton"
+                            Content="{Binding NextButtonText}"
+                            Command="{Binding NextCommand}"
+                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=220}"
+                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource GrungeMenuButton}">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=ValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
-                                        <Setter Property="Visibility" Value="Visible"/>
+                                    <DataTrigger Binding="{Binding NextButtonText}" Value="CREATE MAP">
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#4CAF50" Offset="0"/>
+                                                    <GradientStop Color="#45a049" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="BorderBrush" Value="#7FFF7F"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Border.Style>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0"
-                                       Text="⚠"
-                                       Foreground="White"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                       FontFamily="Segoe UI"
-                                       Margin="0,0,15,0"
-                                       VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding ValidationMessage}"
-                                       Foreground="White"
-                                       FontFamily="Consolas"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                                       TextWrapping="Wrap"
-                                       VerticalAlignment="Center"/>
-                            <Button Grid.Column="2"
-                                    Width="24" Height="24"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Cursor="Hand"
-                                    Command="{Binding ClearValidationMessageCommand}">
-                                <TextBlock Text="✕"
-                                           Foreground="White"
-                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                                           FontFamily="Segoe UI"/>
-                            </Button>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- CONTENT AREA on an angled trapezoid board like Main Menu -->
+            <Grid Margin="16,12,16,12">
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,16,16,16">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="-6"/>
+                            <TranslateTransform x:Name="BoardSlideTx" X="100" Y="0"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+
+                    <Grid.CacheMode>
+                        <BitmapCache/>
+                    </Grid.CacheMode>
+
+                    <!-- Board visuals -->
+                    <Viewbox Stretch="Fill" StretchDirection="Both">
+                        <Grid Width="1400" Height="800">
+                            <Path Stretch="Fill"
+                                  Fill="#E00B0B0B"
+                                  Stroke="#66FFFFFF"
+                                  StrokeThickness="1">
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="100,0" IsClosed="True">
+                                            <LineSegment Point="1400,0"/>
+                                            <LineSegment Point="1300,800"/>
+                                            <LineSegment Point="0,800"/>
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                                <Path.Effect>
+                                    <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="#AA000000" Opacity="0.8"/>
+                                </Path.Effect>
+                            </Path>
+
+                            <!-- Right-side shadow gradient -->
+                            <Rectangle HorizontalAlignment="Right" Width="44" Height="800" IsHitTestVisible="False">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#66000000" Offset="0.0"/>
+                                        <GradientStop Color="#00000000" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <!-- Board overlays -->
+                            <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/scratches.png"
+                                   Stretch="UniformToFill"
+                                   Opacity="0.10"
+                                   IsHitTestVisible="False"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/splatters.png"
+                                   Stretch="UniformToFill"
+                                   Opacity="0.08"
+                                   IsHitTestVisible="False"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
                         </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+                    </Viewbox>
 
-            <!-- Footer -->
-            <Border Grid.Row="3" 
-                    Background="{DynamicResource SurfaceBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,1,0,0">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Direction="90" ShadowDepth="5" Opacity="0.1" BlurRadius="10"/>
-                </Border.Effect>
-                <Grid Margin="40,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Content atop the board -->
+                    <Grid Margin="64,52,72,52">
+                        <!-- Only step content and validation (navigation moved to footer) -->
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="← RETURN TO MAIN MENU"
-                                Command="{Binding CancelCommand}"
-                                MinWidth="180"
-                                Height="40">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
-                                            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-
-                        <Border Background="{DynamicResource Surface2Brush}"
-                                CornerRadius="20"
-                                Padding="15,8"
-                                Margin="20,0,0,0">
-                            <TextBlock Text="{Binding ProgressText}"
-                                       Foreground="{DynamicResource ForegroundBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
-                                       FontWeight="Bold"/>
+                        <!-- Step content with scroll -->
+                        <Border Grid.Row="0" Background="#00000000" Margin="0,4,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ContentControl x:Name="StepContentControl"
+                                                Content="{Binding CurrentStepContent}"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Margin="8"/>
+                            </ScrollViewer>
                         </Border>
-                    </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="← PREVIOUS"
-                                Command="{Binding PreviousCommand}"
-                                Visibility="{Binding PreviousButtonVisibility}"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                MinWidth="120"
-                                Height="40"
-                                Margin="0,0,10,0">
-                            <Button.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.1" BlurRadius="5"/>
-                            </Button.Effect>
-                        </Button>
-
-                        <Button x:Name="NextButton"
-                                Content="{Binding NextButtonText}"
-                                Command="{Binding NextCommand}"
-                                IsDefault="True"
-                                MinWidth="150"
-                                Height="40">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                        <!-- Validation message (name preserved for code-behind) -->
+                        <Border Grid.Row="1"
+                                x:Name="ValidationMessageBorder"
+                                Margin="0,10,0,0"
+                                Padding="20,15"
+                                CornerRadius="8"
+                                HorizontalAlignment="Center"
+                                MinWidth="400">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#FF5252" Offset="0"/>
+                                    <GradientStop Color="#FF1744" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.3" BlurRadius="10"/>
+                            </Border.Effect>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding NextButtonText}" Value="CREATE MAP">
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                        <GradientStop Color="#4CAF50" Offset="0"/>
-                                                        <GradientStop Color="#45a049" Offset="1"/>
-                                                    </LinearGradientBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Setter Property="FontSize" Value="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                                    Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"/>
-                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        <DataTrigger Binding="{Binding Path=ValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
+                                            <Setter Property="Visibility" Value="Visible"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Button.Style>
-                            <Button.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.2" BlurRadius="8"/>
-                            </Button.Effect>
-                        </Button>
-                    </StackPanel>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="⚠"
+                                           Foreground="White"
+                                           FontFamily="Segoe UI"
+                                           Margin="0,0,15,0"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="24"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding ValidationMessage}"
+                                           Foreground="White"
+                                           FontFamily="Consolas"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+                                <Button Grid.Column="2"
+                                        Width="24" Height="24"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Command="{Binding ClearValidationMessageCommand}">
+                                    <TextBlock Text="✕"
+                                               Foreground="White"
+                                               FontFamily="Segoe UI">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </Grid>
-            </Border>
-        </Grid>
+            </Grid>
+        </DockPanel>
+
+        <!-- Background motion animations -->
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard RepeatBehavior="Forever">
+                        <!-- Aurora drift -->
+                        <DoubleAnimation Storyboard.TargetName="AurMove"
+                                         Storyboard.TargetProperty="X"
+                                         From="-40" To="40"
+                                         Duration="0:0:45"
+                                         AutoReverse="True"/>
+                        <DoubleAnimation Storyboard.TargetName="AurMove"
+                                         Storyboard.TargetProperty="Y"
+                                         From="18" To="-18"
+                                         Duration="0:1:00"
+                                         AutoReverse="True"/>
+                        <!-- Slight midpoint shift -->
+                        <DoubleAnimation Storyboard.TargetName="Aur2"
+                                         Storyboard.TargetProperty="Offset"
+                                         From="0.45" To="0.55"
+                                         Duration="0:0:18"
+                                         AutoReverse="True"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+
+            <!-- Board entrance -->
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource BoardEntrance}"/>
+            </EventTrigger>
+        </Grid.Triggers>
     </Grid>
 </UserControl>
