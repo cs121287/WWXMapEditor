@@ -8,5 +8,10 @@ namespace WWXMapEditor.Views.NewMapSteps
         {
             InitializeComponent();
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

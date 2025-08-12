@@ -101,7 +101,7 @@ namespace WWXMapEditor.Services
                 if (app != null)
                 {
                     _stylesResources = app.Resources.MergedDictionaries
-                        .FirstOrDefault(d => d.Source?.OriginalString?.Contains("Styles.xaml") ?? false);
+                        .FirstOrDefault(d => d.Source?.OriginalString?.Contains("Styles.xaml", StringComparison.OrdinalIgnoreCase) ?? false);
                 }
             }
             catch (Exception ex)
@@ -145,6 +145,9 @@ namespace WWXMapEditor.Services
             // Apply theme and scaling immediately if changed (hot-reload)
             ApplyTheme();
             ApplyUIScaling();
+
+            // Bubble a global resource for views that bind Application.Resources["AppSettings"]
+            TryPublishSettingsToAppResources();
         }
         #endregion
 
@@ -241,6 +244,9 @@ namespace WWXMapEditor.Services
 
                 // Notify about settings change
                 OnSettingsChanged("Settings", oldSettings, _settings);
+
+                // Also publish to Application.Resources for global view bindings
+                TryPublishSettingsToAppResources();
             }
             catch (Exception ex)
             {
@@ -297,6 +303,9 @@ namespace WWXMapEditor.Services
 
                 // Notify about settings change
                 OnSettingsChanged("Settings", oldSettings, _settings);
+
+                // Also publish to Application.Resources for global view bindings
+                TryPublishSettingsToAppResources();
 
                 return true;
             }
@@ -383,38 +392,40 @@ namespace WWXMapEditor.Services
                 var theme = _settings.Theme == "Light" ? ThemeService.Theme.Light : ThemeService.Theme.Dark;
                 _themeService.SetTheme(theme);
 
-                // Also support hot-reload with new theme system
+                // Hot-reload support: also swap a theme dictionary directly (non-breaking)
                 var app = System.Windows.Application.Current;
                 if (app == null) return;
 
                 app.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    // Check if we have theme resources
-                    var themeUri = _settings.Theme?.ToLower() switch
+                    var themeUri = _settings.Theme?.ToLowerInvariant() switch
                     {
-                        "dark" => new Uri("/Resources/Themes/DarkTheme.xaml", UriKind.Relative),
-                        "light" => new Uri("/Resources/Themes/LightTheme.xaml", UriKind.Relative),
-                        _ => new Uri("/Resources/Themes/DarkTheme.xaml", UriKind.Relative)
+                        "dark" => new Uri("pack://application:,,,/WWXMapEditor;component/Resources/Themes/DarkTheme.xaml", UriKind.Absolute),
+                        "light" => new Uri("pack://application:,,,/WWXMapEditor;component/Resources/Themes/LightTheme.xaml", UriKind.Absolute),
+                        _ => new Uri("pack://application:,,,/WWXMapEditor;component/Resources/Themes/DarkTheme.xaml", UriKind.Absolute)
                     };
 
                     try
                     {
-                        // Remove existing theme
+                        // Remove existing theme dictionary inserted by this path (if present)
                         var existingTheme = app.Resources.MergedDictionaries
-                            .FirstOrDefault(d => d.Source?.OriginalString?.Contains("Theme.xaml") ?? false);
+                            .FirstOrDefault(d => d?.Source != null &&
+                                                 (d.Source.OriginalString.Contains("DarkTheme.xaml", StringComparison.OrdinalIgnoreCase) ||
+                                                  d.Source.OriginalString.Contains("LightTheme.xaml", StringComparison.OrdinalIgnoreCase)));
 
                         if (existingTheme != null)
                         {
                             app.Resources.MergedDictionaries.Remove(existingTheme);
                         }
 
-                        // Add new theme
+                        // Add new theme (ThemeService already added one; this is a safety fallback)
                         var newTheme = new ResourceDictionary { Source = themeUri };
-                        app.Resources.MergedDictionaries.Add(newTheme);
+                        if (!app.Resources.MergedDictionaries.Contains(newTheme))
+                            app.Resources.MergedDictionaries.Insert(0, newTheme);
                     }
                     catch
                     {
-                        // If new theme system fails, existing ThemeService is already applied
+                        // If direct theme swap fails, ThemeService has already applied a theme.
                     }
                 }));
             }
@@ -610,6 +621,9 @@ namespace WWXMapEditor.Services
             ApplyTheme();
             ApplyUIScaling();
 
+            // Publish to Application.Resources so every view can bind globally
+            TryPublishSettingsToAppResources();
+
             // Apply other settings as needed
             OnPropertyChanged(nameof(Settings));
         }
@@ -621,6 +635,15 @@ namespace WWXMapEditor.Services
             SaveSettings(_settings);
             ApplyAllSettings();
             OnSettingsChanged("Settings", oldSettings, _settings);
+        }
+
+        private void TryPublishSettingsToAppResources()
+        {
+            var app = System.Windows.Application.Current;
+            if (app == null) return;
+
+            app.Resources["AppSettings"] = _settings;
+            app.Resources["SettingsService"] = this;
         }
 
         #region UI Scale Helper Methods

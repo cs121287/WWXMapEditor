@@ -2,17 +2,17 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
-             xmlns:converters="clr-namespace:WWXMapEditor.Converters"
-             StartupUri="/Views/MainWindow.xaml">
+             xmlns:converters="clr-namespace:WWXMapEditor.Converters">
+    <!-- We control startup in App.xaml.cs to ensure configuration is completed before MainWindow shows -->
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Theme Resources -->
-                <ResourceDictionary Source="/Resources/Themes/DarkTheme.xaml"/>
+                <!-- Theme Resources (Default to Dark; ThemeService will swap if needed before showing windows) -->
+                <ResourceDictionary Source="/WWXMapEditor;component/Resources/Themes/DarkTheme.xaml"/>
                 <!-- Styles -->
-                <ResourceDictionary Source="/Resources/Styles.xaml"/>
+                <ResourceDictionary Source="/WWXMapEditor;component/Resources/Styles.xaml"/>
                 <!-- Adaptive Scaling Resources (new) -->
-                <ResourceDictionary Source="/Resources/ScalingResources.xaml"/>
+                <ResourceDictionary Source="/WWXMapEditor;component/Resources/ScalingResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Existing converter registrations -->

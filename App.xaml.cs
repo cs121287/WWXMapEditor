@@ -22,6 +22,9 @@ namespace WWXMapEditor
             // Check if settings exist and are valid
             bool settingsValid = CheckSettings();
 
+            // Make settings globally bindable by views (Application.Resources)
+            TryPublishSettingsGlobals();
+
             // Apply theme first
             _settingsService.ApplyTheme();
 
@@ -34,14 +37,16 @@ namespace WWXMapEditor
 
             if (!settingsValid || _isFirstRun)
             {
-                // Show configuration window first
+                // Show configuration window first; block until done so settings are saved/loaded before main window shows
                 var configWindow = new Window
                 {
                     Title = "WWX Map Editor - Initial Configuration",
                     Width = 1200,
                     Height = 800,
                     WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                    Background = (System.Windows.Media.Brush)FindResource("BackgroundBrush")
+                    Background = (System.Windows.Media.Brush)FindResource("BackgroundBrush"),
+                    ShowInTaskbar = true,
+                    ResizeMode = ResizeMode.CanResize
                 };
 
                 var configView = new ConfigurationView();
@@ -53,21 +58,41 @@ namespace WWXMapEditor
                 configView.DataContext = configViewModel;
                 configWindow.Content = configView;
 
-                // Handle configuration window closing
+                // When closed, apply all settings again and show main window
                 configWindow.Closed += (s, args) =>
                 {
-                    // Apply all settings including scaling
+                    // Ensure latest settings are loaded from disk
+                    _settingsService.LoadSettings();
+
+                    // Apply all settings including theme and scaling
                     _settingsService.ApplyAllSettings();
+
+                    // Re-publish settings globally for any bindings
+                    TryPublishSettingsGlobals();
+
+                    // Finally show main window
                     mainWindow.Show();
                 };
 
-                configWindow.Show();
+                // Block until configuration is complete
+                configWindow.ShowDialog();
             }
             else
             {
                 // Settings are valid, show main window directly
                 mainWindow.Show();
             }
+
+            // Keep globals in sync if settings change at runtime
+            _settingsService.SettingsChanged += (_, __) => TryPublishSettingsGlobals();
+        }
+
+        private void TryPublishSettingsGlobals()
+        {
+            if (_settingsService == null) return;
+
+            Current.Resources["SettingsService"] = _settingsService;
+            Current.Resources["AppSettings"] = _settingsService.Settings;
         }
 
         private bool CheckSettings()
@@ -87,7 +112,7 @@ namespace WWXMapEditor
                 }
 
                 // Load and validate settings
-                var settings = _settingsService.LoadSettings();
+                var settings = _settingsService!.LoadSettings();
 
                 // Check if this is marked as first run
                 if (settings.IsFirstRun)

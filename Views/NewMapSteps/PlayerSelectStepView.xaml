@@ -15,6 +15,9 @@
         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
         <conv:IntComparisonConverter x:Key="IntComparisonConverter"/>
 
+        <!-- Ensure all ComboBoxes in this view use the themed style (non-white background) -->
+        <Style TargetType="ComboBox" BasedOn="{StaticResource SettingsComboBoxStyle}"/>
+
         <!-- Section header styles (matching Settings/Configuration) -->
         <Style x:Key="SectionKicker" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
@@ -64,7 +67,7 @@
                         CornerRadius="3"
                         BorderThickness="1"
                         BorderBrush="{DynamicResource BorderBrush}"
-                        Background="Transparent"
+                        Background="{x:Null}"
                         Margin="0,0,8,0"/>
                 <TextBlock Text="{Binding}"
                            FontFamily="Consolas"
@@ -91,7 +94,7 @@
                     <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Random">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="Transparent"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{x:Null}"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -356,7 +359,7 @@
                         <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,0,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Redonia">
                                             <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
@@ -411,7 +414,7 @@
                         <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Redonia">
                                             <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
@@ -445,7 +448,7 @@
                                 <ControlTemplate TargetType="CheckBox">
                                     <Border x:Name="ToggleBackground"
                                             Width="60" Height="30"
-                                            Background="{DynamicResource Surface3Brush}"
+                                            Background="{DynamicResource Surface2Brush}"
                                             CornerRadius="15"
                                             Cursor="Hand">
                                         <Canvas>
@@ -556,7 +559,7 @@
                         <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Redonia">
                                             <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
@@ -691,7 +694,7 @@
                         <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Redonia">
                                             <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>

@@ -70,7 +70,7 @@ namespace WWXMapEditor.Models
             { "Select All", "Ctrl+A" },
             { "Zoom In", "Ctrl+Plus" },
             { "Zoom Out", "Ctrl+Minus" },
-            { "Reset Zoom", "Ctrl+0" },
+            { "Reset Zoom", "Ctrl-0" },
             { "Toggle Grid", "G" },
             { "Toggle Snap", "S" }
         };

@@ -26,14 +26,15 @@ namespace WWXMapEditor.Services
 
         private ThemeService()
         {
+            // Use component pack URIs so themes resolve regardless of caller
             _darkTheme = new ResourceDictionary
             {
-                Source = new Uri("/WWXMapEditor;component/Resources/Themes/DarkTheme.xaml", UriKind.Relative)
+                Source = new Uri("pack://application:,,,/WWXMapEditor;component/Resources/Themes/DarkTheme.xaml", UriKind.Absolute)
             };
 
             _lightTheme = new ResourceDictionary
             {
-                Source = new Uri("/WWXMapEditor;component/Resources/Themes/LightTheme.xaml", UriKind.Relative)
+                Source = new Uri("pack://application:,,,/WWXMapEditor;component/Resources/Themes/LightTheme.xaml", UriKind.Absolute)
             };
 
             _currentTheme = _darkTheme;
@@ -61,25 +62,24 @@ namespace WWXMapEditor.Services
 
             // Find and remove the current theme dictionary
             ResourceDictionary themeToRemove = null;
-            ResourceDictionary stylesDict = null;
 
-            foreach (var dict in appResources.MergedDictionaries)
+            for (int i = appResources.MergedDictionaries.Count - 1; i >= 0; i--)
             {
-                if (dict.Source != null)
+                var dict = appResources.MergedDictionaries[i];
+                if (dict?.Source != null)
                 {
                     var sourceString = dict.Source.ToString();
-                    if (sourceString.Contains("DarkTheme.xaml") || sourceString.Contains("LightTheme.xaml"))
+                    if (sourceString.Contains("DarkTheme.xaml", StringComparison.OrdinalIgnoreCase) ||
+                        sourceString.Contains("LightTheme.xaml", StringComparison.OrdinalIgnoreCase))
                     {
                         themeToRemove = dict;
-                    }
-                    else if (sourceString.Contains("Styles.xaml"))
-                    {
-                        stylesDict = dict;
+                        break;
                     }
                 }
                 else if (dict == _currentTheme)
                 {
                     themeToRemove = dict;
+                    break;
                 }
             }
 
@@ -89,14 +89,17 @@ namespace WWXMapEditor.Services
                 appResources.MergedDictionaries.Remove(themeToRemove);
             }
 
-            // Add the new theme at the beginning
+            // Add the new theme at the beginning so view-level resources can override if needed
             appResources.MergedDictionaries.Insert(0, newTheme);
 
             _currentTheme = newTheme;
             CurrentTheme = theme;
 
-            // Force refresh of all dynamic resources
-            RefreshDynamicResources(app.MainWindow);
+            // Force refresh of all dynamic resources on the visual tree
+            if (app.MainWindow != null)
+            {
+                RefreshDynamicResources(app.MainWindow);
+            }
 
             ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(theme));
         }
@@ -105,11 +108,11 @@ namespace WWXMapEditor.Services
         {
             if (obj == null) return;
 
-            // Update the object's resources
+            // Safely trigger re-evaluation of DynamicResource without wiping local resources
             if (obj is FrameworkElement element)
             {
-                element.Resources = new ResourceDictionary();
                 element.InvalidateProperty(FrameworkElement.StyleProperty);
+                element.InvalidateVisual();
                 element.UpdateLayout();
             }
 
@@ -142,9 +145,9 @@ namespace WWXMapEditor.Services
             // Create brushes
             foreach (var key in customTheme.Keys)
             {
-                if (key.ToString().EndsWith("Color"))
+                if (key.ToString().EndsWith("Color", StringComparison.Ordinal))
                 {
-                    var brushKey = key.ToString().Replace("Color", "Brush");
+                    var brushKey = key.ToString().Replace("Color", "Brush", StringComparison.Ordinal);
                     customTheme[brushKey] = new SolidColorBrush((System.Windows.Media.Color)customTheme[key]);
                 }
             }
