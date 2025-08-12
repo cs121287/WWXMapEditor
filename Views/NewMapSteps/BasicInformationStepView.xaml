@@ -51,7 +51,7 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="#AA000000" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -63,7 +63,7 @@
         <sys:String x:Key="TerrainSand">Sand</sys:String>
         <sys:String x:Key="TerrainSea">Sea</sys:String>
 
-        <!-- Player Count Options (kept as constants if used elsewhere) -->
+        <!-- Player Count Options -->
         <sys:Int32 x:Key="Players2">2</sys:Int32>
         <sys:Int32 x:Key="Players3">3</sys:Int32>
         <sys:Int32 x:Key="Players4">4</sys:Int32>
@@ -149,8 +149,7 @@
                     <TextBox Grid.Row="1"
                              Text="{Binding ParentViewModel.MapName, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource SettingsTextBoxStyle}"
-                             VerticalContentAlignment="Center"
-                             SnapsToDevicePixels="True">
+                             VerticalContentAlignment="Center">
                         <TextBox.Height>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="45"/>
@@ -201,8 +200,7 @@
                              Style="{StaticResource SettingsTextBoxStyle}"
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
-                             VerticalScrollBarVisibility="Auto"
-                             SnapsToDevicePixels="True">
+                             VerticalScrollBarVisibility="Auto">
                         <TextBox.Height>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="120"/>
@@ -232,7 +230,7 @@
         <Border Grid.Column="1" Width="1" Margin="12,12" Opacity="0.22"
                 Background="{DynamicResource BorderBrush}"/>
 
-        <!-- Right Column: Configuration (Size + Terrain only; Alliances moved to Player Select) -->
+        <!-- Right Column: Configuration (Size + Terrain) -->
         <StackPanel Grid.Column="2" Margin="8,0,8,0">
             <!-- Header -->
             <Grid Margin="0,0,0,16">
@@ -414,7 +412,7 @@
                                             <Border Grid.Column="0"
                                                     Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                     Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="#90EE90"/>
+                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainPlainsBrush}"/>
                                             <TextBlock Grid.Column="1" Text="Plains" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
@@ -457,7 +455,7 @@
                                             <Border Grid.Column="0"
                                                     Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                     Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="#8B8989"/>
+                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainMountainBrush}"/>
                                             <TextBlock Grid.Column="1" Text="Mountain" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
@@ -500,7 +498,7 @@
                                             <Border Grid.Column="0"
                                                     Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                     Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="#228B22"/>
+                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainForestBrush}"/>
                                             <TextBlock Grid.Column="1" Text="Forest" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"

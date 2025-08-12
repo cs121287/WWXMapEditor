@@ -9,23 +9,18 @@
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
-    <!-- Resources brought in to match Main Menu look and button feel -->
     <UserControl.Resources>
-        <!-- Converters used locally -->
+        <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="LocalBoolToVisConverter"/>
-        <!-- Note: BooleanToInverseVisibilityConverter is expected at app-level as before -->
-
         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+
+        <!-- Derived local brushes to avoid hardcoded colors -->
+        <SolidColorBrush x:Key="DividerTopBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.20"/>
+        <SolidColorBrush x:Key="DividerBottomBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.13"/>
+        <SolidColorBrush x:Key="ScanlineLightBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.125"/>
 
         <!-- Fallback base style (so BasedOn resolves even if app-level doesn't define it) -->
         <Style x:Key="MenuButtonStyle" TargetType="Button"/>
-
-        <!-- Overlay colors and brushes (matching Main Menu) -->
-        <Color x:Key="Aurora1">#4400E58A</Color>
-        <Color x:Key="Aurora2">#4420A4FF</Color>
-        <Color x:Key="Aurora3">#44B770FF</Color>
-
-        <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
 
         <!-- Assets used by the grunge button -->
         <ImageBrush x:Key="SlatOpacityMaskBrush"
@@ -52,7 +47,7 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
-        <!-- Main Menu button look -->
+        <!-- Main Menu button look (theme-aware) -->
         <Style x:Key="GrungeMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
             <Setter Property="Width">
                 <Setter.Value>
@@ -73,8 +68,8 @@
                 </Setter.Value>
             </Setter>
             <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-            <Setter Property="Background" Value="#E0101010"/>
-            <Setter Property="BorderBrush" Value="#77FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="18,6"/>
             <Setter Property="Margin" Value="0,8,0,8"/>
@@ -99,14 +94,14 @@
                                     <StaticResource ResourceKey="SlatOpacityMaskBrush"/>
                                 </Border.OpacityMask>
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#CC000000" Opacity="0.45"/>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="{DynamicResource ShadowColor}" Opacity="0.45"/>
                                 </Border.Effect>
                             </Border>
 
                             <!-- Divider scratches -->
                             <Grid IsHitTestVisible="False">
-                                <Rectangle Height="1" VerticalAlignment="Top" Fill="#33FFFFFF" Margin="12,6,12,0"/>
-                                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#22FFFFFF" Margin="12,0,12,6"/>
+                                <Rectangle Height="1" VerticalAlignment="Top" Fill="{StaticResource DividerTopBrush}" Margin="12,6,12,0"/>
+                                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="{StaticResource DividerBottomBrush}" Margin="12,0,12,6"/>
                             </Grid>
 
                             <!-- Textured pale-green selection fill that grows from left -->
@@ -115,7 +110,7 @@
                                     <ScaleTransform x:Name="SelectScale" ScaleX="0" ScaleY="1"/>
                                 </Grid.RenderTransform>
                                 <Grid.RenderTransformOrigin>0,0.5</Grid.RenderTransformOrigin>
-                                <Rectangle Fill="{StaticResource MenuHighlightBrush}" Opacity="1"/>
+                                <Rectangle Fill="{DynamicResource MenuHighlightBrush}" Opacity="1"/>
                                 <Rectangle Fill="{StaticResource SelectionTextureBrush}" Opacity="0.35"/>
                             </Grid>
 
@@ -125,7 +120,7 @@
                                   VerticalAlignment="Center"
                                   Margin="8,0,8,0"
                                   Fill="{DynamicResource AccentBrush}"
-                                  Stroke="#88222222"
+                                  Stroke="{DynamicResource BorderBrush}"
                                   StrokeThickness="0.8"
                                   Data="M 0,0 L 12,6 L 0,12 Z"
                                   Opacity="0">
@@ -171,11 +166,11 @@
                             </Trigger>
 
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#99FFFFFF"/>
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="SlabBorder" Property="Background" Value="#F0181818"/>
-                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#BBFFFFFF"/>
+                                <Setter TargetName="SlabBorder" Property="Background" Value="{DynamicResource PressedBrush}"/>
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.6"/>
@@ -225,9 +220,9 @@
             <Rectangle Opacity="0.30" IsHitTestVisible="False">
                 <Rectangle.Fill>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop x:Name="Aur1" Color="{StaticResource Aurora1}" Offset="0"/>
-                        <GradientStop x:Name="Aur2" Color="{StaticResource Aurora2}" Offset="0.5"/>
-                        <GradientStop x:Name="Aur3" Color="{StaticResource Aurora3}" Offset="1"/>
+                        <GradientStop x:Name="Aur1" Color="{DynamicResource Aurora1}" Offset="0"/>
+                        <GradientStop x:Name="Aur2" Color="{DynamicResource Aurora2}" Offset="0.5"/>
+                        <GradientStop x:Name="Aur3" Color="{DynamicResource Aurora3}" Offset="1"/>
                     </LinearGradientBrush>
                 </Rectangle.Fill>
                 <Rectangle.RenderTransform>
@@ -242,7 +237,7 @@
                         <DrawingBrush.Drawing>
                             <DrawingGroup>
                                 <GeometryDrawing Brush="#00000000" Geometry="M0,0 L3,0 L3,3 L0,3 Z"/>
-                                <GeometryDrawing Brush="#20FFFFFF" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
+                                <GeometryDrawing Brush="{StaticResource ScanlineLightBrush}" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
                             </DrawingGroup>
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
@@ -300,7 +295,7 @@
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="28"/>
                         </TextBlock.FontSize>
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
+                            <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
                         </TextBlock.Effect>
                     </TextBlock>
                     <TextBlock Text="Design your battlefield with custom settings and victory conditions"
@@ -315,8 +310,7 @@
             </Border>
 
             <!-- Footer with navigation buttons and step counter -->
-            <!-- IMPORTANT: Footer must come BEFORE the content in the DockPanel to ensure it docks at the bottom,
-                 because LastChildFill=True makes the last child fill remaining space. -->
+            <!-- IMPORTANT: Footer must come BEFORE the content in the DockPanel to ensure it docks at the bottom -->
             <Grid DockPanel.Dock="Bottom" Margin="28,0,28,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -375,7 +369,7 @@
                                                 </LinearGradientBrush>
                                             </Setter.Value>
                                         </Setter>
-                                        <Setter Property="BorderBrush" Value="#7FFF7F"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -403,8 +397,8 @@
                     <Viewbox Stretch="Fill" StretchDirection="Both">
                         <Grid Width="1400" Height="800">
                             <Path Stretch="Fill"
-                                  Fill="#E00B0B0B"
-                                  Stroke="#66FFFFFF"
+                                  Fill="{DynamicResource Surface3Brush}"
+                                  Stroke="{DynamicResource LightBorderBrush}"
                                   StrokeThickness="1">
                                 <Path.Data>
                                     <PathGeometry>
@@ -416,7 +410,7 @@
                                     </PathGeometry>
                                 </Path.Data>
                                 <Path.Effect>
-                                    <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="#AA000000" Opacity="0.8"/>
+                                    <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="{DynamicResource ShadowColor}" Opacity="0.8"/>
                                 </Path.Effect>
                             </Path>
 
@@ -424,7 +418,7 @@
                             <Rectangle HorizontalAlignment="Right" Width="44" Height="800" IsHitTestVisible="False">
                                 <Rectangle.Fill>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="#66000000" Offset="0.0"/>
+                                        <GradientStop Color="{DynamicResource ShadowColor}" Offset="0.0"/>
                                         <GradientStop Color="#00000000" Offset="1.0"/>
                                     </LinearGradientBrush>
                                 </Rectangle.Fill>
@@ -478,7 +472,7 @@
                                 </LinearGradientBrush>
                             </Border.Background>
                             <Border.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.3" BlurRadius="10"/>
+                                <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="5" Opacity="0.3" BlurRadius="10"/>
                             </Border.Effect>
                             <Border.Style>
                                 <Style TargetType="Border">

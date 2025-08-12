@@ -39,7 +39,7 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="#AA000000" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -130,28 +130,14 @@
                                 <!-- Toggle -->
                                 <Border Grid.Column="1"
                                         x:Name="ToggleBackground"
+                                        Width="60" Height="30"
                                         Background="{DynamicResource Surface3Brush}"
                                         CornerRadius="15">
-                                    <Border.Width>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="60"/>
-                                    </Border.Width>
-                                    <Border.Height>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                                    </Border.Height>
                                     <Canvas>
                                         <Ellipse x:Name="ToggleCircle"
+                                                 Width="26" Height="26"
                                                  Fill="{DynamicResource ForegroundBrush}"
                                                  Canvas.Left="2" Canvas.Top="2">
-                                            <Ellipse.Width>
-                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                            </Ellipse.Width>
-                                            <Ellipse.Height>
-                                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                            </Ellipse.Height>
                                             <Ellipse.RenderTransform>
                                                 <TranslateTransform x:Name="ToggleTransform" X="0"/>
                                             </Ellipse.RenderTransform>
@@ -218,9 +204,8 @@
                                             Padding="15"
                                             Cursor="Hand">
                                         <StackPanel>
-                                            <Border Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
-                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
-                                                    Background="Black"
+                                            <Border Width="40" Height="40"
+                                                    Background="{DynamicResource ShroudBlackBrush}"
                                                     CornerRadius="4"
                                                     Margin="0,0,0,10"
                                                     HorizontalAlignment="Center"/>
@@ -271,9 +256,8 @@
                                             Padding="15"
                                             Cursor="Hand">
                                         <StackPanel>
-                                            <Border Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
-                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=40}"
-                                                    Background="Gray"
+                                            <Border Width="40" Height="40"
+                                                    Background="{DynamicResource ShroudGreyBrush}"
                                                     CornerRadius="4"
                                                     Margin="0,0,0,10"
                                                     HorizontalAlignment="Center"/>
@@ -406,16 +390,10 @@
                 <Grid>
                     <!-- Minimap Preview -->
                     <Canvas x:Name="PreviewCanvas"
+                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=400}"
+                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=400}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center">
-                        <Canvas.Width>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="400"/>
-                        </Canvas.Width>
-                        <Canvas.Height>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="400"/>
-                        </Canvas.Height>
                         <Canvas.Background>
                             <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
                                 <DrawingBrush.Drawing>
@@ -429,35 +407,25 @@
                         </Canvas.Background>
 
                         <!-- Fog Effect Overlay -->
-                        <Grid>
-                            <Grid.Width>
-                                <Binding ElementName="PreviewCanvas" Path="Width"/>
-                            </Grid.Width>
-                            <Grid.Height>
-                                <Binding ElementName="PreviewCanvas" Path="Height"/>
-                            </Grid.Height>
+                        <Grid Width="{Binding ElementName=PreviewCanvas, Path=Width}"
+                              Height="{Binding ElementName=PreviewCanvas, Path=Height}">
                             <Grid.OpacityMask>
                                 <RadialGradientBrush Center="0.5,0.5" RadiusX="0.3" RadiusY="0.3">
                                     <GradientStop Color="Transparent" Offset="0"/>
                                     <GradientStop Color="Black" Offset="1"/>
                                 </RadialGradientBrush>
                             </Grid.OpacityMask>
-                            <Rectangle Fill="Black" 
+                            <Rectangle Fill="{DynamicResource ShroudBlackBrush}" 
+                                       Opacity="0.8"
                                        Visibility="{Binding ParentViewModel.FogOfWarEnabled, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         </Grid>
 
                         <!-- Unit Indicator -->
-                        <Ellipse Fill="{DynamicResource AccentBrush}">
-                            <Ellipse.Width>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                            </Ellipse.Width>
-                            <Ellipse.Height>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                            </Ellipse.Height>
+                        <Ellipse Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=30}"
+                                 Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=30}"
+                                 Fill="{DynamicResource AccentBrush}">
                             <Ellipse.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="5"/>
+                                <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="5"/>
                             </Ellipse.Effect>
                             <Ellipse.Triggers>
                                 <EventTrigger RoutedEvent="Loaded">
@@ -471,16 +439,8 @@
                                 </EventTrigger>
                             </Ellipse.Triggers>
                             <Ellipse.RenderTransform>
-                                <TranslateTransform>
-                                    <TranslateTransform.X>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="185"/>
-                                    </TranslateTransform.X>
-                                    <TranslateTransform.Y>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="185"/>
-                                    </TranslateTransform.Y>
-                                </TranslateTransform>
+                                <TranslateTransform X="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=185}"
+                                                    Y="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=185}"/>
                             </Ellipse.RenderTransform>
                         </Ellipse>
                     </Canvas>
@@ -536,7 +496,7 @@
                                 <Rectangle Grid.Row="1" Grid.Column="0"
                                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
-                                           Fill="Black"
+                                           Fill="{DynamicResource ShroudBlackBrush}"
                                            Opacity="0.8"
                                            Margin="0,0,10,5"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1"
@@ -557,15 +517,15 @@
                                            Stroke="{DynamicResource BorderBrush}"
                                            StrokeThickness="1"
                                            Margin="0,0,10,0"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1"
+                                    <TextBlock Grid.Row="2" Grid.Column="1"
                                            Text="Visible Area"
                                            Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                            FontFamily="Consolas">
-                                    <TextBlock.FontSize>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                                  Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
-                                    </TextBlock.FontSize>
-                                </TextBlock>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
                             </Grid>
                         </StackPanel>
                     </Border>

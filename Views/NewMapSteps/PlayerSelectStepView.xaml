@@ -40,7 +40,7 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="#AA000000" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="2" Opacity="0.18" BlurRadius="8"/>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -60,8 +60,7 @@
         <DataTemplate x:Key="CountryItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <Border x:Name="FlagSwatch"
-                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
+                        Width="18" Height="18"
                         CornerRadius="3"
                         BorderThickness="1"
                         BorderBrush="{DynamicResource BorderBrush}"
@@ -72,24 +71,24 @@
                            Foreground="{DynamicResource ForegroundBrush}"/>
             </StackPanel>
             <DataTemplate.Triggers>
-                <!-- Map each country to its flag color -->
+                <!-- Map each country to its flag color (theme-provided) -->
                 <DataTrigger Binding="{Binding}" Value="Redonia">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#2ECC71"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Sevaria">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#9E9E9E"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Auria">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#F1C40F"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Maritain">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#3498DB"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Norvos">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#E74C3C"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Valtro">
-                    <Setter TargetName="FlagSwatch" Property="Background" Value="#000000"/>
+                    <Setter TargetName="FlagSwatch" Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding}" Value="Random">
                     <Setter TargetName="FlagSwatch" Property="Background" Value="Transparent"/>
@@ -128,8 +127,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
+                        Width="56" Height="56"
                         Background="{DynamicResource AccentBrush}"
                         CornerRadius="28"
                         Margin="0,0,12,0">
@@ -172,11 +170,8 @@
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="2"
                                         CornerRadius="8"
+                                        Height="50"
                                         Cursor="Hand" Padding="16,0">
-                                    <Border.Height>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="50"/>
-                                    </Border.Height>
                                     <Grid>
                                         <TextBlock Text="2"
                                                    Foreground="{DynamicResource ForegroundBrush}"
@@ -215,11 +210,8 @@
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="2"
                                         CornerRadius="8"
+                                        Height="50"
                                         Cursor="Hand" Padding="16,0">
-                                    <Border.Height>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="50"/>
-                                    </Border.Height>
                                     <Grid>
                                         <TextBlock Text="3"
                                                    Foreground="{DynamicResource ForegroundBrush}"
@@ -257,11 +249,8 @@
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="2"
                                         CornerRadius="8"
+                                        Height="50"
                                         Cursor="Hand" Padding="16,0">
-                                    <Border.Height>
-                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="50"/>
-                                    </Border.Height>
                                     <Grid>
                                         <TextBlock Text="4"
                                                    Foreground="{DynamicResource ForegroundBrush}"
@@ -305,8 +294,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
+                        Width="56" Height="56"
                         Background="{DynamicResource AccentBrush}"
                         CornerRadius="28"
                         Margin="0,0,12,0">
@@ -340,7 +328,7 @@
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
 
-                    <!-- Player 1 (no alliance toggle for Player 1) -->
+                    <!-- Player 1 -->
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -360,44 +348,33 @@
                                   SelectedItem="{Binding ParentViewModel.Player1Country, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   ItemTemplate="{StaticResource CountryItemTemplate}"
                                   FontFamily="Consolas"
-                                  VerticalAlignment="Center">
-                            <ComboBox.MinWidth>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="200"/>
-                            </ComboBox.MinWidth>
-                            <ComboBox.Height>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="34"/>
-                            </ComboBox.Height>
-                        </ComboBox>
+                                  MinWidth="200"
+                                  Height="34"
+                                  VerticalAlignment="Center"/>
 
                         <!-- Live flag swatch -->
-                        <Border Grid.Column="2"
-                                Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                CornerRadius="3" BorderThickness="1"
-                                BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,0,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Redonia">
-                                            <Setter Property="Background" Value="#2ECC71"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Sevaria">
-                                            <Setter Property="Background" Value="#9E9E9E"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Auria">
-                                            <Setter Property="Background" Value="#F1C40F"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Maritain">
-                                            <Setter Property="Background" Value="#3498DB"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Norvos">
-                                            <Setter Property="Background" Value="#E74C3C"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Valtro">
-                                            <Setter Property="Background" Value="#000000"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -405,7 +382,7 @@
                         </Border>
                     </Grid>
 
-                    <!-- Player 2 (includes alliance toggle) -->
+                    <!-- Player 2 -->
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -427,43 +404,32 @@
                                   SelectedItem="{Binding ParentViewModel.Player2Country, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   ItemTemplate="{StaticResource CountryItemTemplate}"
                                   FontFamily="Consolas"
-                                  VerticalAlignment="Center">
-                            <ComboBox.MinWidth>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="200"/>
-                            </ComboBox.MinWidth>
-                            <ComboBox.Height>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="34"/>
-                            </ComboBox.Height>
-                        </ComboBox>
+                                  MinWidth="200"
+                                  Height="34"
+                                  VerticalAlignment="Center"/>
 
-                        <Border Grid.Column="2"
-                                Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                CornerRadius="3" BorderThickness="1"
-                                BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
+                        <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Redonia">
-                                            <Setter Property="Background" Value="#2ECC71"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Sevaria">
-                                            <Setter Property="Background" Value="#9E9E9E"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Auria">
-                                            <Setter Property="Background" Value="#F1C40F"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Maritain">
-                                            <Setter Property="Background" Value="#3498DB"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Norvos">
-                                            <Setter Property="Background" Value="#E74C3C"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Valtro">
-                                            <Setter Property="Background" Value="#000000"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -478,30 +444,16 @@
                             <CheckBox.Template>
                                 <ControlTemplate TargetType="CheckBox">
                                     <Border x:Name="ToggleBackground"
+                                            Width="60" Height="30"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="15"
                                             Cursor="Hand">
-                                        <Border.Width>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="60"/>
-                                        </Border.Width>
-                                        <Border.Height>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                                        </Border.Height>
                                         <Canvas>
                                             <Ellipse x:Name="ToggleCircle"
+                                                     Width="26" Height="26"
                                                      Fill="{DynamicResource ForegroundBrush}"
                                                      Canvas.Left="2"
                                                      Canvas.Top="2">
-                                                <Ellipse.Width>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Width>
-                                                <Ellipse.Height>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Height>
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="ToggleTransform" X="0"/>
                                                 </Ellipse.RenderTransform>
@@ -597,43 +549,32 @@
                                   SelectedItem="{Binding ParentViewModel.Player3Country, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   ItemTemplate="{StaticResource CountryItemTemplate}"
                                   FontFamily="Consolas"
-                                  VerticalAlignment="Center">
-                            <ComboBox.MinWidth>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="200"/>
-                            </ComboBox.MinWidth>
-                            <ComboBox.Height>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="34"/>
-                            </ComboBox.Height>
-                        </ComboBox>
+                                  MinWidth="200"
+                                  Height="34"
+                                  VerticalAlignment="Center"/>
 
-                        <Border Grid.Column="2"
-                                Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                CornerRadius="3" BorderThickness="1"
-                                BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
+                        <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Redonia">
-                                            <Setter Property="Background" Value="#2ECC71"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Sevaria">
-                                            <Setter Property="Background" Value="#9E9E9E"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Auria">
-                                            <Setter Property="Background" Value="#F1C40F"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Maritain">
-                                            <Setter Property="Background" Value="#3498DB"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Norvos">
-                                            <Setter Property="Background" Value="#E74C3C"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Valtro">
-                                            <Setter Property="Background" Value="#000000"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -648,30 +589,16 @@
                             <CheckBox.Template>
                                 <ControlTemplate TargetType="CheckBox">
                                     <Border x:Name="ToggleBackground"
+                                            Width="60" Height="30"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="15"
                                             Cursor="Hand">
-                                        <Border.Width>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="60"/>
-                                        </Border.Width>
-                                        <Border.Height>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                                        </Border.Height>
                                         <Canvas>
                                             <Ellipse x:Name="ToggleCircle"
+                                                     Width="26" Height="26"
                                                      Fill="{DynamicResource ForegroundBrush}"
                                                      Canvas.Left="2"
                                                      Canvas.Top="2">
-                                                <Ellipse.Width>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Width>
-                                                <Ellipse.Height>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Height>
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="ToggleTransform" X="0"/>
                                                 </Ellipse.RenderTransform>
@@ -757,43 +684,32 @@
                                   SelectedItem="{Binding ParentViewModel.Player4Country, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   ItemTemplate="{StaticResource CountryItemTemplate}"
                                   FontFamily="Consolas"
-                                  VerticalAlignment="Center">
-                            <ComboBox.MinWidth>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="200"/>
-                            </ComboBox.MinWidth>
-                            <ComboBox.Height>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="34"/>
-                            </ComboBox.Height>
-                        </ComboBox>
+                                  MinWidth="200"
+                                  Height="34"
+                                  VerticalAlignment="Center"/>
 
-                        <Border Grid.Column="2"
-                                Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=24}"
-                                CornerRadius="3" BorderThickness="1"
-                                BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
+                        <Border Grid.Column="2" Width="24" Height="24" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="10,0,10,0" VerticalAlignment="Center">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Redonia">
-                                            <Setter Property="Background" Value="#2ECC71"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Sevaria">
-                                            <Setter Property="Background" Value="#9E9E9E"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Auria">
-                                            <Setter Property="Background" Value="#F1C40F"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Maritain">
-                                            <Setter Property="Background" Value="#3498DB"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Norvos">
-                                            <Setter Property="Background" Value="#E74C3C"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Valtro">
-                                            <Setter Property="Background" Value="#000000"/>
+                                            <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -808,30 +724,16 @@
                             <CheckBox.Template>
                                 <ControlTemplate TargetType="CheckBox">
                                     <Border x:Name="ToggleBackground"
+                                            Width="60" Height="30"
                                             Background="{DynamicResource Surface3Brush}"
                                             CornerRadius="15"
                                             Cursor="Hand">
-                                        <Border.Width>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="60"/>
-                                        </Border.Width>
-                                        <Border.Height>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
-                                        </Border.Height>
                                         <Canvas>
                                             <Ellipse x:Name="ToggleCircle"
+                                                     Width="26" Height="26"
                                                      Fill="{DynamicResource ForegroundBrush}"
                                                      Canvas.Left="2"
                                                      Canvas.Top="2">
-                                                <Ellipse.Width>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Width>
-                                                <Ellipse.Height>
-                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="26"/>
-                                                </Ellipse.Height>
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="ToggleTransform" X="0"/>
                                                 </Ellipse.RenderTransform>

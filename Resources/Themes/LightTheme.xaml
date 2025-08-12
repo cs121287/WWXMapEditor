@@ -33,6 +33,15 @@
     <Color x:Key="DividerSoftColor">#22000000</Color>
     <!-- 13% black -->
 
+    <!-- Shadows -->
+    <Color x:Key="ShadowColor">#77000000</Color>
+
+    <!-- Status colors (used for gradients etc.) -->
+    <Color x:Key="SuccessStartColor">#FF2E7D32</Color>
+    <Color x:Key="SuccessEndColor">#FF1B5E20</Color>
+    <Color x:Key="DangerStartColor">#FFD32F2F</Color>
+    <Color x:Key="DangerEndColor">#FFB71C1C</Color>
+
     <!-- Aurora/neon aligned with Main Menu -->
     <Color x:Key="NeonShadowColor">#FF00E58A</Color>
     <Color x:Key="Aurora1">#4400E58A</Color>
@@ -57,6 +66,16 @@
     <SolidColorBrush x:Key="LightBorderBrush" Color="{StaticResource LightBorderColor}"/>
     <SolidColorBrush x:Key="DividerStrongBrush" Color="{StaticResource DividerStrongColor}"/>
     <SolidColorBrush x:Key="DividerSoftBrush" Color="{StaticResource DividerSoftColor}"/>
+
+    <!-- Success/Danger gradients -->
+    <LinearGradientBrush x:Key="SuccessGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource SuccessStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource SuccessEndColor}" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DangerGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource DangerStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource DangerEndColor}" Offset="1"/>
+    </LinearGradientBrush>
 
     <!-- Pale-green selection fill (same feel as DarkTheme/MainMenu) -->
     <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
@@ -89,6 +108,26 @@
                 ViewportUnits="Absolute"
                 Viewport="0,0,24,24"
                 Stretch="Fill"/>
+
+    <!-- Specialized brushes for view content that must be theme-aware -->
+    <!-- Terrain swatches (light tuned for visibility) -->
+    <SolidColorBrush x:Key="TerrainPlainsBrush" Color="#7CC97C"/>
+    <SolidColorBrush x:Key="TerrainMountainBrush" Color="#777777"/>
+    <SolidColorBrush x:Key="TerrainForestBrush" Color="#1C7A1C"/>
+    <SolidColorBrush x:Key="TerrainSandBrush" Color="#CDAE64"/>
+    <SolidColorBrush x:Key="TerrainSeaBrush" Color="#2F6CB3"/>
+
+    <!-- Country flag colors (kept consistent with brand colors) -->
+    <SolidColorBrush x:Key="CountryRedoniaBrush" Color="#2ECC71"/>
+    <SolidColorBrush x:Key="CountrySevariaBrush" Color="#9E9E9E"/>
+    <SolidColorBrush x:Key="CountryAuriaBrush" Color="#F1C40F"/>
+    <SolidColorBrush x:Key="CountryMaritainBrush" Color="#3498DB"/>
+    <SolidColorBrush x:Key="CountryNorvosBrush" Color="#E74C3C"/>
+    <SolidColorBrush x:Key="CountryValtroBrush" Color="#000000"/>
+
+    <!-- Fog/shroud preview brushes -->
+    <SolidColorBrush x:Key="ShroudBlackBrush" Color="#FF000000"/>
+    <SolidColorBrush x:Key="ShroudGreyBrush" Color="#FF808080"/>
 
     <!-- Base button style (light): minimal and safe to BasedOn -->
     <Style x:Key="MenuButtonStyle" TargetType="Button">

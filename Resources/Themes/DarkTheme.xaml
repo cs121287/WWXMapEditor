@@ -11,7 +11,7 @@
     <Color x:Key="Surface3Color">#E0101010</Color>
     <!-- deep slab (matches slats) -->
     <Color x:Key="BorderColor">#FF2F3947</Color>
-    <!-- general app border (unused by main menu) -->
+    <!-- general app border -->
     <Color x:Key="ForegroundColor">#FFF3F7FA</Color>
     <!-- primary text -->
     <Color x:Key="ForegroundSecondaryColor">#FFB8C0CC</Color>
@@ -33,7 +33,16 @@
     <Color x:Key="DividerSoftColor">#22FFFFFF</Color>
     <!-- 13% white -->
 
-    <!-- Aurora (parallax overlay) aligned with MainMenuView -->
+    <!-- Shadows -->
+    <Color x:Key="ShadowColor">#AA000000</Color>
+
+    <!-- Status colors (used for gradients etc.) -->
+    <Color x:Key="SuccessStartColor">#FF4CAF50</Color>
+    <Color x:Key="SuccessEndColor">#FF45A049</Color>
+    <Color x:Key="DangerStartColor">#FFFF5252</Color>
+    <Color x:Key="DangerEndColor">#FFFF1744</Color>
+
+    <!-- Aurora (parallax overlay) aligned with MainMenuView) -->
     <Color x:Key="NeonShadowColor">#FF00E58A</Color>
     <Color x:Key="Aurora1">#4400E58A</Color>
     <Color x:Key="Aurora2">#4420A4FF</Color>
@@ -57,6 +66,16 @@
     <SolidColorBrush x:Key="LightBorderBrush" Color="{StaticResource LightBorderColor}"/>
     <SolidColorBrush x:Key="DividerStrongBrush" Color="{StaticResource DividerStrongColor}"/>
     <SolidColorBrush x:Key="DividerSoftBrush" Color="{StaticResource DividerSoftColor}"/>
+
+    <!-- Success/Danger gradients -->
+    <LinearGradientBrush x:Key="SuccessGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource SuccessStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource SuccessEndColor}" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DangerGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource DangerStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource DangerEndColor}" Offset="1"/>
+    </LinearGradientBrush>
 
     <!-- Pale-green selection fill (used by MainMenuView; duplicated here for consistency) -->
     <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
@@ -89,6 +108,26 @@
                 ViewportUnits="Absolute"
                 Viewport="0,0,24,24"
                 Stretch="Fill"/>
+
+    <!-- Specialized brushes for view content that must be theme-aware -->
+    <!-- Terrain swatches -->
+    <SolidColorBrush x:Key="TerrainPlainsBrush" Color="#90EE90"/>
+    <SolidColorBrush x:Key="TerrainMountainBrush" Color="#8B8989"/>
+    <SolidColorBrush x:Key="TerrainForestBrush" Color="#228B22"/>
+    <SolidColorBrush x:Key="TerrainSandBrush" Color="#E2C27B"/>
+    <SolidColorBrush x:Key="TerrainSeaBrush" Color="#2F6CB3"/>
+
+    <!-- Country flag colors -->
+    <SolidColorBrush x:Key="CountryRedoniaBrush" Color="#2ECC71"/>
+    <SolidColorBrush x:Key="CountrySevariaBrush" Color="#9E9E9E"/>
+    <SolidColorBrush x:Key="CountryAuriaBrush" Color="#F1C40F"/>
+    <SolidColorBrush x:Key="CountryMaritainBrush" Color="#3498DB"/>
+    <SolidColorBrush x:Key="CountryNorvosBrush" Color="#E74C3C"/>
+    <SolidColorBrush x:Key="CountryValtroBrush" Color="#000000"/>
+
+    <!-- Fog/shroud preview brushes -->
+    <SolidColorBrush x:Key="ShroudBlackBrush" Color="#FF000000"/>
+    <SolidColorBrush x:Key="ShroudGreyBrush" Color="#FF808080"/>
 
     <!-- Base button style that views can BasedOn (kept minimal to avoid breaking other screens) -->
     <Style x:Key="MenuButtonStyle" TargetType="Button">

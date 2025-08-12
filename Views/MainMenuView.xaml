@@ -15,66 +15,17 @@
              PreviewKeyDown="UserControl_PreviewKeyDown">
 
     <UserControl.Resources>
-        <!-- Single ResourceDictionary contains both merged fallbacks and all resources -->
         <ResourceDictionary>
-            <!-- SAFETY FALLBACKS: prevent ResourceReferenceKeyNotFoundException -->
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary>
-                    <!-- Theme/brush fallbacks (only used if app-level themes don't provide them) -->
-                    <SolidColorBrush x:Key="ForegroundBrush" Color="#FFECECEC"/>
-                    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="#FFB8B8B8"/>
-                    <!-- Accent leaned towards muted green to suit the menu -->
-                    <SolidColorBrush x:Key="AccentBrush" Color="#FFCFE3B0"/>
 
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#140B0B0B"/>
-                    <SolidColorBrush x:Key="Surface3Brush" Color="#E0101010"/>
-                    <SolidColorBrush x:Key="BackgroundBrush" Color="#FF0A0A0A"/>
-
-                    <!-- Older keys used in earlier iterations; harmless to keep as fallbacks -->
-                    <SolidColorBrush x:Key="HoverBrush" Color="#1AFFFFFF"/>
-                    <SolidColorBrush x:Key="PressedBrush" Color="#33111111"/>
-                    <SolidColorBrush x:Key="NeonBorderBrush" Color="#33FFFFFF"/>
-                    <Color x:Key="NeonShadowColor">#AA00FFFF</Color>
-
-                    <!-- If an upstream style was expected, provide a benign base so BasedOn resolves -->
-                    <Style x:Key="MenuButtonStyle" TargetType="Button"/>
-                </ResourceDictionary>
-            </ResourceDictionary.MergedDictionaries>
-
+            <!-- Converter -->
             <conv:MultiplyConverter x:Key="MultiplyConverter"/>
 
-            <!-- Overlay colors (safe local defaults) -->
-            <Color x:Key="Aurora1">#4400E58A</Color>
-            <Color x:Key="Aurora2">#4420A4FF</Color>
-            <Color x:Key="Aurora3">#44B770FF</Color>
+            <!-- Derived brushes from theme for view-only visuals (no hardcoded colors) -->
+            <SolidColorBrush x:Key="ScanlineLightBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.125"/>
+            <SolidColorBrush x:Key="DividerTopBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.20"/>
+            <SolidColorBrush x:Key="DividerBottomBrush" Color="{DynamicResource LightBorderColor}" Opacity="0.13"/>
 
-            <!-- Selection highlight (pale green, subdued like sample) -->
-            <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
-
-            <!-- Text styles -->
-            <Style x:Key="HeadlineText" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Consolas"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                <Setter Property="HorizontalAlignment" Value="Left"/>
-                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <Style x:Key="SubtitleText" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Consolas"/>
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
-                <Setter Property="HorizontalAlignment" Value="Left"/>
-                <Setter Property="Opacity" Value="0.85"/>
-                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-            </Style>
-
-            <!-- Assets: Opacity mask for torn slats, selection texture, and board overlays
-                 Ensure these files exist and Build Action = Resource -->
+            <!-- Assets: Opacity mask for torn slats, selection texture, and board overlays -->
             <ImageBrush x:Key="SlatOpacityMaskBrush"
                         ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/slat_mask.png"
                         Stretch="Fill"/>
@@ -87,7 +38,7 @@
                         Viewport="0,0,24,24"
                         Stretch="Fill"/>
 
-            <!-- Grunge slat button: torn-edge mask + textured green selection fill + pointer wedge -->
+            <!-- Grunge slat button: uses theme resources only -->
             <Style x:Key="GrungeMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
                 <!-- Size with FontScale to match app-wide scaling -->
                 <Setter Property="Width">
@@ -106,8 +57,8 @@
                     </Setter.Value>
                 </Setter>
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-                <Setter Property="Background" Value="#E0101010"/>
-                <Setter Property="BorderBrush" Value="#77FFFFFF"/>
+                <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="18,6"/>
                 <Setter Property="Margin" Value="0,8,0,8"/>
@@ -133,14 +84,14 @@
                                         <StaticResource ResourceKey="SlatOpacityMaskBrush"/>
                                     </Border.OpacityMask>
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#CC000000" Opacity="0.45"/>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="{DynamicResource ShadowColor}" Opacity="0.45"/>
                                     </Border.Effect>
                                 </Border>
 
                                 <!-- Divider scratches -->
                                 <Grid IsHitTestVisible="False">
-                                    <Rectangle Height="1" VerticalAlignment="Top" Fill="#33FFFFFF" Margin="12,6,12,0"/>
-                                    <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#22FFFFFF" Margin="12,0,12,6"/>
+                                    <Rectangle Height="1" VerticalAlignment="Top" Fill="{StaticResource DividerTopBrush}" Margin="12,6,12,0"/>
+                                    <Rectangle Height="1" VerticalAlignment="Bottom" Fill="{StaticResource DividerBottomBrush}" Margin="12,0,12,6"/>
                                 </Grid>
 
                                 <!-- Textured pale-green selection fill that grows from left -->
@@ -151,7 +102,7 @@
                                     <Grid.RenderTransformOrigin>0,0.5</Grid.RenderTransformOrigin>
 
                                     <!-- Flat color base -->
-                                    <Rectangle Fill="{StaticResource MenuHighlightBrush}" Opacity="1"/>
+                                    <Rectangle Fill="{DynamicResource MenuHighlightBrush}" Opacity="1"/>
 
                                     <!-- Tiled noise texture over it -->
                                     <Rectangle Fill="{StaticResource SelectionTextureBrush}" Opacity="0.35"/>
@@ -162,8 +113,8 @@
                                       HorizontalAlignment="Right"
                                       VerticalAlignment="Center"
                                       Margin="8,0,8,0"
-                                      Fill="#CFE3B0"
-                                      Stroke="#88222222"
+                                      Fill="{DynamicResource AccentBrush}"
+                                      Stroke="{DynamicResource BorderBrush}"
                                       StrokeThickness="0.8"
                                       Data="M 0,0 L 12,6 L 0,12 Z"
                                       Opacity="0">
@@ -209,14 +160,14 @@
                                     </Trigger.ExitActions>
                                 </Trigger>
 
-                                <!-- Focused: keep border emphasis, but DO NOT show the wedge unless hovered -->
+                                <!-- Focused: keep border emphasis -->
                                 <Trigger Property="IsKeyboardFocused" Value="True">
-                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#99FFFFFF"/>
+                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                                 </Trigger>
 
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="SlabBorder" Property="Background" Value="#F0181818"/>
-                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#BBFFFFFF"/>
+                                    <Setter TargetName="SlabBorder" Property="Background" Value="{DynamicResource PressedBrush}"/>
+                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="{DynamicResource LightBorderBrush}"/>
                                 </Trigger>
 
                                 <Trigger Property="IsEnabled" Value="False">
@@ -226,6 +177,28 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+            </Style>
+
+            <!-- Text styles -->
+            <Style x:Key="HeadlineText" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="SubtitleText" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Opacity" Value="0.85"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             </Style>
 
             <!-- Animated transition storyboard for the left-side label -->
@@ -276,9 +249,9 @@
             <Rectangle Opacity="0.30" IsHitTestVisible="False">
                 <Rectangle.Fill>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop x:Name="Aur1" Color="{StaticResource Aurora1}" Offset="0"/>
-                        <GradientStop x:Name="Aur2" Color="{StaticResource Aurora2}" Offset="0.5"/>
-                        <GradientStop x:Name="Aur3" Color="{StaticResource Aurora3}" Offset="1"/>
+                        <GradientStop x:Name="Aur1" Color="{DynamicResource Aurora1}" Offset="0"/>
+                        <GradientStop x:Name="Aur2" Color="{DynamicResource Aurora2}" Offset="0.5"/>
+                        <GradientStop x:Name="Aur3" Color="{DynamicResource Aurora3}" Offset="1"/>
                     </LinearGradientBrush>
                 </Rectangle.Fill>
                 <Rectangle.RenderTransform>
@@ -293,7 +266,7 @@
                         <DrawingBrush.Drawing>
                             <DrawingGroup>
                                 <GeometryDrawing Brush="#00000000" Geometry="M0,0 L3,0 L3,3 L0,3 Z"/>
-                                <GeometryDrawing Brush="#20FFFFFF" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
+                                <GeometryDrawing Brush="{StaticResource ScanlineLightBrush}" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
                             </DrawingGroup>
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
@@ -370,10 +343,10 @@
                         <!-- Thin vertical rail with ticks -->
                         <Grid Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=340}"
                               Width="6" Margin="0,0,0,8">
-                            <Rectangle Fill="#AA0B0B0B"/>
-                            <Rectangle Fill="#33FFFFFF" Width="1" HorizontalAlignment="Right" Margin="0,4,1,4"/>
-                            <Rectangle Fill="#22FFFFFF" Height="12" Width="2" HorizontalAlignment="Right" Margin="0,16,1,0" VerticalAlignment="Top"/>
-                            <Rectangle Fill="#22FFFFFF" Height="20" Width="2" HorizontalAlignment="Right" Margin="0,0,1,16" VerticalAlignment="Bottom"/>
+                            <Rectangle Fill="{DynamicResource Surface3Brush}"/>
+                            <Rectangle Fill="{DynamicResource LightBorderBrush}" Width="1" HorizontalAlignment="Right" Margin="0,4,1,4"/>
+                            <Rectangle Fill="{DynamicResource DividerStrongBrush}" Height="12" Width="2" HorizontalAlignment="Right" Margin="0,16,1,0" VerticalAlignment="Top"/>
+                            <Rectangle Fill="{DynamicResource DividerSoftBrush}" Height="20" Width="2" HorizontalAlignment="Right" Margin="0,0,1,16" VerticalAlignment="Bottom"/>
                         </Grid>
                         <!-- Dynamic text: shows hovered button text, else "Main Menu" -->
                         <TextBlock x:Name="SideLabelText"
@@ -392,11 +365,10 @@
                                 </TransformGroup>
                             </TextBlock.RenderTransform>
                             <TextBlock.FontSize>
-                                <!-- Increased font size -->
                                 <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
                             </TextBlock.FontSize>
                             <TextBlock.Effect>
-                                <DropShadowEffect Color="#CC000000" BlurRadius="8" ShadowDepth="1" Opacity="0.7"/>
+                                <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="8" ShadowDepth="1" Opacity="0.7"/>
                             </TextBlock.Effect>
                         </TextBlock>
                     </StackPanel>
@@ -426,8 +398,8 @@
                             <Grid Width="600" Height="420">
                                 <Path x:Name="BoardPath"
                                       Stretch="Fill"
-                                      Fill="#E00B0B0B"
-                                      Stroke="#66FFFFFF"
+                                      Fill="{DynamicResource Surface3Brush}"
+                                      Stroke="{DynamicResource LightBorderBrush}"
                                       StrokeThickness="1">
                                     <!-- Trapezoid: top narrower than bottom -->
                                     <Path.Data>
@@ -440,7 +412,7 @@
                                         </PathGeometry>
                                     </Path.Data>
                                     <Path.Effect>
-                                        <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="#AA000000" Opacity="0.8"/>
+                                        <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="{DynamicResource ShadowColor}" Opacity="0.8"/>
                                     </Path.Effect>
                                 </Path>
 
@@ -448,7 +420,7 @@
                                 <Rectangle HorizontalAlignment="Right" Width="36" Height="420" IsHitTestVisible="False">
                                     <Rectangle.Fill>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#66000000" Offset="0.0"/>
+                                            <GradientStop Color="{DynamicResource ShadowColor}" Offset="0.0"/>
                                             <GradientStop Color="#00000000" Offset="1.0"/>
                                         </LinearGradientBrush>
                                     </Rectangle.Fill>
