@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
+                    xmlns:conv="clr-namespace:WWXMapEditor.Converters"
+                    xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling">
+
+    <!-- Adaptive scaling converter instances -->
+    <conv:MultiplyConverter x:Key="MultiplyConverter" />
+    <conv:ThicknessScaleConverter x:Key="ThicknessScaleConverter" />
+    <conv:UniformThicknessScaleConverter x:Key="UniformThicknessScaleConverter" />
+    <conv:LayoutDensityToThicknessConverter x:Key="LayoutDensityToThicknessConverter"
+                                          Compact="4"
+                                          Normal="8"
+                                          Spacious="12" />
+    <conv:LayoutDensityToDoubleConverter x:Key="LayoutDensityToDoubleConverter"
+                                       Compact="4"
+                                       Normal="8"
+                                       Spacious="12" />
+
+    <!-- Base (design) constants -->
+    <System:Double x:Key="BaseFontSizeSmall">12</System:Double>
+    <System:Double x:Key="BaseFontSizeMedium">14</System:Double>
+    <System:Double x:Key="BaseFontSizeLarge">16</System:Double>
+    <System:Double x:Key="BaseFontSizeXLarge">18</System:Double>
+    <System:Double x:Key="BaseFontSizeXXLarge">24</System:Double>
+    <System:Double x:Key="BaseFontSizeHeader">36</System:Double>
+    <System:Double x:Key="BaseFontSizeHero">48</System:Double>
+    <System:Double x:Key="BaseFontSizeTitle">32</System:Double>
+
+    <!-- Scaled header text style (example) -->
+    <Style x:Key="ScaledHeaderText" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize">
+            <Setter.Value>
+                <Binding Source="{x:Static scaling:ScaleService.Instance}"
+                 Path="FontScale"
+                 Converter="{StaticResource MultiplyConverter}"
+                 ConverterParameter="{StaticResource BaseFontSizeHeader}"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScaledHeroText" TargetType="TextBlock" BasedOn="{StaticResource ScaledHeaderText}">
+        <Setter Property="FontSize">
+            <Setter.Value>
+                <Binding Source="{x:Static scaling:ScaleService.Instance}"
+                 Path="FontScale"
+                 Converter="{StaticResource MultiplyConverter}"
+                 ConverterParameter="{StaticResource BaseFontSizeHero}"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

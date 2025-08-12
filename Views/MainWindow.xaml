@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WWXMapEditor.Views"
+        xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" 
         Height="1080" 
@@ -13,13 +14,8 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="{DynamicResource BackgroundBrush}">
-
     <Grid>
-        <!-- Main Menu View - Shows when no other view is active -->
-        <local:MainMenuView x:Name="MainMenu" 
-                            Visibility="{Binding MainMenuVisibility}"/>
-
-        <!-- Content Container for other views -->
+        <local:MainMenuView x:Name="MainMenu" Visibility="{Binding MainMenuVisibility}"/>
         <ContentControl Content="{Binding CurrentView}" 
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"/>

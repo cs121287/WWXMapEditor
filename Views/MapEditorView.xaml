@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
              xmlns:controls="clr-namespace:WWXMapEditor.Controls"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
@@ -77,50 +79,60 @@
             </ToolBar.Resources>
 
             <Button Command="{Binding SaveCommand}" ToolTip="Save (Ctrl+S)">
-                <TextBlock Text="💾" FontSize="20"/>
+                <TextBlock Text="💾" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </Button>
             <Separator/>
 
             <Button Command="{Binding UndoCommand}" ToolTip="Undo (Ctrl+Z)">
-                <TextBlock Text="↶" FontSize="20"/>
+                <TextBlock Text="↶" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </Button>
             <Button Command="{Binding RedoCommand}" ToolTip="Redo (Ctrl+Y)">
-                <TextBlock Text="↷" FontSize="20"/>
+                <TextBlock Text="↷" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </Button>
             <Separator/>
 
             <RadioButton GroupName="Tools" IsChecked="{Binding IsSelectToolActive}" 
                          Command="{Binding SelectToolCommand}" CommandParameter="Select" 
                          ToolTip="Select Tool">
-                <TextBlock Text="⬚" FontSize="20"/>
+                <TextBlock Text="⬚" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </RadioButton>
             <RadioButton GroupName="Tools" IsChecked="{Binding IsBrushToolActive}" 
                          Command="{Binding SelectToolCommand}" CommandParameter="Brush" 
                          ToolTip="Brush Tool">
-                <TextBlock Text="🖌" FontSize="20"/>
+                <TextBlock Text="🖌" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </RadioButton>
             <RadioButton GroupName="Tools" IsChecked="{Binding IsRectangleToolActive}" 
                          Command="{Binding SelectToolCommand}" CommandParameter="Rectangle" 
                          ToolTip="Rectangle Tool">
-                <TextBlock Text="▭" FontSize="20"/>
+                <TextBlock Text="▭" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </RadioButton>
             <RadioButton GroupName="Tools" IsChecked="{Binding IsFillToolActive}" 
                          Command="{Binding SelectToolCommand}" CommandParameter="Fill" 
                          ToolTip="Fill Tool">
-                <TextBlock Text="🪣" FontSize="20"/>
+                <TextBlock Text="🪣" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </RadioButton>
             <RadioButton GroupName="Tools" IsChecked="{Binding IsEraserToolActive}" 
                          Command="{Binding SelectToolCommand}" CommandParameter="Eraser" 
                          ToolTip="Eraser Tool">
-                <TextBlock Text="🗑" FontSize="20"/>
+                <TextBlock Text="🗑" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </RadioButton>
             <Separator/>
 
             <ToggleButton IsChecked="{Binding ShowGrid}" ToolTip="Toggle Grid (G)">
-                <TextBlock Text="⊞" FontSize="20"/>
+                <TextBlock Text="⊞" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </ToggleButton>
             <ToggleButton IsChecked="{Binding SnapToGrid}" ToolTip="Toggle Snap to Grid (S)">
-                <TextBlock Text="⊟" FontSize="20"/>
+                <TextBlock Text="⊟" FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                     Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"/>
             </ToggleButton>
         </ToolBar>
 
@@ -132,7 +144,7 @@
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Panel - Tile Palette -->
+            <!-- Left Panel -->
             <Border Grid.Column="0" Background="{DynamicResource Surface2Brush}" 
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                 <Grid>
@@ -144,7 +156,8 @@
                     <TextBlock Grid.Row="0" Text="TILE PALETTE" 
                                Foreground="{DynamicResource ForegroundBrush}" 
                                FontFamily="Consolas"
-                               FontSize="16"
+                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                FontWeight="Bold" 
                                Margin="10,10,10,5"/>
 
@@ -186,7 +199,7 @@
                 </Grid>
             </Border>
 
-            <!-- Center - Map Canvas -->
+            <!-- Center Map -->
             <Grid Grid.Column="1" Background="{DynamicResource BackgroundBrush}">
                 <ScrollViewer x:Name="MapScrollViewer" 
                               HorizontalScrollBarVisibility="Auto" 
@@ -202,8 +215,6 @@
                                                CenterX="0.5" 
                                                CenterY="0.5"/>
                             </Grid.LayoutTransform>
-
-                            <!-- Map Canvas Control -->
                             <controls:MapCanvas x:Name="MapCanvas"
                                               Map="{Binding CurrentMap}"
                                               ShowGrid="{Binding ShowGrid}"
@@ -218,7 +229,6 @@
                     </Border>
                 </ScrollViewer>
 
-                <!-- Zoom Controls -->
                 <Border HorizontalAlignment="Right" 
                         VerticalAlignment="Bottom" 
                         Margin="20"
@@ -238,7 +248,9 @@
                                    VerticalAlignment="Center" 
                                    Margin="10,0"
                                    MinWidth="50"
-                                   TextAlignment="Center">
+                                   TextAlignment="Center"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=14}">
                             <TextBlock.Text>
                                 <Binding Path="ZoomLevel" StringFormat="{}{0:P0}"/>
                             </TextBlock.Text>
@@ -252,7 +264,7 @@
                 </Border>
             </Grid>
 
-            <!-- Right Panel - Properties -->
+            <!-- Right Panel -->
             <Border Grid.Column="2" Background="{DynamicResource Surface2Brush}" 
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -260,7 +272,8 @@
                         <TextBlock Text="MAP PROPERTIES" 
                                    Foreground="{DynamicResource ForegroundBrush}" 
                                    FontFamily="Consolas"
-                                   FontSize="16"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                    FontWeight="Bold" 
                                    Margin="0,0,0,10"/>
 
@@ -309,18 +322,15 @@
                                           Foreground="{DynamicResource ForegroundBrush}"
                                           FontWeight="Bold"
                                           Margin="0,0,0,5"/>
-
                                 <Grid Visibility="{Binding IsBrushSettingsVisible}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
                                     <TextBlock Text="Brush Size:" 
                                               Foreground="{DynamicResource ForegroundBrush}" 
                                               VerticalAlignment="Center"
                                               Margin="0,0,10,0"/>
-
                                     <ComboBox Grid.Column="1" 
                                               SelectedItem="{Binding BrushSize}" 
                                               ItemsSource="{Binding BrushSizes}"

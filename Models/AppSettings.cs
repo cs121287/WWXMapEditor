@@ -104,17 +104,17 @@ namespace WWXMapEditor.Models
         public int WindowWidth { get; set; } = 1920;
         public int WindowHeight { get; set; } = 1080;
 
-        // Audio Settings (Added for sound functionality)
+        // Audio Settings
         public bool EnableSoundEffects { get; set; } = true;
         public double SoundVolume { get; set; } = 0.7;
 
-        // Performance Settings (Added for performance optimization)
+        // Performance Settings
         public bool LowQualityMode { get; set; } = false;
         public int MaxFrameRate { get; set; } = 60;
         public bool EnableVSync { get; set; } = true;
         public bool EnableHardwareAcceleration { get; set; } = true;
 
-        // Backup Settings (Added for backup functionality)
+        // Backup Settings
         public bool EnableBackups { get; set; } = true;
         public string BackupLocation { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Backups");
         public int MaxBackupCount { get; set; } = 10;
@@ -130,11 +130,11 @@ namespace WWXMapEditor.Models
         public bool EnablePlugins { get; set; } = false;
         public string PluginDirectory { get; set; } = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "WWXMapEditor", "Plugins");
 
-        // Update Settings (Added for update checking)
+        // Update Settings
         public bool CheckForUpdates { get; set; } = true;
         public DateTime LastUpdateCheck { get; set; } = DateTime.MinValue;
 
-        // Custom Settings (Added for extensibility)
+        // Custom Settings
         public Dictionary<string, object> CustomSettings { get; set; } = new Dictionary<string, object>();
 
         // Configuration Metadata
@@ -143,11 +143,24 @@ namespace WWXMapEditor.Models
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
         public string Version { get; set; } = "1.0.0";
 
-        // User Information (Added for logging/tracking)
+        // User Information
         [JsonIgnore]
         public string CurrentUser { get; set; } = "cs121287";
 
         [JsonIgnore]
         public DateTime SessionStartTime { get; set; } = DateTime.UtcNow;
+
+        // NEW SCALING MODEL FIELDS
+        public string ScaleMode { get; set; } = "Automatic"; // Automatic | CustomFixed | SystemDpiOnly | LegacyPercent
+        public double MinAutoScale { get; set; } = 0.75;
+        public double MaxAutoScale { get; set; } = 1.65;
+        public double DesignWidth { get; set; } = 1920;
+        public double DesignHeight { get; set; } = 1080;
+        public double? CustomFixedScale { get; set; } = null;
+        public double MinFontScale { get; set; } = 0.85;
+        public double MaxFontScale { get; set; } = 1.8;
+        public double? FontScaleOverride { get; set; } = null;
+        public bool UseDensityBreakpoints { get; set; } = true;
+        public string? LegacyUIScalingPercent { get; set; } = null;
     }
 }

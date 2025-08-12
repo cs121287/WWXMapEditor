@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using WWXMapEditor.ViewModels;
 using WWXMapEditor.Services;
+using WWXMapEditor.UI.Scaling; // Adaptive scaling attachment
 
 namespace WWXMapEditor.Views
 {
@@ -14,21 +15,17 @@ namespace WWXMapEditor.Views
             InitializeComponent();
 
             _settingsService = SettingsService.Instance;
-
-            // Set up the DataContext
             DataContext = new MainWindowViewModel();
 
-            // Subscribe to scaling changes if needed
+            // Attach adaptive scaling (DPI / size change monitoring)
+            Loaded += (_, __) => ScaleService.Instance.Attach(this);
+
             _settingsService.ScalingChanged += OnScalingChanged;
         }
 
         private void OnScalingChanged(object? sender, EventArgs e)
         {
-            // Force layout update to ensure scaled resources are applied
-            Dispatcher.Invoke(() =>
-            {
-                UpdateLayout();
-            });
+            Dispatcher.Invoke(UpdateLayout);
         }
 
         protected override void OnClosed(EventArgs e)

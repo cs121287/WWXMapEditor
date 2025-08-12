@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
@@ -22,7 +24,8 @@
             <Grid Margin="{DynamicResource MarginLarge}">
                 <TextBlock Text="SETTINGS" 
                            FontFamily="Consolas"
-                           FontSize="{DynamicResource FontSizeHeader}"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=36}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource ForegroundBrush}"
                            HorizontalAlignment="Left"
@@ -38,14 +41,14 @@
             </Grid>
         </Border>
 
-        <!-- Settings Content -->
+        <!-- Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MinWidth="200" MaxWidth="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Category List -->
+            <!-- Categories -->
             <Border Grid.Column="0" 
                     Background="{DynamicResource SurfaceBrush}" 
                     BorderBrush="{DynamicResource BorderBrush}" 
@@ -87,7 +90,6 @@
                 </ListBox>
             </Border>
 
-            <!-- Settings Pages - No ScrollViewer needed with 2-column layout -->
             <ContentControl Grid.Column="1" 
                             Margin="{DynamicResource MarginXLarge}" 
                             Content="{Binding CurrentSettingsPage}"/>
@@ -99,8 +101,7 @@
                 BorderBrush="{DynamicResource BorderBrush}" 
                 BorderThickness="0,2,0,0">
             <Grid Margin="{DynamicResource MarginLarge}">
-                <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Button Content="RESET TO DEFAULTS" 
                             Style="{StaticResource SecondaryButtonStyle}"
                             MinWidth="200"
@@ -109,8 +110,7 @@
                             Command="{Binding ResetToDefaultsCommand}"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" 
-                            HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="APPLY" 
                             Style="{StaticResource PrimaryButtonStyle}"
                             MinWidth="120"

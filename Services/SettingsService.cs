@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using WWXMapEditor.Models;
 using System.Linq;
+using WWXMapEditor.UI.Scaling;
 
 namespace WWXMapEditor.Services
 {
@@ -162,7 +163,7 @@ namespace WWXMapEditor.Services
                         var oldSettings = _settings;
                         _settings = loadedSettings;
 
-                        // Convert UIScaling percentage string to UiScale double if needed
+                        // Convert UIScaling percentage string to UiScale double if needed (legacy support)
                         if (!string.IsNullOrEmpty(_settings.UIScaling))
                         {
                             string scaleStr = _settings.UIScaling.Replace("%", "");
@@ -211,7 +212,7 @@ namespace WWXMapEditor.Services
                 var oldSettings = _settings;
                 _settings = settings;
 
-                // Update UIScaling string from UiScale
+                // Update UIScaling string from UiScale for legacy UI (keep in sync for compatibility)
                 _settings.UIScaling = $"{(int)(_settings.UiScale * 100)}%";
 
                 // Temporarily disable file watcher to avoid circular updates
@@ -266,7 +267,7 @@ namespace WWXMapEditor.Services
                 var oldSettings = _settings;
                 _settings = settings;
 
-                // Update UIScaling string from UiScale
+                // Update UIScaling string from UiScale for legacy UI (keep in sync for compatibility)
                 _settings.UIScaling = $"{(int)(_settings.UiScale * 100)}%";
 
                 // Temporarily disable file watcher to avoid circular updates
@@ -349,7 +350,7 @@ namespace WWXMapEditor.Services
                 isValid = false;
             }
 
-            // Validate UI scaling
+            // Legacy UI scaling sanity (kept for backward-compat UI)
             var validScalings = new[] { "50%", "75%", "100%", "125%", "150%", "175%", "200%" };
             if (!validScalings.Contains(settings.UIScaling))
             {
@@ -427,20 +428,42 @@ namespace WWXMapEditor.Services
         {
             if (_settings == null) return;
 
-            // Parse the scale percentage
-            var scaleFactor = _settings.UIScaling.TrimEnd('%');
-            if (!double.TryParse(scaleFactor, out double scale))
+            // Synchronize AppSettings into ScaleService (new advanced scaling)
+            var scaleSvc = ScaleService.Instance;
+            scaleSvc.ScaleMode = (_settings.ScaleMode ?? "Automatic");
+            scaleSvc.CustomFixedScale = _settings.CustomFixedScale.HasValue && _settings.CustomFixedScale.Value > 0
+                ? _settings.CustomFixedScale.Value : 1.0;
+            scaleSvc.DesignWidth = _settings.DesignWidth > 0 ? _settings.DesignWidth : 1920;
+            scaleSvc.DesignHeight = _settings.DesignHeight > 0 ? _settings.DesignHeight : 1080;
+            scaleSvc.MinAutoScale = _settings.MinAutoScale > 0 ? _settings.MinAutoScale : 0.75;
+            scaleSvc.MaxAutoScale = _settings.MaxAutoScale > 0 ? _settings.MaxAutoScale : 1.65;
+            scaleSvc.MinFontScale = _settings.MinFontScale > 0 ? _settings.MinFontScale : 0.85;
+            scaleSvc.MaxFontScale = _settings.MaxFontScale > 0 ? _settings.MaxFontScale : 1.8;
+            scaleSvc.EnableBreakpointStyling = _settings.UseDensityBreakpoints;
+
+            // Legacy percent compatibility: if ScaleMode is LegacyPercent, drive UiScale from UIScaling string
+            if (string.Equals(_settings.ScaleMode, "LegacyPercent", StringComparison.OrdinalIgnoreCase))
             {
-                scale = 100;
+                var scaleFactor = _settings.UIScaling.TrimEnd('%');
+                if (!double.TryParse(scaleFactor, out double scalePercent)) scalePercent = 100;
+                var uiScale = Math.Clamp(scalePercent / 100.0, 0.5, 2.0);
+                _settings.UiScale = uiScale;
+                scaleSvc.CustomFixedScale = uiScale; // used when CustomFixed or LegacyPercent fallback
+            }
+            else if (string.Equals(_settings.ScaleMode, "CustomFixed", StringComparison.OrdinalIgnoreCase))
+            {
+                // Ensure CustomFixedScale is consistent and non-null
+                if (!_settings.CustomFixedScale.HasValue || _settings.CustomFixedScale.Value <= 0)
+                {
+                    _settings.CustomFixedScale = 1.0;
+                }
             }
 
-            scale = scale / 100.0;
+            // Recompute scales
+            scaleSvc.Recompute();
 
-            if (scale < 0.5 || scale > 2.0)
-                scale = 1.0;
-
-            _currentScale = scale;
-            _settings.UiScale = scale;
+            // Update current scale snapshot
+            _currentScale = scaleSvc.EffectiveScale;
 
             if (System.Windows.Application.Current == null)
                 return;
@@ -449,7 +472,8 @@ namespace WWXMapEditor.Services
             {
                 try
                 {
-                    UpdateScaledResources(scale);
+                    // Update app resources based on EffectiveScale (UI sizes) and FontScale (text)
+                    UpdateScaledResources(scaleSvc.EffectiveScale, scaleSvc.FontScale);
 
                     // Notify that scaling has changed
                     ScalingChanged?.Invoke(this, EventArgs.Empty);
@@ -467,41 +491,41 @@ namespace WWXMapEditor.Services
             });
         }
 
-        private void UpdateScaledResources(double scale)
+        private void UpdateScaledResources(double uiScale, double fontScale)
         {
-            // Update font sizes
-            UpdateResource("FontSizeSmall", GetBaseValue("BaseFontSizeSmall") * scale);
-            UpdateResource("FontSizeMedium", GetBaseValue("BaseFontSizeMedium") * scale);
-            UpdateResource("FontSizeLarge", GetBaseValue("BaseFontSizeLarge") * scale);
-            UpdateResource("FontSizeXLarge", GetBaseValue("BaseFontSizeXLarge") * scale);
-            UpdateResource("FontSizeXXLarge", GetBaseValue("BaseFontSizeXXLarge") * scale);
-            UpdateResource("FontSizeTitle", GetBaseValue("BaseFontSizeTitle") * scale);
-            UpdateResource("FontSizeHeader", GetBaseValue("BaseFontSizeHeader") * scale);
-            UpdateResource("FontSizeMenu", GetBaseValue("BaseFontSizeMenu") * scale);
+            // Update font sizes (use fontScale)
+            UpdateResource("FontSizeSmall", GetBaseValue("BaseFontSizeSmall") * fontScale);
+            UpdateResource("FontSizeMedium", GetBaseValue("BaseFontSizeMedium") * fontScale);
+            UpdateResource("FontSizeLarge", GetBaseValue("BaseFontSizeLarge") * fontScale);
+            UpdateResource("FontSizeXLarge", GetBaseValue("BaseFontSizeXLarge") * fontScale);
+            UpdateResource("FontSizeXXLarge", GetBaseValue("BaseFontSizeXXLarge") * fontScale);
+            UpdateResource("FontSizeTitle", GetBaseValue("BaseFontSizeTitle") * fontScale);
+            UpdateResource("FontSizeHeader", GetBaseValue("BaseFontSizeHeader") * fontScale);
+            UpdateResource("FontSizeMenu", GetBaseValue("BaseFontSizeMenu") * fontScale);
 
-            // Update button sizes
-            UpdateResource("ScaledButtonWidth", GetBaseValue("BaseButtonWidth") * scale);
-            UpdateResource("ScaledButtonHeight", GetBaseValue("BaseButtonHeight") * scale);
-            UpdateResource("ScaledEditorButtonSize", GetBaseValue("BaseEditorButtonSize") * scale);
-            UpdateResource("ScaledToolbarButtonSize", GetBaseValue("BaseToolbarButtonSize") * scale);
-            UpdateResource("ScaledStepCircleSize", GetBaseValue("BaseStepCircleSize") * scale);
+            // Update button sizes (use uiScale)
+            UpdateResource("ScaledButtonWidth", GetBaseValue("BaseButtonWidth") * uiScale);
+            UpdateResource("ScaledButtonHeight", GetBaseValue("BaseButtonHeight") * uiScale);
+            UpdateResource("ScaledEditorButtonSize", GetBaseValue("BaseEditorButtonSize") * uiScale);
+            UpdateResource("ScaledToolbarButtonSize", GetBaseValue("BaseToolbarButtonSize") * uiScale);
+            UpdateResource("ScaledStepCircleSize", GetBaseValue("BaseStepCircleSize") * uiScale);
 
-            // Update control widths
-            UpdateResource("ScaledComboBoxWidth", GetBaseValue("BaseComboBoxWidth") * scale);
-            UpdateResource("ScaledTextBoxWidth", GetBaseValue("BaseTextBoxWidth") * scale);
-            UpdateResource("ScaledBrowseButtonWidth", GetBaseValue("BaseBrowseButtonWidth") * scale);
+            // Update control widths (use uiScale)
+            UpdateResource("ScaledComboBoxWidth", GetBaseValue("BaseComboBoxWidth") * uiScale);
+            UpdateResource("ScaledTextBoxWidth", GetBaseValue("BaseTextBoxWidth") * uiScale);
+            UpdateResource("ScaledBrowseButtonWidth", GetBaseValue("BaseBrowseButtonWidth") * uiScale);
 
-            // Update margins and padding
-            UpdateThickness("MarginSmall", 5 * scale);
-            UpdateThickness("MarginMedium", 10 * scale);
-            UpdateThickness("MarginLarge", 20 * scale);
-            UpdateThickness("MarginXLarge", 30 * scale);
-            UpdateThickness("PaddingSmall", 5 * scale);
-            UpdateThickness("PaddingMedium", 10 * scale);
-            UpdateThickness("PaddingLarge", 15 * scale);
-            UpdateThickness("PaddingXLarge", 30 * scale, 25 * scale);
-            UpdateThickness("ButtonMargin", 0, 10 * scale);
-            UpdateThickness("ButtonPadding", 15 * scale, 8 * scale);
+            // Update margins and padding (use uiScale)
+            UpdateThickness("MarginSmall", 5 * uiScale);
+            UpdateThickness("MarginMedium", 10 * uiScale);
+            UpdateThickness("MarginLarge", 20 * uiScale);
+            UpdateThickness("MarginXLarge", 30 * uiScale);
+            UpdateThickness("PaddingSmall", 5 * uiScale);
+            UpdateThickness("PaddingMedium", 10 * uiScale);
+            UpdateThickness("PaddingLarge", 15 * uiScale);
+            UpdateThickness("PaddingXLarge", 30 * uiScale, 25 * uiScale);
+            UpdateThickness("ButtonMargin", 0, 10 * uiScale);
+            UpdateThickness("ButtonPadding", 15 * uiScale, 8 * uiScale);
         }
 
         private double GetBaseValue(string key)

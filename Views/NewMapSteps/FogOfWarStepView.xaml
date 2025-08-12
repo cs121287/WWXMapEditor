@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
 
@@ -38,7 +39,8 @@
                             CornerRadius="30"
                             Margin="0,0,15,0">
                         <TextBlock Text="🌫️" 
-                                   FontSize="28"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=28}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
@@ -47,13 +49,15 @@
                         <TextBlock Text="FOG OF WAR" 
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="20"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                    FontWeight="Bold"
                                    Margin="0,0,0,5"/>
                         <TextBlock Text="Configure visibility settings" 
                                    Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="12"/>
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"/>
                     </StackPanel>
                 </Grid>
 
@@ -79,12 +83,14 @@
                                         <TextBlock Text="Enable Fog of War"
                                                    Foreground="{DynamicResource ForegroundBrush}"
                                                    FontFamily="Consolas"
-                                                   FontSize="16"
+                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                                                    FontWeight="Bold"/>
                                         <TextBlock Text="Limits visibility to explored areas"
                                                    Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                    FontFamily="Consolas"
-                                                   FontSize="12"
+                                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                                                    Margin="0,5,0,0"/>
                                     </StackPanel>
 
@@ -143,7 +149,8 @@
                     <TextBlock Text="Shroud Type"
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
-                               FontSize="14"
+                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                FontWeight="Bold"
                                Margin="0,0,0,15"/>
 
@@ -176,13 +183,15 @@
                                             <TextBlock Text="Black"
                                                        Foreground="{DynamicResource ForegroundBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="13"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                                        FontWeight="Bold"
                                                        HorizontalAlignment="Center"/>
                                             <TextBlock Text="Unexplored"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="10"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                        HorizontalAlignment="Center"
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
@@ -220,13 +229,15 @@
                                             <TextBlock Text="Grey"
                                                        Foreground="{DynamicResource ForegroundBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="13"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                                        FontWeight="Bold"
                                                        HorizontalAlignment="Center"/>
                                             <TextBlock Text="Explored"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        FontFamily="Consolas"
-                                                       FontSize="10"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                        HorizontalAlignment="Center"
                                                        Margin="0,2,0,0"/>
                                         </StackPanel>
@@ -246,7 +257,8 @@
                     <TextBlock Text="Vision Range Penalty"
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
-                               FontSize="14"
+                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                FontWeight="Bold"
                                Margin="0,0,0,15"/>
 
@@ -275,14 +287,16 @@
                                        Text="Low"
                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="11"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                        HorizontalAlignment="Left"/>
 
                             <TextBlock Grid.Column="1"
                                        Text="{Binding ParentViewModel.VisionPenaltyMultiplier, StringFormat='{}{0:F1}x'}"
                                        Foreground="{DynamicResource AccentBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center"/>
 
@@ -290,7 +304,8 @@
                                        Text="High"
                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="11"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                        HorizontalAlignment="Right"/>
                         </Grid>
                     </Grid>
@@ -312,7 +327,8 @@
                 <TextBlock Text="PREVIEW"
                            Foreground="{DynamicResource ForegroundBrush}"
                            FontFamily="Consolas"
-                           FontSize="16"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                            FontWeight="Bold"
                            HorizontalAlignment="Center"/>
             </Border>
@@ -388,7 +404,8 @@
                                 <TextBlock Text="LEGEND"
                                            Foreground="{DynamicResource ForegroundBrush}"
                                            FontFamily="Consolas"
-                                           FontSize="12"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                                            FontWeight="Bold"
                                            Margin="0,0,0,10"/>
 
@@ -411,7 +428,8 @@
                                                Text="Unit Position"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="11"
+                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                                Margin="0,0,0,5"/>
 
                                     <Rectangle Grid.Row="1" Grid.Column="0"
@@ -423,7 +441,8 @@
                                                Text="Fog of War"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="11"
+                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                                Margin="0,0,0,5"/>
 
                                     <Rectangle Grid.Row="2" Grid.Column="0"
@@ -436,7 +455,8 @@
                                                Text="Visible Area"
                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                FontFamily="Consolas"
-                                               FontSize="11"/>
+                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"/>
                                 </Grid>
                             </StackPanel>
                         </Border>

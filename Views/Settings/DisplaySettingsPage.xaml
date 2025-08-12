@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200">
 
@@ -17,9 +18,15 @@
                    Text="DISPLAY SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
-                   FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
-                   Margin="{DynamicResource MarginLarge}"/>
+                   Margin="{DynamicResource MarginLarge}">
+            <TextBlock.FontSize>
+                <Binding Source="{x:Static scaling:ScaleService.Instance}"
+                         Path="FontScale"
+                         Converter="{StaticResource MultiplyConverter}"
+                         ConverterParameter="{StaticResource BaseFontSizeXXLarge}"/>
+            </TextBlock.FontSize>
+        </TextBlock>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -66,13 +73,44 @@
                 <!-- UI Scale Section -->
                 <GroupBox Header="UI Scale" Style="{StaticResource SettingsGroupBoxStyle}">
                     <StackPanel>
+                        <!-- Scale Mode -->
                         <Grid Margin="{DynamicResource MarginMedium}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="UI scaling:" 
+                            <TextBlock Text="Scaling mode:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
+
+                            <ComboBox Grid.Column="1"
+                                      SelectedItem="{Binding ScaleMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding ScaleModes}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
+
+                        <!-- Legacy Percent UI (visible only when ScaleMode == LegacyPercent) -->
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ScaleMode}" Value="LegacyPercent">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="UI scaling (%):" 
                                        Foreground="White" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"
@@ -85,13 +123,114 @@
                                       HorizontalAlignment="Stretch"/>
                         </Grid>
 
-                        <Grid>
+                        <!-- Custom Fixed UI (visible only when ScaleMode == CustomFixed) -->
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ScaleMode}" Value="CustomFixed">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Custom scale:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
+
+                            <Slider Grid.Column="1"
+                                    Minimum="0.5"
+                                    Maximum="2.0"
+                                    TickFrequency="0.05"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding CustomFixedScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="{DynamicResource MarginMedium}"/>
+
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding CustomFixedScale, StringFormat={}{0:0.00}x}"
+                                       Foreground="White"
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Advanced thresholds -->
+                        <Expander Header="Advanced scaling thresholds" Margin="{DynamicResource MarginMedium}">
+                            <StackPanel>
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Min auto scale:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding MinAutoScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Max auto scale:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding MaxAutoScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Design width:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding DesignWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Design height:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding DesignHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Min font scale:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding MinFontScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+                                <Grid Margin="{DynamicResource MarginSmall}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Max font scale:" Foreground="White" FontSize="{DynamicResource FontSizeMedium}" VerticalAlignment="Center" Margin="{DynamicResource MarginSmall}"/>
+                                    <TextBox Grid.Column="1" Text="{Binding MaxFontScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" Style="{StaticResource SettingsTextBoxStyle}" />
+                                </Grid>
+
+                                <CheckBox Content="Use density breakpoints (Compact/Normal/Spacious)" 
+                                          IsChecked="{Binding UseDensityBreakpoints, Mode=TwoWay}"
+                                          Style="{StaticResource SettingsCheckBoxStyle}"
+                                          Margin="{DynamicResource MarginMedium}"/>
+                            </StackPanel>
+                        </Expander>
+
+                        <!-- Font size preference (maps to FontScaleOverride) -->
+                        <Grid Margin="{DynamicResource MarginMedium}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Font size:" 
+                            <TextBlock Text="Font size preference:" 
                                        Foreground="White" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"

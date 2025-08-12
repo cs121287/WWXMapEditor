@@ -4,9 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
-    
+
+    <!-- Assumes a global MultiplyConverter is registered in App resources.
+         If not, uncomment local resource:
+    <UserControl.Resources>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+    </UserControl.Resources>
+    -->
+
     <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,7 +28,8 @@
             <Grid Margin="20,15">
                 <TextBlock Text="ABOUT" 
                            FontFamily="Consolas"
-                           FontSize="36"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=36}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource ForegroundBrush}"
                            HorizontalAlignment="Left"
@@ -30,7 +40,8 @@
                         Style="{StaticResource EditorButtonStyle}"
                         Width="40"
                         Height="40"
-                        FontSize="20"
+                        FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                           Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                         Command="{Binding CloseCommand}"/>
             </Grid>
         </Border>
@@ -45,7 +56,8 @@
                 
                 <TextBlock Text="WWX MAP EDITOR" 
                            FontFamily="Consolas"
-                           FontSize="32"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=32}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource ForegroundBrush}"
                            HorizontalAlignment="Center"
@@ -53,14 +65,16 @@
                 
                 <TextBlock Text="Version 1.0.0" 
                            FontFamily="Consolas"
-                           FontSize="16"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                            Foreground="{DynamicResource ForegroundSecondaryBrush}"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,30"/>
                 
                 <TextBlock TextWrapping="Wrap"
                            FontFamily="Consolas"
-                           FontSize="14"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                            Foreground="{DynamicResource ForegroundBrush}"
                            LineHeight="20"
                            Margin="0,0,0,20">
@@ -71,14 +85,16 @@
                 
                 <TextBlock Text="Features:" 
                            FontFamily="Consolas"
-                           FontSize="16"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource ForegroundBrush}"
                            Margin="0,0,0,10"/>
                 
                 <TextBlock TextWrapping="Wrap"
                            FontFamily="Consolas"
-                           FontSize="14"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                            Foreground="{DynamicResource ForegroundBrush}"
                            LineHeight="20"
                            Margin="20,0,0,20">
@@ -97,7 +113,8 @@
                 
                 <TextBlock Text="© 2025 WWX Map Editor Team" 
                            FontFamily="Consolas"
-                           FontSize="12"
+                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                              Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                            Foreground="{DynamicResource ForegroundSecondaryBrush}"
                            HorizontalAlignment="Center"
                            Margin="0,30,0,0"/>
@@ -110,7 +127,8 @@
                     Style="{StaticResource MenuButtonStyle}"
                     Width="120"
                     Height="40"
-                    FontSize="16"
+                    FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                       Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
                     Margin="20,15"
                     HorizontalAlignment="Right"
                     Command="{Binding CloseCommand}"/>

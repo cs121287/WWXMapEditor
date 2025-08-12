@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200">
 
@@ -17,9 +18,15 @@
                    Text="ADVANCED SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
-                   FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
-                   Margin="{DynamicResource MarginLarge}"/>
+                   Margin="{DynamicResource MarginLarge}">
+            <TextBlock.FontSize>
+                <Binding Source="{x:Static scaling:ScaleService.Instance}"
+                         Path="FontScale"
+                         Converter="{StaticResource MultiplyConverter}"
+                         ConverterParameter="{StaticResource BaseFontSizeXXLarge}"/>
+            </TextBlock.FontSize>
+        </TextBlock>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

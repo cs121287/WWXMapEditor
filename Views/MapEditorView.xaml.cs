@@ -11,7 +11,7 @@ namespace WWXMapEditor.Views
             InitializeComponent();
         }
 
-        private void OnMapMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void OnMapMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
@@ -71,12 +71,7 @@ namespace WWXMapEditor.Views
 
         private void OnMiniMapClick(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is ViewModels.MapEditorViewModel viewModel)
-            {
-                // MiniMapCanvas doesn't exist in the current XAML, so we'll comment this out for now
-                // var position = e.GetPosition(MiniMapCanvas);
-                // viewModel.NavigateToMiniMapPosition(position.X, position.Y);
-            }
+            // Placeholder for potential minimap interaction
         }
     }
 }

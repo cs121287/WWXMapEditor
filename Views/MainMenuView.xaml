@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
     <Grid>
-        <!-- Subtle animated background pattern -->
         <Grid.Background>
             <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" Opacity="0.02">
                 <DrawingBrush.Drawing>
@@ -38,12 +39,12 @@
             </Grid.RowDefinitions>
 
             <!-- Header Section -->
-            <Border Grid.Row="0" 
-                    Padding="{DynamicResource PaddingXLarge}">
+            <Border Grid.Row="0" Padding="{DynamicResource PaddingXLarge}">
                 <StackPanel HorizontalAlignment="Center">
                     <TextBlock Text="WWX MAP EDITOR" 
                                Style="{StaticResource HeaderTextStyle}"
-                               FontSize="{DynamicResource FontSizeHeader}"
+                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=36}"
                                Foreground="{DynamicResource ForegroundBrush}"
                                Margin="{DynamicResource MarginMedium}">
                         <TextBlock.Effect>
@@ -59,14 +60,14 @@
                 </StackPanel>
             </Border>
 
-            <!-- Main Content Area with Image -->
+            <!-- Main Content Area -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left Content Area -->
+                <!-- Left area -->
                 <Grid Grid.Column="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -74,7 +75,6 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Center Menu Panel - Moved to top row for alignment with image -->
                     <Border Grid.Row="0" 
                             HorizontalAlignment="Center"
                             VerticalAlignment="Top"
@@ -89,15 +89,14 @@
                         </Border.Effect>
 
                         <StackPanel>
-                            <!-- Menu Title -->
                             <TextBlock Text="MAIN MENU" 
                                        Style="{StaticResource TitleTextStyle}"
                                        HorizontalAlignment="Center"
                                        Margin="0,0,0,30"
-                                       FontSize="{DynamicResource FontSizeXLarge}"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=32}"
                                        Foreground="{DynamicResource ForegroundBrush}"/>
 
-                            <!-- Menu Buttons Grid -->
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -110,7 +109,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- First Row -->
+                                <!-- Row 1 -->
                                 <Button Grid.Row="0" Grid.Column="0"
                                         Content="NEW MAP" 
                                         Style="{StaticResource MenuButtonStyle}"
@@ -139,7 +138,7 @@
                                     </Button.ToolTip>
                                 </Button>
 
-                                <!-- Second Row -->
+                                <!-- Row 2 -->
                                 <Button Grid.Row="1" Grid.Column="0"
                                         Content="LOAD MAP" 
                                         Style="{StaticResource MenuButtonStyle}"
@@ -168,7 +167,7 @@
                                     </Button.ToolTip>
                                 </Button>
 
-                                <!-- Third Row -->
+                                <!-- Row 3 -->
                                 <Button Grid.Row="2" Grid.Column="0"
                                         Content="RECENT MAPS" 
                                         Style="{StaticResource MenuButtonStyle}"
@@ -198,12 +197,10 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Spacer for middle row -->
                     <Grid Grid.Row="1"/>
 
-                    <!-- Info Panels at Bottom -->
-                    <Grid Grid.Row="2" 
-                          Margin="0,40,0,40"
+                    <!-- Info Panels -->
+                    <Grid Grid.Row="2" Margin="0,40,0,40"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Bottom">
                         <Grid.ColumnDefinitions>
@@ -212,7 +209,6 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Editor Stats Panel -->
                         <Border Grid.Column="0" 
                                 Background="{DynamicResource Surface2Brush}"
                                 BorderBrush="{DynamicResource BorderBrush}"
@@ -291,7 +287,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Quick Tips Panel -->
                         <Border Grid.Column="2" 
                                 Background="{DynamicResource Surface2Brush}"
                                 BorderBrush="{DynamicResource BorderBrush}"
@@ -324,7 +319,7 @@
                     </Grid>
                 </Grid>
 
-                <!-- Right Side Image -->
+                <!-- Right Image -->
                 <Grid Grid.Column="1" Margin="20,40,40,40">
                     <Border Background="{DynamicResource Surface2Brush}"
                             BorderBrush="{DynamicResource BorderBrush}"
@@ -337,21 +332,16 @@
                         </Border.Effect>
 
                         <Grid>
-                            <!-- Fallback rectangle if image is not found -->
                             <Rectangle Fill="{DynamicResource Surface3Brush}"
                                        RadiusX="8"
                                        RadiusY="8"/>
-
-                            <!-- Image Container with aspect ratio preservation -->
                             <Viewbox Stretch="Uniform" 
                                      StretchDirection="Both"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"
                                      MaxWidth="500"
                                      MaxHeight="500">
-                                <!-- Try multiple image paths for compatibility -->
                                 <Grid>
-                                    <!-- Primary image path -->
                                     <Image x:Name="MainMenuImage"
                                            Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
                                            RenderOptions.BitmapScalingMode="HighQuality"
@@ -366,7 +356,6 @@
                                         </Image.Effect>
                                     </Image>
 
-                                    <!-- Fallback placeholder if image doesn't load -->
                                     <Border x:Name="ImagePlaceholder"
                                             Background="{DynamicResource Surface3Brush}"
                                             Width="400"
@@ -386,7 +375,8 @@
                                             <TextBlock Text="WWX"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
-                                                       FontSize="72"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=72}"
                                                        FontWeight="Bold"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        Opacity="0.3"/>
@@ -394,7 +384,8 @@
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Bottom"
                                                        Margin="0,0,0,50"
-                                                       FontSize="18"
+                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
+                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
                                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                        Opacity="0.5"/>
                                         </Grid>
@@ -402,7 +393,6 @@
                                 </Grid>
                             </Viewbox>
 
-                            <!-- Optional overlay for branding or text -->
                             <Border Background="{DynamicResource BackgroundBrush}"
                                     Opacity="0.7"
                                     VerticalAlignment="Bottom"
@@ -422,8 +412,7 @@
             </Grid>
 
             <!-- Footer -->
-            <Border Grid.Row="2" 
-                    Padding="{DynamicResource PaddingLarge}">
+            <Border Grid.Row="2" Padding="{DynamicResource PaddingLarge}">
                 <Grid>
                     <TextBlock Text="&#169; 2025 WWX Map Editor - User: cs121287" 
                                Style="{StaticResource DescriptionTextStyle}"

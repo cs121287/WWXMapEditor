@@ -39,6 +39,12 @@ namespace WWXMapEditor.ViewModels
         private double _visionPenaltyMultiplier = 1.0;
         private string _visionPenaltyMultiplierString = "Default (1x)";
 
+        // Alliances (Player 1 is the local player; Players 2..4 can be Ally/Enemy)
+        private bool _player2IsAlly = false;
+        private bool _player3IsAlly = false;
+        private bool _player4IsAlly = false;
+        private bool _suppressAllianceValidation = false;
+
         public string MapName
         {
             get => _mapName;
@@ -86,8 +92,81 @@ namespace WWXMapEditor.ViewModels
         public int NumberOfPlayers
         {
             get => _numberOfPlayers;
-            set => SetProperty(ref _numberOfPlayers, value);
+            set
+            {
+                if (value < 2 || value > 4)
+                    return;
+
+                if (SetProperty(ref _numberOfPlayers, value))
+                {
+                    // Reset/Enforce alliances according to rules when count changes
+                    EnforceAllianceConstraints(changedPlayerIndex: 0);
+                }
+            }
         }
+
+        public int NumberOfPlayersOld // not used externally; for future transitions if needed
+        {
+            get => _numberOfPlayers;
+        }
+
+        public int NumberOfPlayersMin => 2;
+        public int NumberOfPlayersMax => 4;
+
+        public bool Player2IsAlly
+        {
+            get => _player2IsAlly;
+            set
+            {
+                if (SetProperty(ref _player2IsAlly, value))
+                {
+                    EnforceAllianceConstraints(changedPlayerIndex: 2);
+                }
+            }
+        }
+
+        public bool Player3IsAlly
+        {
+            get => _player3IsAlly;
+            set
+            {
+                if (SetProperty(ref _player3IsAlly, value))
+                {
+                    EnforceAllianceConstraints(changedPlayerIndex: 3);
+                }
+            }
+        }
+
+        public bool Player4IsAlly
+        {
+            get => _player4IsAlly;
+            set
+            {
+                if (SetProperty(ref _player4IsAlly, value))
+                {
+                    EnforceAllianceConstraints(changedPlayerIndex: 4);
+                }
+            }
+        }
+
+        public int NumberOfPlayersAlliesCount =>
+            (Player2IsAlly ? 1 : 0) +
+            (NumberOfPlayers >= 3 && Player3IsAlly ? 1 : 0) +
+            (NumberOfPlayers >= 4 && Player4IsAlly ? 1 : 0);
+
+        public int NumberOfPlayersEnemiesCount =>
+            (NumberOfPlayers - 1) - NumberOfPlayersAlliesCount; // excluding Player1
+
+        public int NumberOfPlayersAlliesMax =>
+            NumberOfPlayers switch
+            {
+                2 => 0,
+                3 => 1,
+                4 => 2, // At most 2 allies among players 2..4
+                _ => 0
+            };
+
+        public int NumberOfPlayersAlliesMin => 0; // Only requirement is at least one enemy; handled below
 
         public bool EliminationVictory
         {
@@ -154,7 +233,6 @@ namespace WWXMapEditor.ViewModels
             {
                 if (SetProperty(ref _visionPenaltyMultiplierString, value))
                 {
-                    // Update the numeric value based on selection
                     switch (value)
                     {
                         case "Default (1x)":
@@ -229,7 +307,7 @@ namespace WWXMapEditor.ViewModels
             _mainWindowViewModel = mainWindowViewModel;
 
             TerrainTypes = new ObservableCollection<string> { "Plains", "Mountain", "Forest", "Sand", "Sea" };
-            PlayerCountOptions = new ObservableCollection<int> { 2, 3, 4, 5, 6 };
+            PlayerCountOptions = new ObservableCollection<int> { 2, 3, 4 }; // restricted to 2-4
             ShroudTypes = new ObservableCollection<string> { "Black", "Grey" };
             VisionPenaltyMultipliers = new ObservableCollection<string> { "Default (1x)", "2x", "3x" };
 
@@ -279,7 +357,82 @@ namespace WWXMapEditor.ViewModels
             CancelCommand = new RelayCommand(ExecuteCancel);
             ClearValidationMessageCommand = new RelayCommand(ExecuteClearValidationMessage);
 
+            // Ensure alliances are valid for default player count (2)
+            EnforceAllianceConstraints(changedPlayerIndex: 0);
+
             UpdateCurrentStep();
+        }
+
+        private void EnforceAllianceConstraints(int changedPlayerIndex)
+        {
+            if (_suppressAllianceValidation) return;
+
+            try
+            {
+                _suppressAllianceValidation = true;
+
+                // Reset players that exceed the selected count
+                if (NumberOfPlayers < 4 && Player4IsAlly) Player4IsAlly = false;
+                if (NumberOfPlayers < 3 && Player3IsAlly) Player3IsAlly = false;
+
+                switch (NumberOfPlayers)
+                {
+                    case 2:
+                        // Player 2 must be enemy
+                        if (Player2IsAlly) Player2IsAlly = false;
+                        break;
+
+                    case 3:
+                        // Not both Player2 and Player3 can be ally (min 1 enemy)
+                        if (Player2IsAlly && Player3IsAlly)
+                        {
+                            if (changedPlayerIndex == 2)
+                            {
+                                Player3IsAlly = false;
+                            }
+                            else
+                            {
+                                Player2IsAlly = false;
+                            }
+                        }
+                        break;
+
+                    case 4:
+                        // At most two allies among players 2,3,4 (min 1 enemy)
+                        int count = 0;
+                        if (Player2IsAlly) count++;
+                        if (Player3IsAlly) count++;
+                        if (Player4IsAlly) count++;
+
+                        if (count > 2)
+                        {
+                            // Turn off one of the other allies (prefer the lowest index not just changed)
+                            if (changedPlayerIndex != 2 && Player2IsAlly)
+                                Player2IsAlly = false;
+                            else if (changedPlayerIndex != 3 && Player3IsAlly)
+                                Player3IsAlly = false;
+                            else if (changedPlayerIndex != 4 && Player4IsAlly)
+                                Player4IsAlly = false;
+                        }
+                        break;
+                }
+
+                // Final safety: ensure at least one enemy exists among other players
+                if (NumberOfPlayersEnemiesCount < 1)
+                {
+                    // If somehow all others became allies, revert the last changed to enemy
+                    switch (changedPlayerIndex)
+                    {
+                        case 4: Player4IsAlly = false; break;
+                        case 3: Player3IsAlly = false; break;
+                        case 2: Player2IsAlly = false; break;
+                    }
+                }
+            }
+            finally
+            {
+                _suppressAllianceValidation = false;
+            }
         }
 
         private void UpdateCurrentStep()
@@ -343,13 +496,29 @@ namespace WWXMapEditor.ViewModels
             switch (CurrentStepIndex)
             {
                 case 0: // Basic Information
+                    // Enforce player count rules before allowing next
+                    if (NumberOfPlayers < 2 || NumberOfPlayers > 4)
+                        return false;
+
+                    if (NumberOfPlayers == 2 && Player2IsAlly)
+                        return false; // should never happen due to enforcement
+
+                    if (NumberOfPlayers == 3 && Player2IsAlly && Player3IsAlly)
+                        return false;
+
+                    if (NumberOfPlayers == 4 && NumberOfPlayersEnemiesCount < 1)
+                        return false;
+
                     return !string.IsNullOrWhiteSpace(MapName) &&
                            MapWidth >= 10 && MapWidth <= 500 &&
                            MapHeight >= 10 && MapHeight <= 500;
+
                 case 1: // Victory Conditions
                     return EliminationVictory || CaptureObjectivesVictory || SurvivalVictory || EconomicVictory;
+
                 case 2: // Fog of War - Last step
                     return true;
+
                 default:
                     return false;
             }
@@ -383,7 +552,6 @@ namespace WWXMapEditor.ViewModels
 
         private void ExecuteCancel(object? parameter)
         {
-            // Show confirmation dialog
             var result = System.Windows.MessageBox.Show(
                 "Are you sure you want to cancel? All unsaved changes will be lost.",
                 "Cancel Map Creation",
@@ -392,7 +560,6 @@ namespace WWXMapEditor.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                // Navigate back to main menu
                 _mainWindowViewModel.NavigateToMainMenu();
             }
         }
@@ -429,23 +596,19 @@ namespace WWXMapEditor.ViewModels
                     }
                 };
 
-                // Create the map with the specified properties
                 var mapService = new MapService();
                 var map = mapService.CreateNewMap(mapProperties);
 
-                // Show success message
                 System.Windows.MessageBox.Show(
                     $"Map '{MapName}' has been created successfully!",
                     "Map Created",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 
-                // Navigate to the map editor with the new map
                 _mainWindowViewModel.NavigateToMapEditor(map);
             }
             catch (Exception ex)
             {
-                // Show error message
                 ValidationMessage = $"Failed to create map: {ex.Message}";
                 System.Windows.MessageBox.Show(
                     $"An error occurred while creating the map:\n\n{ex.Message}",

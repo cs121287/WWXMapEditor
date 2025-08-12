@@ -5,10 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
+             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200">
 
     <UserControl.Resources>
+        <!-- Local converter instances ensure designer/runtime can resolve them even if app-level resources change -->
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+        <conv:StringComparisonConverter x:Key="StringComparisonConverter"/>
+        <conv:IntComparisonConverter x:Key="IntComparisonConverter"/>
+
         <Storyboard x:Key="FadeInAnimation">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5"/>
             <ThicknessAnimation Storyboard.TargetProperty="Margin" From="50,0,0,0" To="0,0,0,0" Duration="0:0:0.5">
@@ -25,12 +32,10 @@
         <sys:String x:Key="TerrainSand">Sand</sys:String>
         <sys:String x:Key="TerrainSea">Sea</sys:String>
 
-        <!-- Player Count Options -->
+        <!-- Player Count Options (restricted to 2-4) -->
         <sys:Int32 x:Key="Players2">2</sys:Int32>
         <sys:Int32 x:Key="Players3">3</sys:Int32>
         <sys:Int32 x:Key="Players4">4</sys:Int32>
-        <sys:Int32 x:Key="Players5">5</sys:Int32>
-        <sys:Int32 x:Key="Players6">6</sys:Int32>
     </UserControl.Resources>
 
     <UserControl.Triggers>
@@ -67,7 +72,7 @@
                             CornerRadius="30"
                             Margin="0,0,15,0">
                         <TextBlock Text="📝" 
-                                   FontSize="28"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=28}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
@@ -76,13 +81,13 @@
                         <TextBlock Text="MAP IDENTITY" 
                                    Foreground="{DynamicResource AccentBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="14"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                    FontWeight="Bold"
                                    Margin="0,0,0,5"/>
                         <TextBlock Text="Give your map a unique name and description" 
                                    Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="12"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Grid>
@@ -126,14 +131,14 @@
                                        Text="Map Name"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                        FontWeight="Bold"
                                        Margin="0,0,0,10"/>
 
                             <TextBox Grid.Row="1"
                                      Text="{Binding ParentViewModel.MapName, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource SettingsTextBoxStyle}"
-                                     FontSize="18"
+                                     FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
                                      Height="45"
                                      VerticalContentAlignment="Center"/>
 
@@ -141,7 +146,7 @@
                                        Text="{Binding ParentViewModel.MapName.Length, StringFormat='Characters: {0}/50'}"
                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="11"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                        HorizontalAlignment="Right"
                                        Margin="0,5,0,0"/>
                         </Grid>
@@ -164,14 +169,14 @@
                                        Text="Map Description"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                        FontWeight="Bold"
                                        Margin="0,0,0,10"/>
 
                             <TextBox Grid.Row="1"
                                      Text="{Binding ParentViewModel.MapDescription, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource SettingsTextBoxStyle}"
-                                     FontSize="14"
+                                     FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"
                                      Height="120"
@@ -181,7 +186,7 @@
                                        Text="Optional: Provide details about your map's theme or objectives"
                                        Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="11"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=11}"
                                        FontStyle="Italic"
                                        Margin="0,5,0,0"/>
                         </Grid>
@@ -218,7 +223,7 @@
                             CornerRadius="30"
                             Margin="0,0,15,0">
                         <TextBlock Text="⚙️" 
-                                   FontSize="28"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=28}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
@@ -227,13 +232,13 @@
                         <TextBlock Text="MAP CONFIGURATION" 
                                    Foreground="{DynamicResource AccentBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="14"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                    FontWeight="Bold"
                                    Margin="0,0,0,5"/>
                         <TextBlock Text="Configure size, terrain, and player settings" 
                                    Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                    FontFamily="Consolas"
-                                   FontSize="12"
+                                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Grid>
@@ -243,6 +248,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <!-- Player count + alliances block will use 6 rows -->
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
@@ -265,7 +271,7 @@
                                 <TextBlock Text="Width"
                                            Foreground="{DynamicResource ForegroundBrush}"
                                            FontFamily="Consolas"
-                                           FontSize="13"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                            FontWeight="Bold"
                                            Margin="0,0,0,8"/>
                                 <Grid>
@@ -297,7 +303,7 @@
                             <TextBlock Grid.Column="1" Text="×"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="20"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Margin="0,15,0,0"/>
@@ -306,7 +312,7 @@
                                 <TextBlock Text="Height"
                                            Foreground="{DynamicResource ForegroundBrush}"
                                            FontFamily="Consolas"
-                                           FontSize="13"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
                                            FontWeight="Bold"
                                            Margin="0,0,0,8"/>
                                 <Grid>
@@ -355,7 +361,7 @@
                                        Text="Starting Terrain"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                        FontWeight="Bold"
                                        Margin="0,0,0,10"/>
 
@@ -387,7 +393,7 @@
                                                                Text="Plains"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="13"/>
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"/>
                                                 </Grid>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -430,7 +436,7 @@
                                                                Text="Mountain"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="13"/>
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"/>
                                                 </Grid>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -473,7 +479,7 @@
                                                                Text="Forest"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="13"/>
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"/>
                                                 </Grid>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -492,7 +498,7 @@
                         </Grid>
                     </Border>
 
-                    <!-- Player Count -->
+                    <!-- Player Count + Alliances -->
                     <Border Grid.Row="2"
                             Background="{DynamicResource Surface2Brush}"
                             BorderBrush="{DynamicResource BorderBrush}"
@@ -500,20 +506,32 @@
                             CornerRadius="8"
                             Padding="20">
                         <Grid>
+                            <!-- Adjusted to 6 rows to match all sections (0..5) -->
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <!-- Header -->
                                 <RowDefinition Height="Auto"/>
+                                <!-- Player count buttons -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Alliances header -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Player 2 toggle -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Player 3 toggle -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Player 4 toggle -->
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0"
                                        Text="Number of Players"
                                        Foreground="{DynamicResource ForegroundBrush}"
                                        FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
                                        FontWeight="Bold"
                                        Margin="0,0,0,10"/>
 
-                            <UniformGrid Grid.Row="1" Rows="1" Columns="5">
+                            <!-- Player count options (2-4 only) -->
+                            <UniformGrid Grid.Row="1" Rows="1" Columns="3" Margin="0,0,0,10">
                                 <!-- 2 Players -->
                                 <RadioButton GroupName="PlayerCount"
                                              IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players2}}"
@@ -531,14 +549,14 @@
                                                     <TextBlock Text="2"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="20"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                                FontWeight="Bold"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"/>
                                                     <TextBlock Text="Players"
                                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="10"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Bottom"
                                                                Margin="0,0,0,5"/>
@@ -574,14 +592,14 @@
                                                     <TextBlock Text="3"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="20"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                                FontWeight="Bold"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"/>
                                                     <TextBlock Text="Players"
                                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="10"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Bottom"
                                                                Margin="0,0,0,5"/>
@@ -602,8 +620,7 @@
 
                                 <!-- 4 Players -->
                                 <RadioButton GroupName="PlayerCount"
-                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players4}}"
-                                             Margin="0,0,5,0">
+                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players4}}">
                                     <RadioButton.Template>
                                         <ControlTemplate TargetType="RadioButton">
                                             <Border x:Name="border"
@@ -617,99 +634,14 @@
                                                     <TextBlock Text="4"
                                                                Foreground="{DynamicResource ForegroundBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="20"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
                                                                FontWeight="Bold"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"/>
                                                     <TextBlock Text="Players"
                                                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                                                FontFamily="Consolas"
-                                                               FontSize="10"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Bottom"
-                                                               Margin="0,0,0,5"/>
-                                                </Grid>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                </Trigger>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </RadioButton.Template>
-                                </RadioButton>
-
-                                <!-- 5 Players -->
-                                <RadioButton GroupName="PlayerCount"
-                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players5}}"
-                                             Margin="0,0,5,0">
-                                    <RadioButton.Template>
-                                        <ControlTemplate TargetType="RadioButton">
-                                            <Border x:Name="border"
-                                                    Background="{DynamicResource Surface3Brush}"
-                                                    BorderBrush="{DynamicResource BorderBrush}"
-                                                    BorderThickness="2"
-                                                    CornerRadius="8"
-                                                    Height="50"
-                                                    Cursor="Hand">
-                                                <Grid>
-                                                    <TextBlock Text="5"
-                                                               Foreground="{DynamicResource ForegroundBrush}"
-                                                               FontFamily="Consolas"
-                                                               FontSize="20"
-                                                               FontWeight="Bold"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center"/>
-                                                    <TextBlock Text="Players"
-                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                               FontFamily="Consolas"
-                                                               FontSize="10"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Bottom"
-                                                               Margin="0,0,0,5"/>
-                                                </Grid>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                                </Trigger>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </RadioButton.Template>
-                                </RadioButton>
-
-                                <!-- 6 Players -->
-                                <RadioButton GroupName="PlayerCount"
-                                             IsChecked="{Binding ParentViewModel.NumberOfPlayers, Converter={StaticResource IntComparisonConverter}, ConverterParameter={StaticResource Players6}}">
-                                    <RadioButton.Template>
-                                        <ControlTemplate TargetType="RadioButton">
-                                            <Border x:Name="border"
-                                                    Background="{DynamicResource Surface3Brush}"
-                                                    BorderBrush="{DynamicResource BorderBrush}"
-                                                    BorderThickness="2"
-                                                    CornerRadius="8"
-                                                    Height="50"
-                                                    Cursor="Hand">
-                                                <Grid>
-                                                    <TextBlock Text="6"
-                                                               Foreground="{DynamicResource ForegroundBrush}"
-                                                               FontFamily="Consolas"
-                                                               FontSize="20"
-                                                               FontWeight="Bold"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center"/>
-                                                    <TextBlock Text="Players"
-                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                               FontFamily="Consolas"
-                                                               FontSize="10"
+                                                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=10}"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Bottom"
                                                                Margin="0,0,0,5"/>
@@ -728,6 +660,279 @@
                                     </RadioButton.Template>
                                 </RadioButton>
                             </UniformGrid>
+
+                            <!-- Alliances header -->
+                            <TextBlock Grid.Row="2"
+                                       Text="Alliances"
+                                       Foreground="{DynamicResource ForegroundBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=13}"
+                                       FontWeight="Bold"
+                                       Margin="0,5,0,10"/>
+
+                            <!-- Player 2 Ally/Enemy toggle -->
+                            <Grid Grid.Row="3" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="Player 2:"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontFamily="Consolas"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"/>
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding ParentViewModel.Player2IsAlly, Mode=TwoWay}"
+                                          Margin="0,0,10,0">
+                                    <CheckBox.Template>
+                                        <ControlTemplate TargetType="CheckBox">
+                                            <Border x:Name="ToggleBackground"
+                                                    Width="60" Height="30"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    CornerRadius="15"
+                                                    Cursor="Hand">
+                                                <Canvas>
+                                                    <Ellipse x:Name="ToggleCircle"
+                                                             Width="26" Height="26"
+                                                             Fill="{DynamicResource ForegroundBrush}"
+                                                             Canvas.Left="2"
+                                                             Canvas.Top="2">
+                                                        <Ellipse.RenderTransform>
+                                                            <TranslateTransform x:Name="ToggleTransform" X="0"/>
+                                                        </Ellipse.RenderTransform>
+                                                    </Ellipse>
+                                                </Canvas>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="ToggleBackground" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Trigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="30" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.EnterActions>
+                                                    <Trigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.ExitActions>
+                                                </Trigger>
+                                                <!-- When only 2 players, force enemy and disable -->
+                                                <DataTrigger Binding="{Binding ParentViewModel.NumberOfPlayers}" Value="2">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </CheckBox.Template>
+                                </CheckBox>
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Consolas"
+                                           FontWeight="Bold"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Enemy"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ParentViewModel.Player2IsAlly}" Value="True">
+                                                    <Setter Property="Text" Value="Ally"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ParentViewModel.NumberOfPlayers}" Value="2">
+                                                    <Setter Property="Text" Value="Enemy (locked for 2 players)"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- Player 3 Ally/Enemy toggle -->
+                            <Grid Grid.Row="4">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ParentViewModel.NumberOfPlayers}" Value="3">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ParentViewModel.NumberOfPlayers}" Value="4">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="Player 3:"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontFamily="Consolas"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"/>
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding ParentViewModel.Player3IsAlly, Mode=TwoWay}"
+                                          Margin="0,0,10,0">
+                                    <CheckBox.Template>
+                                        <ControlTemplate TargetType="CheckBox">
+                                            <Border x:Name="ToggleBackground"
+                                                    Width="60" Height="30"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    CornerRadius="15"
+                                                    Cursor="Hand">
+                                                <Canvas>
+                                                    <Ellipse x:Name="ToggleCircle"
+                                                             Width="26" Height="26"
+                                                             Fill="{DynamicResource ForegroundBrush}"
+                                                             Canvas.Left="2"
+                                                             Canvas.Top="2">
+                                                        <Ellipse.RenderTransform>
+                                                            <TranslateTransform x:Name="ToggleTransform" X="0"/>
+                                                        </Ellipse.RenderTransform>
+                                                    </Ellipse>
+                                                </Canvas>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="ToggleBackground" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Trigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="30" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.EnterActions>
+                                                    <Trigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.ExitActions>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </CheckBox.Template>
+                                </CheckBox>
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Consolas"
+                                           FontWeight="Bold"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Enemy"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ParentViewModel.Player3IsAlly}" Value="True">
+                                                    <Setter Property="Text" Value="Ally"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- Player 4 Ally/Enemy toggle (visible when 4 players) -->
+                            <Grid Grid.Row="5">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ParentViewModel.NumberOfPlayers}" Value="4">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="Player 4:"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontFamily="Consolas"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}"/>
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding ParentViewModel.Player4IsAlly, Mode=TwoWay}"
+                                          Margin="0,0,10,0">
+                                    <CheckBox.Template>
+                                        <ControlTemplate TargetType="CheckBox">
+                                            <Border x:Name="ToggleBackground"
+                                                    Width="60" Height="30"
+                                                    Background="{DynamicResource Surface3Brush}"
+                                                    CornerRadius="15"
+                                                    Cursor="Hand">
+                                                <Canvas>
+                                                    <Ellipse x:Name="ToggleCircle"
+                                                             Width="26" Height="26"
+                                                             Fill="{DynamicResource ForegroundBrush}"
+                                                             Canvas.Left="2"
+                                                             Canvas.Top="2">
+                                                        <Ellipse.RenderTransform>
+                                                            <TranslateTransform x:Name="ToggleTransform" X="0"/>
+                                                        </Ellipse.RenderTransform>
+                                                    </Ellipse>
+                                                </Canvas>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="ToggleBackground" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Trigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="30" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.EnterActions>
+                                                    <Trigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetName="ToggleTransform" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.ExitActions>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </CheckBox.Template>
+                                </CheckBox>
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Consolas"
+                                           FontWeight="Bold"
+                                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=12}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Enemy"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ParentViewModel.Player4IsAlly}" Value="True">
+                                                    <Setter Property="Text" Value="Ally"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
                         </Grid>
                     </Border>
                 </Grid>

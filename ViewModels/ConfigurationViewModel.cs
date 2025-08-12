@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Linq;
 using WWXMapEditor.Services;
-using Microsoft.Win32;
 
 namespace WWXMapEditor.ViewModels
 {
@@ -36,7 +35,20 @@ namespace WWXMapEditor.ViewModels
         private bool _smoothZooming = true;
         private bool _autoSaveEnabled = true;
         private bool _startInFullscreen = true;
+
+        // Legacy percent (used only when ScaleMode == LegacyPercent)
         private string _uiScaling = "100%";
+
+        // NEW ADVANCED SCALING PROPERTIES (mirror AppSettings)
+        private string _scaleMode = "Automatic"; // Automatic | CustomFixed | SystemDpiOnly | LegacyPercent
+        private double _customFixedScale = 1.0;  // used when CustomFixed
+        private double _minAutoScale = 0.75;
+        private double _maxAutoScale = 1.65;
+        private double _designWidth = 1920;
+        private double _designHeight = 1080;
+        private double _minFontScale = 0.85;
+        private double _maxFontScale = 1.8;
+        private bool _useDensityBreakpoints = true;
 
         // File locations
         private string _defaultProjectDirectory = "";
@@ -244,6 +256,7 @@ namespace WWXMapEditor.ViewModels
             }
         }
 
+        // Legacy percent string (only used when ScaleMode == LegacyPercent)
         public string UIScaling
         {
             get => _uiScaling;
@@ -252,8 +265,115 @@ namespace WWXMapEditor.ViewModels
                 if (SetProperty(ref _uiScaling, value))
                 {
                     UIScalingSummary = value;
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
 
-                    // Apply UI scaling immediately
+        // New advanced scaling props
+        public string ScaleMode
+        {
+            get => _scaleMode;
+            set
+            {
+                if (SetProperty(ref _scaleMode, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double CustomFixedScale
+        {
+            get => _customFixedScale;
+            set
+            {
+                if (SetProperty(ref _customFixedScale, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double MinAutoScale
+        {
+            get => _minAutoScale;
+            set
+            {
+                if (SetProperty(ref _minAutoScale, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double MaxAutoScale
+        {
+            get => _maxAutoScale;
+            set
+            {
+                if (SetProperty(ref _maxAutoScale, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double DesignWidth
+        {
+            get => _designWidth;
+            set
+            {
+                if (SetProperty(ref _designWidth, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double DesignHeight
+        {
+            get => _designHeight;
+            set
+            {
+                if (SetProperty(ref _designHeight, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double MinFontScale
+        {
+            get => _minFontScale;
+            set
+            {
+                if (SetProperty(ref _minFontScale, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public double MaxFontScale
+        {
+            get => _maxFontScale;
+            set
+            {
+                if (SetProperty(ref _maxFontScale, value))
+                {
+                    ApplyUIScalingImmediately();
+                }
+            }
+        }
+
+        public bool UseDensityBreakpoints
+        {
+            get => _useDensityBreakpoints;
+            set
+            {
+                if (SetProperty(ref _useDensityBreakpoints, value))
+                {
                     ApplyUIScalingImmediately();
                 }
             }
@@ -386,6 +506,9 @@ namespace WWXMapEditor.ViewModels
         public ObservableCollection<int> GridSizeOptions { get; }
         public ObservableCollection<int> AutoSaveIntervalOptions { get; }
 
+        // New scale modes for dropdown
+        public ObservableCollection<string> ScaleModes { get; }
+
         #endregion
 
         #region Commands
@@ -428,6 +551,9 @@ namespace WWXMapEditor.ViewModels
             GridSizeOptions = new ObservableCollection<int> { 8, 16, 24, 32, 48, 64 };
             AutoSaveIntervalOptions = new ObservableCollection<int> { 1, 3, 5, 10, 15, 30 };
 
+            // New scaling modes
+            ScaleModes = new ObservableCollection<string> { "Automatic", "SystemDpiOnly", "CustomFixed", "LegacyPercent" };
+
             // Initialize commands
             PreviousCommand = new RelayCommand(ExecutePrevious, CanExecutePrevious);
             NextCommand = new RelayCommand(ExecuteNext, CanExecuteNext);
@@ -458,7 +584,19 @@ namespace WWXMapEditor.ViewModels
             SmoothZooming = settings.SmoothZooming;
             AutoSaveEnabled = settings.AutoSaveEnabled;
             StartInFullscreen = settings.StartInFullscreen;
-            UIScaling = settings.UIScaling;
+
+            // Advanced scaling
+            ScaleMode = settings.ScaleMode ?? "Automatic";
+            UIScaling = settings.UIScaling ?? "100%"; // for LegacyPercent only
+            CustomFixedScale = settings.CustomFixedScale ?? 1.0;
+            MinAutoScale = settings.MinAutoScale;
+            MaxAutoScale = settings.MaxAutoScale;
+            DesignWidth = settings.DesignWidth;
+            DesignHeight = settings.DesignHeight;
+            MinFontScale = settings.MinFontScale;
+            MaxFontScale = settings.MaxFontScale;
+            UseDensityBreakpoints = settings.UseDensityBreakpoints;
+
             DefaultProjectDirectory = settings.DefaultProjectDirectory;
             DefaultTilesetDirectory = settings.DefaultTilesetDirectory;
             AutoSaveLocation = settings.AutoSaveLocation;
@@ -497,7 +635,7 @@ namespace WWXMapEditor.ViewModels
             PreviousButtonVisibility = CurrentStepIndex > 0 ? Visibility.Visible : Visibility.Collapsed;
             NextButtonText = CurrentStepIndex == ConfigurationSteps.Count - 1 ? "FINISH" : "NEXT";
 
-            // Update content based on current step
+            // Update content based on current step (keep DataContext as this VM)
             switch (CurrentStepIndex)
             {
                 case 0:
@@ -570,16 +708,29 @@ namespace WWXMapEditor.ViewModels
 
         private void ApplyUIScalingImmediately()
         {
-            // Update the settings and apply UI scaling without saving to disk
-            var tempSettings = _settingsService.Settings;
-            tempSettings.UIScaling = UIScaling;
+            // Update scaling-related settings and apply immediately (no disk save here)
+            var s = _settingsService.Settings;
 
-            // Convert percentage to double for UiScale
-            string scaleStr = UIScaling.Replace("%", "");
-            if (double.TryParse(scaleStr, out double scalePercent))
+            s.ScaleMode = ScaleMode;
+            s.UIScaling = UIScaling; // kept in sync for legacy percent UIs
+
+            if (ScaleMode.Equals("LegacyPercent", StringComparison.OrdinalIgnoreCase))
             {
-                tempSettings.UiScale = scalePercent / 100.0;
+                string scaleStr = UIScaling.Replace("%", "");
+                if (double.TryParse(scaleStr, out double scalePercent))
+                {
+                    s.UiScale = scalePercent / 100.0;
+                }
             }
+
+            s.CustomFixedScale = CustomFixedScale;
+            s.MinAutoScale = MinAutoScale;
+            s.MaxAutoScale = MaxAutoScale;
+            s.DesignWidth = DesignWidth;
+            s.DesignHeight = DesignHeight;
+            s.MinFontScale = MinFontScale;
+            s.MaxFontScale = MaxFontScale;
+            s.UseDensityBreakpoints = UseDensityBreakpoints;
 
             _settingsService.ApplyUIScaling();
         }
@@ -737,13 +888,27 @@ namespace WWXMapEditor.ViewModels
             settings.SmoothZooming = SmoothZooming;
             settings.AutoSaveEnabled = AutoSaveEnabled;
             settings.StartInFullscreen = StartInFullscreen;
-            settings.UIScaling = UIScaling;
 
-            // Convert percentage to double for UiScale
-            string scaleStr = UIScaling.Replace("%", "");
-            if (double.TryParse(scaleStr, out double scalePercent))
+            // Advanced scaling persistence
+            settings.ScaleMode = ScaleMode;
+            settings.UIScaling = UIScaling;
+            settings.CustomFixedScale = CustomFixedScale;
+            settings.MinAutoScale = MinAutoScale;
+            settings.MaxAutoScale = MaxAutoScale;
+            settings.DesignWidth = DesignWidth;
+            settings.DesignHeight = DesignHeight;
+            settings.MinFontScale = MinFontScale;
+            settings.MaxFontScale = MaxFontScale;
+            settings.UseDensityBreakpoints = UseDensityBreakpoints;
+
+            // If LegacyPercent, also update UiScale from the percent string
+            if (ScaleMode.Equals("LegacyPercent", StringComparison.OrdinalIgnoreCase))
             {
-                settings.UiScale = scalePercent / 100.0;
+                string scaleStr = UIScaling.Replace("%", "");
+                if (double.TryParse(scaleStr, out double scalePercent))
+                {
+                    settings.UiScale = scalePercent / 100.0;
+                }
             }
 
             // Ensure directories are set

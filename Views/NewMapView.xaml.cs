@@ -15,54 +15,46 @@ namespace WWXMapEditor.Views
 
         private void SetupValidationMessageHandling()
         {
-            // Set up validation message visibility binding
-            this.DataContextChanged += OnDataContextChanged;
+            DataContextChanged += OnDataContextChanged;
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (DataContext is ViewModels.NewMapViewModel viewModel)
             {
-                // Unsubscribe from previous view model if exists
                 if (e.OldValue is ViewModels.NewMapViewModel oldViewModel)
                 {
                     oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
                 }
-
-                // Subscribe to new view model
                 viewModel.PropertyChanged += OnViewModelPropertyChanged;
             }
         }
 
         private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ViewModels.NewMapViewModel.ValidationMessage))
+            if (e.PropertyName == nameof(ViewModels.NewMapViewModel.ValidationMessage) &&
+                sender is ViewModels.NewMapViewModel vm)
             {
-                if (sender is ViewModels.NewMapViewModel viewModel)
-                {
-                    UpdateValidationMessageVisibility(viewModel.ValidationMessage);
-                }
+                UpdateValidationMessageVisibility(vm.ValidationMessage);
             }
         }
 
         private void UpdateValidationMessageVisibility(string validationMessage)
         {
-            // Access the ValidationMessageBorder element from XAML
-            if (this.FindName("ValidationMessageBorder") is System.Windows.FrameworkElement validationBorder)
+            if (FindName("ValidationMessageBorder") is System.Windows.FrameworkElement validationBorder)
             {
                 validationBorder.Visibility = string.IsNullOrWhiteSpace(validationMessage)
-                    ? System.Windows.Visibility.Collapsed
-                    : System.Windows.Visibility.Visible;
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
             }
         }
 
         private void CloseValidationMessage_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is ViewModels.NewMapViewModel viewModel)
+            if (DataContext is ViewModels.NewMapViewModel vm)
             {
-                viewModel.ValidationMessage = string.Empty;
+                vm.ValidationMessage = string.Empty;
             }
-
             UpdateValidationMessageVisibility(string.Empty);
         }
     }
