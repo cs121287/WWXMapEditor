@@ -7,456 +7,629 @@
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="1080" d:DesignWidth="1920">
+             d:DesignHeight="1080" d:DesignWidth="1920"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True"
+             Loaded="UserControl_Loaded"
+             MouseMove="UserControl_MouseMove"
+             PreviewKeyDown="UserControl_PreviewKeyDown">
+
+    <UserControl.Resources>
+        <!-- Single ResourceDictionary contains both merged fallbacks and all resources -->
+        <ResourceDictionary>
+            <!-- SAFETY FALLBACKS: prevent ResourceReferenceKeyNotFoundException -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <!-- Theme/brush fallbacks (only used if app-level themes don't provide them) -->
+                    <SolidColorBrush x:Key="ForegroundBrush" Color="#FFECECEC"/>
+                    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="#FFB8B8B8"/>
+                    <!-- Accent leaned towards muted green to suit the menu -->
+                    <SolidColorBrush x:Key="AccentBrush" Color="#FFCFE3B0"/>
+
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#140B0B0B"/>
+                    <SolidColorBrush x:Key="Surface3Brush" Color="#E0101010"/>
+                    <SolidColorBrush x:Key="BackgroundBrush" Color="#FF0A0A0A"/>
+
+                    <!-- Older keys used in earlier iterations; harmless to keep as fallbacks -->
+                    <SolidColorBrush x:Key="HoverBrush" Color="#1AFFFFFF"/>
+                    <SolidColorBrush x:Key="PressedBrush" Color="#33111111"/>
+                    <SolidColorBrush x:Key="NeonBorderBrush" Color="#33FFFFFF"/>
+                    <Color x:Key="NeonShadowColor">#AA00FFFF</Color>
+
+                    <!-- If an upstream style was expected, provide a benign base so BasedOn resolves -->
+                    <Style x:Key="MenuButtonStyle" TargetType="Button"/>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+
+            <!-- Overlay colors (safe local defaults) -->
+            <Color x:Key="Aurora1">#4400E58A</Color>
+            <Color x:Key="Aurora2">#4420A4FF</Color>
+            <Color x:Key="Aurora3">#44B770FF</Color>
+
+            <!-- Selection highlight (pale green, subdued like sample) -->
+            <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
+
+            <!-- Text styles -->
+            <Style x:Key="HeadlineText" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="SubtitleText" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Opacity" Value="0.85"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+
+            <!-- Assets: Opacity mask for torn slats, selection texture, and board overlays
+                 Ensure these files exist and Build Action = Resource -->
+            <ImageBrush x:Key="SlatOpacityMaskBrush"
+                        ImageSource="pack://application:,,,/Resources/Images/MainMenu/overlays/slat_mask.png"
+                        Stretch="Fill"/>
+
+            <!-- Tile the selection texture so it keeps a crisp grain at any size -->
+            <ImageBrush x:Key="SelectionTextureBrush"
+                        ImageSource="pack://application:,,,/Resources/Images/MainMenu/overlays/selection_texture.png"
+                        TileMode="Tile"
+                        ViewportUnits="Absolute"
+                        Viewport="0,0,24,24"
+                        Stretch="Fill"/>
+
+            <!-- Grunge slat button: torn-edge mask + textured green selection fill + pointer wedge -->
+            <Style x:Key="GrungeMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
+                <!-- Size with FontScale to match app-wide scaling -->
+                <Setter Property="Width">
+                    <Setter.Value>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="420"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Height">
+                    <Setter.Value>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="52"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="FontSize">
+                    <Setter.Value>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                <Setter Property="Background" Value="#E0101010"/>
+                <Setter Property="BorderBrush" Value="#77FFFFFF"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="18,6"/>
+                <Setter Property="Margin" Value="0,8,0,8"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <!-- Subtle slant -->
+                                <Grid.RenderTransform>
+                                    <SkewTransform AngleX="-6"/>
+                                </Grid.RenderTransform>
+
+                                <!-- Base slab with torn-edge mask -->
+                                <Border x:Name="SlabBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="0">
+                                    <Border.OpacityMask>
+                                        <StaticResource ResourceKey="SlatOpacityMaskBrush"/>
+                                    </Border.OpacityMask>
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#CC000000" Opacity="0.45"/>
+                                    </Border.Effect>
+                                </Border>
+
+                                <!-- Divider scratches -->
+                                <Grid IsHitTestVisible="False">
+                                    <Rectangle Height="1" VerticalAlignment="Top" Fill="#33FFFFFF" Margin="12,6,12,0"/>
+                                    <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#22FFFFFF" Margin="12,0,12,6"/>
+                                </Grid>
+
+                                <!-- Textured pale-green selection fill that grows from left -->
+                                <Grid x:Name="SelectFill" Opacity="0.0" ClipToBounds="True">
+                                    <Grid.RenderTransform>
+                                        <ScaleTransform x:Name="SelectScale" ScaleX="0" ScaleY="1"/>
+                                    </Grid.RenderTransform>
+                                    <Grid.RenderTransformOrigin>0,0.5</Grid.RenderTransformOrigin>
+
+                                    <!-- Flat color base -->
+                                    <Rectangle Fill="{StaticResource MenuHighlightBrush}" Opacity="1"/>
+
+                                    <!-- Tiled noise texture over it -->
+                                    <Rectangle Fill="{StaticResource SelectionTextureBrush}" Opacity="0.35"/>
+                                </Grid>
+
+                                <!-- Pointer wedge on the right -->
+                                <Path x:Name="PointerWedge"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      Margin="8,0,8,0"
+                                      Fill="#CFE3B0"
+                                      Stroke="#88222222"
+                                      StrokeThickness="0.8"
+                                      Data="M 0,0 L 12,6 L 0,12 Z"
+                                      Opacity="0">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="WedgeTx" X="12" Y="0"/>
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Content -->
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <!-- Hover/focus animate green bar + wedge -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="SelectFill" Property="Opacity" Value="1.0"/>
+                                    <Setter TargetName="PointerWedge" Property="Opacity" Value="0.9"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="1" Duration="0:0:0.12"/>
+                                                <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                                 Storyboard.TargetProperty="X"
+                                                                 To="0" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="0" Duration="0:0:0.12"/>
+                                                <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                                 Storyboard.TargetProperty="X"
+                                                                 To="12" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+
+                                <!-- Focused: keep border emphasis, but DO NOT show the wedge unless hovered -->
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#99FFFFFF"/>
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="SlabBorder" Property="Background" Value="#F0181818"/>
+                                    <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#BBFFFFFF"/>
+                                </Trigger>
+
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Animated transition storyboard for the left-side label -->
+            <Storyboard x:Key="SideLabelChangeStoryboard">
+                <DoubleAnimation Storyboard.TargetName="SideLabelText"
+                                 Storyboard.TargetProperty="Opacity"
+                                 From="0" To="1"
+                                 Duration="0:0:0.18"/>
+                <DoubleAnimation Storyboard.TargetName="SideLabelScale"
+                                 Storyboard.TargetProperty="ScaleX"
+                                 From="0.96" To="1"
+                                 Duration="0:0:0.18"/>
+                <DoubleAnimation Storyboard.TargetName="SideLabelScale"
+                                 Storyboard.TargetProperty="ScaleY"
+                                 From="0.96" To="1"
+                                 Duration="0:0:0.18"/>
+                <DoubleAnimation Storyboard.TargetName="SideLabelTx"
+                                 Storyboard.TargetProperty="Y"
+                                 From="6" To="0"
+                                 Duration="0:0:0.18"/>
+            </Storyboard>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
     <Grid>
-        <Grid.Background>
-            <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" Opacity="0.02">
-                <DrawingBrush.Drawing>
-                    <DrawingGroup>
-                        <GeometryDrawing Brush="{DynamicResource BackgroundBrush}"
-                                         Geometry="M0,0 L100,0 L100,100 L0,100 Z"/>
-                        <GeometryDrawing Geometry="M 0,50 L 50,0 L 100,50 L 50,100 Z">
-                            <GeometryDrawing.Pen>
-                                <Pen Brush="{DynamicResource AccentBrush}" Thickness="0.5"/>
-                            </GeometryDrawing.Pen>
-                        </GeometryDrawing>
-                        <GeometryDrawing Geometry="M 25,25 L 75,25 L 75,75 L 25,75 Z">
-                            <GeometryDrawing.Pen>
-                                <Pen Brush="{DynamicResource AccentBrush}" Thickness="0.5"/>
-                            </GeometryDrawing.Pen>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                </DrawingBrush.Drawing>
-            </DrawingBrush>
-        </Grid.Background>
+        <!-- BACKGROUND LAYERS (with parallax ONLY on the background) -->
+        <Grid x:Name="BackgroundRoot">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="BgParallax" X="0" Y="0"/>
+            </Grid.RenderTransform>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- Fullscreen artwork -->
+            <Image Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
+                   Stretch="UniformToFill"
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
 
-            <!-- Header Section -->
-            <Border Grid.Row="0" Padding="{DynamicResource PaddingXLarge}">
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="WWX MAP EDITOR" 
-                               Style="{StaticResource HeaderTextStyle}"
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=36}"
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               Margin="{DynamicResource MarginMedium}">
-                        <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="4"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text="Strategic Map Creation Tool" 
-                               Style="{StaticResource SubtitleTextStyle}"
-                               HorizontalAlignment="Center"
-                               FontSize="{DynamicResource FontSizeLarge}"
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               Opacity="0.7"/>
-                </StackPanel>
-            </Border>
+            <!-- Dark vignette for readability -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.95" RadiusY="0.95">
+                        <GradientStop Color="#00000000" Offset="0.0"/>
+                        <GradientStop Color="#D0000000" Offset="1.0"/>
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
 
-            <!-- Main Content Area -->
-            <Grid Grid.Row="1">
+            <!-- Gentle aurora overlay -->
+            <Rectangle Opacity="0.30" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop x:Name="Aur1" Color="{StaticResource Aurora1}" Offset="0"/>
+                        <GradientStop x:Name="Aur2" Color="{StaticResource Aurora2}" Offset="0.5"/>
+                        <GradientStop x:Name="Aur3" Color="{StaticResource Aurora3}" Offset="1"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+                <Rectangle.RenderTransform>
+                    <TranslateTransform x:Name="AurMove" X="0" Y="0"/>
+                </Rectangle.RenderTransform>
+            </Rectangle>
+
+            <!-- Subtle screen lines -->
+            <Rectangle Opacity="0.05" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,3,3" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="#00000000" Geometry="M0,0 L3,0 L3,3 L0,3 Z"/>
+                                <GeometryDrawing Brush="#20FFFFFF" Geometry="M0,0 L3,0 L3,1 L0,1 Z"/>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Dust motes layer -->
+            <Canvas IsHitTestVisible="False" Opacity="0.18">
+                <Ellipse Width="3" Height="3" Fill="#FFFFFFFF" Canvas.Left="200" Canvas.Top="300">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                                     From="200" To="800" Duration="0:0:25" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                                     From="300" To="150" Duration="0:0:25" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="0.5" Duration="0:0:6" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                <Ellipse Width="2" Height="2" Fill="#FFFFFFFF" Canvas.Left="900" Canvas.Top="700">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)"
+                                                     From="900" To="1200" Duration="0:0:22" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)"
+                                                     From="700" To="500" Duration="0:0:22" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="0.4" Duration="0:0:5" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+            </Canvas>
+        </Grid>
+
+        <!-- CONTENT (scrollable to avoid cutoff) -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-                <!-- Left area -->
-                <Grid Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- Minimal title (top-left) -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="28,24,0,0">
+                    <TextBlock Style="{StaticResource HeadlineText}" Text="WWX MAP EDITOR">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="28"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource SubtitleText}" Text="Strategic Map Creation Tool" Margin="2,4,0,0">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                </StackPanel>
 
-                    <Border Grid.Row="0" 
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Background="{DynamicResource Surface2Brush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusLarge}"
-                            Padding="40"
-                            Margin="0,40,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="15"/>
-                        </Border.Effect>
+                <!-- Vertical dynamic label next to slats -->
+                <Border Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Background="#00000000" Margin="0,0,22,0">
+                    <StackPanel>
+                        <!-- Thin vertical rail with ticks -->
+                        <Grid Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=340}"
+                              Width="6" Margin="0,0,0,8">
+                            <Rectangle Fill="#AA0B0B0B"/>
+                            <Rectangle Fill="#33FFFFFF" Width="1" HorizontalAlignment="Right" Margin="0,4,1,4"/>
+                            <Rectangle Fill="#22FFFFFF" Height="12" Width="2" HorizontalAlignment="Right" Margin="0,16,1,0" VerticalAlignment="Top"/>
+                            <Rectangle Fill="#22FFFFFF" Height="20" Width="2" HorizontalAlignment="Right" Margin="0,0,1,16" VerticalAlignment="Bottom"/>
+                        </Grid>
+                        <!-- Dynamic text: shows hovered button text, else "Main Menu" -->
+                        <TextBlock x:Name="SideLabelText"
+                                   Text="{Binding HoverLabelText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Foreground="{DynamicResource ForegroundBrush}"
+                                   Opacity="0.95"
+                                   FontFamily="Consolas"
+                                   FontWeight="Bold">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="-90"/>
+                            </TextBlock.LayoutTransform>
+                            <TextBlock.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform x:Name="SideLabelTx" Y="0"/>
+                                    <ScaleTransform x:Name="SideLabelScale" ScaleX="1" ScaleY="1"/>
+                                </TransformGroup>
+                            </TextBlock.RenderTransform>
+                            <TextBlock.FontSize>
+                                <!-- Increased font size -->
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale" Converter="{StaticResource MultiplyConverter}" ConverterParameter="30"/>
+                            </TextBlock.FontSize>
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#CC000000" BlurRadius="8" ShadowDepth="1" Opacity="0.7"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel>
-                            <TextBlock Text="MAIN MENU" 
-                                       Style="{StaticResource TitleTextStyle}"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,0,0,30"
-                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=32}"
-                                       Foreground="{DynamicResource ForegroundBrush}"/>
+                <!-- Angled trapezoid board on the right -->
+                <Grid x:Name="BoardContainer"
+                      Grid.Row="1" Grid.Column="2"
+                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Margin="16,24,24,24">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="-8"/>
+                            <TranslateTransform x:Name="BoardSlideTx" X="100" Y="0"/>
+                        </TransformGroup>
+                    </Grid.RenderTransform>
 
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                    <!-- Cache the board visuals for smoother animation -->
+                    <Grid.CacheMode>
+                        <BitmapCache/>
+                    </Grid.CacheMode>
 
-                                <!-- Row 1 -->
-                                <Button Grid.Row="0" Grid.Column="0"
-                                        Content="NEW MAP" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="NewMapCreation">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Create a new map from scratch"/>
-                                    </Button.ToolTip>
-                                </Button>
+                    <!-- Board shape as trapezoid -->
+                    <Grid>
+                        <!-- Trapezoid path (normalized coords), stretched to container -->
+                        <Viewbox Stretch="Fill" StretchDirection="Both">
+                            <Grid Width="600" Height="420">
+                                <Path x:Name="BoardPath"
+                                      Stretch="Fill"
+                                      Fill="#E00B0B0B"
+                                      Stroke="#66FFFFFF"
+                                      StrokeThickness="1">
+                                    <!-- Trapezoid: top narrower than bottom -->
+                                    <Path.Data>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="60,0" IsClosed="True">
+                                                <LineSegment Point="600,0"/>
+                                                <LineSegment Point="540,420"/>
+                                                <LineSegment Point="0,420"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </Path.Data>
+                                    <Path.Effect>
+                                        <DropShadowEffect BlurRadius="30" Direction="320" ShadowDepth="10" Color="#AA000000" Opacity="0.8"/>
+                                    </Path.Effect>
+                                </Path>
 
-                                <Button Grid.Row="0" Grid.Column="2"
-                                        Content="SETTINGS" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="Settings">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Configure editor settings and preferences"/>
-                                    </Button.ToolTip>
-                                </Button>
+                                <!-- Strong right-side shadow gradient -->
+                                <Rectangle HorizontalAlignment="Right" Width="36" Height="420" IsHitTestVisible="False">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#66000000" Offset="0.0"/>
+                                            <GradientStop Color="#00000000" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
 
-                                <!-- Row 2 -->
-                                <Button Grid.Row="1" Grid.Column="0"
-                                        Content="LOAD MAP" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="LoadMap">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Load an existing map for editing"/>
-                                    </Button.ToolTip>
-                                </Button>
-
-                                <Button Grid.Row="1" Grid.Column="2"
-                                        Content="ABOUT" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="About">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Information about WWX Map Editor"/>
-                                    </Button.ToolTip>
-                                </Button>
-
-                                <!-- Row 3 -->
-                                <Button Grid.Row="2" Grid.Column="0"
-                                        Content="RECENT MAPS" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        IsEnabled="False">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Quick access to recently edited maps"/>
-                                    </Button.ToolTip>
-                                </Button>
-
-                                <Button Grid.Row="2" Grid.Column="2"
-                                        Content="EXIT" 
-                                        Style="{StaticResource MenuButtonStyle}"
-                                        Width="280"
-                                        Height="60"
-                                        Margin="5"
-                                        FontSize="{DynamicResource FontSizeLarge}"
-                                        Command="{Binding DataContext.ExitCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                    <Button.ToolTip>
-                                        <ToolTip Content="Exit the application"/>
-                                    </Button.ToolTip>
-                                </Button>
+                                <!-- Board overlays (scratches/splatters) -->
+                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/scratches.png"
+                                       Stretch="UniformToFill"
+                                       Opacity="0.10"
+                                       IsHitTestVisible="False"
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/splatters.png"
+                                       Stretch="UniformToFill"
+                                       Opacity="0.08"
+                                       IsHitTestVisible="False"
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Grid>
+                        </Viewbox>
+
+                        <!-- Stack of menu slats over the board -->
+                        <StackPanel x:Name="MenuStack"
+                                    Margin="36,36,48,36"
+                                    VerticalAlignment="Center">
+                            <!-- Each button gets events for hover -->
+                            <Button Style="{StaticResource GrungeMenuButton}"
+                                    Content="NEW MAP"
+                                    x:Name="BtnNewMap"
+                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="NewMapCreation"
+                                    MouseEnter="MenuButton_MouseEnter"
+                                    MouseLeave="MenuButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <TranslateTransform x:Name="TxNewMap" X="60" Y="0"/>
+                                </Button.RenderTransform>
+                            </Button>
+
+                            <Button Style="{StaticResource GrungeMenuButton}"
+                                    Content="LOAD MAP"
+                                    x:Name="BtnLoadMap"
+                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="LoadMap"
+                                    MouseEnter="MenuButton_MouseEnter"
+                                    MouseLeave="MenuButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <TranslateTransform x:Name="TxLoadMap" X="60" Y="0"/>
+                                </Button.RenderTransform>
+                            </Button>
+
+                            <Button Style="{StaticResource GrungeMenuButton}"
+                                    Content="SETTINGS"
+                                    x:Name="BtnSettings"
+                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="Settings"
+                                    MouseEnter="MenuButton_MouseEnter"
+                                    MouseLeave="MenuButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <TranslateTransform x:Name="TxSettings" X="60" Y="0"/>
+                                </Button.RenderTransform>
+                            </Button>
+
+                            <Button Style="{StaticResource GrungeMenuButton}"
+                                    Content="ABOUT"
+                                    x:Name="BtnAbout"
+                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="About"
+                                    MouseEnter="MenuButton_MouseEnter"
+                                    MouseLeave="MenuButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <TranslateTransform x:Name="TxAbout" X="60" Y="0"/>
+                                </Button.RenderTransform>
+                            </Button>
+
+                            <Button Style="{StaticResource GrungeMenuButton}"
+                                    Content="EXIT"
+                                    x:Name="BtnExit"
+                                    Command="{Binding DataContext.ExitCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    MouseEnter="MenuButton_MouseEnter"
+                                    MouseLeave="MenuButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <TranslateTransform x:Name="TxExit" X="60" Y="0"/>
+                                </Button.RenderTransform>
+                            </Button>
                         </StackPanel>
-                    </Border>
-
-                    <Grid Grid.Row="1"/>
-
-                    <!-- Info Panels -->
-                    <Grid Grid.Row="2" Margin="0,40,0,40"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Bottom">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" 
-                                Background="{DynamicResource Surface2Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                Padding="25,20"
-                                Width="280">
-                            <Border.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
-                            </Border.Effect>
-
-                            <StackPanel>
-                                <TextBlock Text="Editor Stats" 
-                                           Style="{StaticResource TitleTextStyle}"
-                                           FontSize="{DynamicResource FontSizeLarge}"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"
-                                           Foreground="{DynamicResource ForegroundBrush}"/>
-
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="0" 
-                                               Text="Maps Created: " 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" 
-                                               Text="0" 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Right"
-                                               Foreground="{DynamicResource AccentBrush}"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" 
-                                               Text="Total Edit Time: " 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" 
-                                               Text="0h 0m" 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Right"
-                                               Foreground="{DynamicResource AccentBrush}"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" 
-                                               Text="Last Session: " 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" 
-                                               Text="New User" 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Right"
-                                               Foreground="{DynamicResource AccentBrush}"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="0" 
-                                               Text="Version: " 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" 
-                                               Text="1.0.0" 
-                                               FontSize="{DynamicResource FontSizeSmall}"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Right"
-                                               Foreground="{DynamicResource AccentBrush}"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Grid.Column="2" 
-                                Background="{DynamicResource Surface2Brush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="{StaticResource CornerRadiusMedium}"
-                                Padding="25,20"
-                                Width="320">
-                            <Border.Effect>
-                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
-                            </Border.Effect>
-
-                            <StackPanel>
-                                <TextBlock Text="Quick Tips" 
-                                           Style="{StaticResource TitleTextStyle}"
-                                           FontSize="{DynamicResource FontSizeLarge}"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"
-                                           Foreground="{DynamicResource ForegroundBrush}"/>
-                                <TextBlock Style="{StaticResource DescriptionTextStyle}"
-                                           TextWrapping="Wrap"
-                                           FontSize="{DynamicResource FontSizeSmall}"
-                                           Foreground="{DynamicResource ForegroundSecondaryBrush}">
-                                    &#8226; Use keyboard shortcuts for faster editing<LineBreak/>
-                                    &#8226; Enable auto-save to prevent data loss<LineBreak/>
-                                    &#8226; Grid snapping helps with precise placement<LineBreak/>
-                                    &#8226; Press F1 for help at any time
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
                     </Grid>
                 </Grid>
-
-                <!-- Right Image -->
-                <Grid Grid.Column="1" Margin="20,40,40,40">
-                    <Border Background="{DynamicResource Surface2Brush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="{StaticResource CornerRadiusLarge}"
-                            Padding="2"
-                            VerticalAlignment="Top">
-                        <Border.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="15"/>
-                        </Border.Effect>
-
-                        <Grid>
-                            <Rectangle Fill="{DynamicResource Surface3Brush}"
-                                       RadiusX="8"
-                                       RadiusY="8"/>
-                            <Viewbox Stretch="Uniform" 
-                                     StretchDirection="Both"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"
-                                     MaxWidth="500"
-                                     MaxHeight="500">
-                                <Grid>
-                                    <Image x:Name="MainMenuImage"
-                                           Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
-                                           RenderOptions.BitmapScalingMode="HighQuality"
-                                           Width="400"
-                                           Height="400">
-                                        <Image.Effect>
-                                            <DropShadowEffect Color="Black" 
-                                                              Direction="270" 
-                                                              ShadowDepth="2" 
-                                                              Opacity="0.1" 
-                                                              BlurRadius="5"/>
-                                        </Image.Effect>
-                                    </Image>
-
-                                    <Border x:Name="ImagePlaceholder"
-                                            Background="{DynamicResource Surface3Brush}"
-                                            Width="400"
-                                            Height="400"
-                                            CornerRadius="8">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ElementName=MainMenuImage, Path=Source}" Value="{x:Null}">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Grid>
-                                            <TextBlock Text="WWX"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=72}"
-                                                       FontWeight="Bold"
-                                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                       Opacity="0.3"/>
-                                            <TextBlock Text="Map Preview"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Bottom"
-                                                       Margin="0,0,0,50"
-                                                       FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
-                                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                       Opacity="0.5"/>
-                                        </Grid>
-                                    </Border>
-                                </Grid>
-                            </Viewbox>
-
-                            <Border Background="{DynamicResource BackgroundBrush}"
-                                    Opacity="0.7"
-                                    VerticalAlignment="Bottom"
-                                    CornerRadius="0,0,8,8"
-                                    Padding="10"
-                                    Visibility="Collapsed">
-                                <TextBlock Text="Strategic Warfare"
-                                           HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource ForegroundBrush}"
-                                           FontSize="{DynamicResource FontSizeLarge}"
-                                           FontWeight="Bold"
-                                           FontFamily="Consolas"/>
-                            </Border>
-                        </Grid>
-                    </Border>
-                </Grid>
             </Grid>
+        </ScrollViewer>
 
-            <!-- Footer -->
-            <Border Grid.Row="2" Padding="{DynamicResource PaddingLarge}">
-                <Grid>
-                    <TextBlock Text="&#169; 2025 WWX Map Editor - User: cs121287" 
-                               Style="{StaticResource DescriptionTextStyle}"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               FontSize="{DynamicResource FontSizeSmall}"
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               Opacity="0.6"/>
+        <!-- Continuous background motion -->
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard RepeatBehavior="Forever">
+                        <!-- Aurora gentle drift -->
+                        <DoubleAnimation Storyboard.TargetName="AurMove"
+                                         Storyboard.TargetProperty="X"
+                                         From="-40" To="40"
+                                         Duration="0:0:45"
+                                         AutoReverse="True"/>
+                        <DoubleAnimation Storyboard.TargetName="AurMove"
+                                         Storyboard.TargetProperty="Y"
+                                         From="20" To="-20"
+                                         Duration="0:1:00"
+                                         AutoReverse="True"/>
+                        <!-- Shift gradient midpoint slightly -->
+                        <DoubleAnimation Storyboard.TargetName="Aur2"
+                                         Storyboard.TargetProperty="Offset"
+                                         From="0.45" To="0.55"
+                                         Duration="0:0:18"
+                                         AutoReverse="True"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
 
-                    <StackPanel Orientation="Horizontal" 
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="Theme: " 
-                                   Style="{StaticResource DescriptionTextStyle}"
-                                   VerticalAlignment="Center"
-                                   FontSize="{DynamicResource FontSizeSmall}"
-                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                   Opacity="0.6"/>
-                        <RadioButton Content="Dark" 
-                                     IsChecked="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}"
-                                     GroupName="ThemeSelection"
-                                     Margin="{DynamicResource MarginSmall}"
-                                     VerticalAlignment="Center"
-                                     FontSize="{DynamicResource FontSizeSmall}"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Opacity="0.8"/>
-                        <RadioButton Content="Light" 
-                                     IsChecked="{Binding DataContext.IsLightTheme, RelativeSource={RelativeSource AncestorType=Window}}"
-                                     GroupName="ThemeSelection"
-                                     Margin="{DynamicResource MarginSmall}"
-                                     VerticalAlignment="Center"
-                                     FontSize="{DynamicResource FontSizeSmall}"
-                                     Foreground="{DynamicResource ForegroundBrush}"
-                                     Opacity="0.8"/>
-                    </StackPanel>
+            <!-- Entrance + cascade: board slides in, then slats stagger -->
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <!-- Board slide-in with slight overshoot -->
+                        <DoubleAnimation Storyboard.TargetName="BoardSlideTx"
+                                         Storyboard.TargetProperty="X"
+                                         From="100" To="0"
+                                         Duration="0:0:0.28">
+                            <DoubleAnimation.EasingFunction>
+                                <BackEase Amplitude="0.6" EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
 
-                    <TextBlock Text="{Binding CurrentTime}" 
-                               HorizontalAlignment="Right"
-                               VerticalAlignment="Center"
-                               FontSize="{DynamicResource FontSizeSmall}"
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               Opacity="0.6"/>
-                </Grid>
-            </Border>
-        </Grid>
+                        <!-- Slat cascade -->
+                        <DoubleAnimation Storyboard.TargetName="TxNewMap"
+                                         Storyboard.TargetProperty="X"
+                                         From="60" To="0"
+                                         BeginTime="0:0:0.10"
+                                         Duration="0:0:0.18">
+                            <DoubleAnimation.EasingFunction>
+                                <QuadraticEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <DoubleAnimation Storyboard.TargetName="TxLoadMap"
+                                         Storyboard.TargetProperty="X"
+                                         From="60" To="0"
+                                         BeginTime="0:0:0.16"
+                                         Duration="0:0:0.18">
+                            <DoubleAnimation.EasingFunction>
+                                <QuadraticEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <DoubleAnimation Storyboard.TargetName="TxSettings"
+                                         Storyboard.TargetProperty="X"
+                                         From="60" To="0"
+                                         BeginTime="0:0:0.22"
+                                         Duration="0:0:0.18">
+                            <DoubleAnimation.EasingFunction>
+                                <QuadraticEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <DoubleAnimation Storyboard.TargetName="TxAbout"
+                                         Storyboard.TargetProperty="X"
+                                         From="60" To="0"
+                                         BeginTime="0:0:0.28"
+                                         Duration="0:0:0.18">
+                            <DoubleAnimation.EasingFunction>
+                                <QuadraticEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <DoubleAnimation Storyboard.TargetName="TxExit"
+                                         Storyboard.TargetProperty="X"
+                                         From="60" To="0"
+                                         BeginTime="0:0:0.34"
+                                         Duration="0:0:0.18">
+                            <DoubleAnimation.EasingFunction>
+                                <QuadraticEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
     </Grid>
 </UserControl>

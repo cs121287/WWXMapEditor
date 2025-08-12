@@ -7,110 +7,185 @@
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
-    
-    <StackPanel>
-        <TextBlock Text="FILE LOCATIONS" 
-                   Foreground="{DynamicResource ForegroundBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=32}" 
-                   FontWeight="Bold" 
-                   Margin="0,0,0,30"/>
-        
-        <TextBlock Text="We'll create these folders if they don't exist" 
-                   Foreground="{DynamicResource ForegroundSecondaryBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=16}" 
-                   Margin="0,0,0,20"/>
-        
-        <!-- Directory Settings -->
-        <GroupBox Header="Default Directories" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel Margin="20">
-                <Grid Margin="0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Text="Projects:" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                    
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding DefaultProjectDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                             Margin="0,0,10,0"/>
-                    
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseProjectDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="100"
-                            Height="35"/>
-                </Grid>
-                
-                <Grid Margin="0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Text="Tilesets:" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                    
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding DefaultTilesetDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                             Margin="0,0,10,0"/>
-                    
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseTilesetDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="100"
-                            Height="35"/>
-                </Grid>
-                
-                <Grid Margin="0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Text="Auto-save:" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                    
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding AutoSaveLocation}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                             Margin="0,0,10,0"/>
-                    
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseAutoSaveLocationCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="100"
-                            Height="35"/>
-                </Grid>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      CanContentScroll="False"
+                      Padding="{DynamicResource MarginLarge}">
+            <Grid HorizontalAlignment="Stretch"
+                  MaxWidth="1600"
+                  Margin="{DynamicResource MarginMedium}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="FILE LOCATIONS" 
+                           Foreground="{DynamicResource ForegroundBrush}" 
+                           FontFamily="Consolas"
+                           FontWeight="Bold" 
+                           Margin="0,0,0,8">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="32"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
+
+                <TextBlock Grid.Row="1"
+                           Text="We'll create these folders if they don't exist" 
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}" 
+                           FontFamily="Consolas"
+                           Margin="0,0,0,16"
+                           TextWrapping="Wrap">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
+
+                <!-- Two-column layout inside the group: Projects | Tilesets on the first row; Auto-save spans full width on second row -->
+                <GroupBox Grid.Row="2"
+                          Header="Default Directories"
+                          Style="{StaticResource SettingsGroupBoxStyle}">
+                    <Grid Margin="{DynamicResource PaddingMedium}" Grid.IsSharedSizeScope="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Projects (row 0, col 0) -->
+                        <Grid Grid.Row="0" Grid.Column="0" Margin="0,6,12,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Projects:" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+
+                            <TextBox Grid.Column="2" 
+                                     Text="{Binding DefaultProjectDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     HorizontalAlignment="Stretch"
+                                     MinWidth="240"
+                                     Margin="0">
+                                <TextBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                </TextBox.FontSize>
+                            </TextBox>
+
+                            <Button Grid.Column="4" 
+                                    Content="Browse..." 
+                                    Command="{Binding BrowseProjectDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    MinWidth="100"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"/>
+                        </Grid>
+
+                        <!-- Tilesets (row 0, col 1) -->
+                        <Grid Grid.Row="0" Grid.Column="1" Margin="12,6,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Tilesets:" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+
+                            <TextBox Grid.Column="2" 
+                                     Text="{Binding DefaultTilesetDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     HorizontalAlignment="Stretch"
+                                     MinWidth="240"
+                                     Margin="0">
+                                <TextBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                </TextBox.FontSize>
+                            </TextBox>
+
+                            <Button Grid.Column="4" 
+                                    Content="Browse..." 
+                                    Command="{Binding BrowseTilesetDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    MinWidth="100"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"/>
+                        </Grid>
+
+                        <!-- Auto-save (row 1, spans two columns) -->
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Auto-save:" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+
+                            <TextBox Grid.Column="2" 
+                                     Text="{Binding AutoSaveLocation}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     HorizontalAlignment="Stretch"
+                                     MinWidth="240"
+                                     Margin="0">
+                                <TextBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                </TextBox.FontSize>
+                            </TextBox>
+
+                            <Button Grid.Column="4" 
+                                    Content="Browse..." 
+                                    Command="{Binding BrowseAutoSaveLocationCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    MinWidth="100"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"/>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

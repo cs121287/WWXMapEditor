@@ -7,90 +7,136 @@
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
-    
-    <StackPanel>
-        <TextBlock Text="EDITOR PREFERENCES" 
-                   Foreground="{DynamicResource ForegroundBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=32}" 
-                   FontWeight="Bold" 
-                   Margin="0,0,0,30"/>
-        
-        <!-- Grid Settings -->
-        <GroupBox Header="Grid Settings" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,0,30">
-            <StackPanel Margin="20">
-                <CheckBox Content="Show grid by default" 
-                          IsChecked="{Binding ShowGrid}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
-                
-                <CheckBox Content="Enable snap to grid" 
-                          IsChecked="{Binding SnapToGrid}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
-                
-                <Grid Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Text="Grid size (pixels):" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                    
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding GridSize}" 
-                              ItemsSource="{Binding GridSizeOptions}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                 Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
-            </StackPanel>
-        </GroupBox>
-        
-        <!-- Auto-save Settings -->
-        <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel Margin="20">
-                <CheckBox Content="Enable auto-save" 
-                          IsChecked="{Binding AutoSaveEnabled}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
-                
-                <Grid Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Text="Save interval (minutes):" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                    
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding AutoSaveInterval}" 
-                              ItemsSource="{Binding AutoSaveIntervalOptions}"
-                              IsEnabled="{Binding AutoSaveEnabled}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                 Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      CanContentScroll="False"
+                      Padding="{DynamicResource MarginLarge}">
+            <Grid HorizontalAlignment="Stretch"
+                  MaxWidth="1600"
+                  Margin="{DynamicResource MarginMedium}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="EDITOR PREFERENCES" 
+                           Foreground="{DynamicResource ForegroundBrush}" 
+                           FontFamily="Consolas"
+                           FontWeight="Bold" 
+                           Margin="0,0,0,20">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="32"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
+
+                <!-- Two columns: Grid Settings | Auto-save -->
+                <UniformGrid Grid.Row="1" Columns="2" HorizontalAlignment="Stretch" Grid.IsSharedSizeScope="True">
+                    <!-- Grid Settings -->
+                    <GroupBox Header="Grid Settings"
+                              Style="{StaticResource SettingsGroupBoxStyle}"
+                              Margin="0,0,12,0">
+                        <StackPanel Margin="{DynamicResource PaddingMedium}">
+                            <CheckBox Content="Show grid by default" 
+                                      IsChecked="{Binding ShowGrid}" 
+                                      Style="{StaticResource SettingsCheckBoxStyle}"
+                                      Margin="0,0,0,8">
+                                <CheckBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </CheckBox.FontSize>
+                            </CheckBox>
+
+                            <CheckBox Content="Enable snap to grid" 
+                                      IsChecked="{Binding SnapToGrid}" 
+                                      Style="{StaticResource SettingsCheckBoxStyle}"
+                                      Margin="0,0,0,12">
+                                <CheckBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </CheckBox.FontSize>
+                            </CheckBox>
+
+                            <!-- Size row -->
+                            <Grid Margin="0,8,0,0" Grid.IsSharedSizeScope="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Grid size (pixels):" 
+                                           Foreground="{DynamicResource ForegroundBrush}" 
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+
+                                <ComboBox Grid.Column="2" 
+                                          SelectedItem="{Binding GridSize}" 
+                                          ItemsSource="{Binding GridSizeOptions}"
+                                          Style="{StaticResource SettingsComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          MinWidth="150"
+                                          MaxWidth="300"/>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Auto-save Settings -->
+                    <GroupBox Header="Auto-save"
+                              Style="{StaticResource SettingsGroupBoxStyle}"
+                              Margin="12,0,0,0">
+                        <StackPanel Margin="{DynamicResource PaddingMedium}">
+                            <CheckBox Content="Enable auto-save" 
+                                      IsChecked="{Binding AutoSaveEnabled}" 
+                                      Style="{StaticResource SettingsCheckBoxStyle}"
+                                      Margin="0,0,0,12">
+                                <CheckBox.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                </CheckBox.FontSize>
+                            </CheckBox>
+
+                            <Grid Margin="0,8,0,0" Grid.IsSharedSizeScope="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Save interval (minutes):" 
+                                           Foreground="{DynamicResource ForegroundBrush}" 
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap">
+                                    <TextBlock.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+
+                                <ComboBox Grid.Column="2" 
+                                          SelectedItem="{Binding AutoSaveInterval}" 
+                                          ItemsSource="{Binding AutoSaveIntervalOptions}"
+                                          IsEnabled="{Binding AutoSaveEnabled}"
+                                          Style="{StaticResource SettingsComboBoxStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          MinWidth="150"
+                                          MaxWidth="300"/>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                </UniformGrid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

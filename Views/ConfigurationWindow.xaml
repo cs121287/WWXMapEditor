@@ -10,9 +10,12 @@
         WindowStyle="None"
         Background="{DynamicResource BackgroundBrush}"
         Icon="/Resources/Images/Icons/app.ico"
-        WindowStartupLocation="CenterScreen">
-    
+        WindowStartupLocation="CenterScreen"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+
+    <!-- Host the redesigned view (full background and board are inside the view) -->
     <Grid>
-        <ContentControl Content="{Binding}"/>
+        <local:ConfigurationView />
     </Grid>
 </Window>

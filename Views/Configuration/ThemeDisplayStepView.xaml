@@ -9,167 +9,248 @@
              d:DesignHeight="600" d:DesignWidth="800"
              Loaded="OnLoaded">
 
-    <StackPanel>
-        <TextBlock Text="THEME &amp; DISPLAY SETTINGS" 
-                   Foreground="{DynamicResource ForegroundBrush}" 
-                   FontFamily="Consolas"
-                   FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                      Converter={StaticResource MultiplyConverter}, ConverterParameter=32}" 
-                   FontWeight="Bold" 
-                   Margin="0,0,0,30"/>
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      CanContentScroll="False"
+                      Padding="{DynamicResource MarginLarge}">
+            <Grid HorizontalAlignment="Stretch"
+                  MaxWidth="1600"
+                  Margin="{DynamicResource MarginMedium}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <!-- Theme Selection -->
-        <GroupBox Header="Choose Your Theme" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,0,30">
-            <StackPanel Margin="20">
-                <RadioButton x:Name="DarkThemeRadio"
-                             Content="Dark Theme (Recommended)" 
-                             IsChecked="{Binding IsDarkTheme}" 
-                             Style="{StaticResource SettingsRadioButtonStyle}"
-                             FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
-                             Margin="0,10"/>
-                <TextBlock Text="A dark color scheme that's easy on the eyes during long editing sessions"
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="THEME &amp; DISPLAY SETTINGS" 
+                           Foreground="{DynamicResource ForegroundBrush}" 
                            FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                           Margin="35,0,0,20"/>
+                           FontWeight="Bold" 
+                           Margin="0,0,0,20">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}"
+                                 Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}"
+                                 ConverterParameter="32"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
 
-                <RadioButton x:Name="LightThemeRadio"
-                             Content="Light Theme" 
-                             IsChecked="{Binding IsLightTheme}" 
-                             Style="{StaticResource SettingsRadioButtonStyle}"
-                             FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                Converter={StaticResource MultiplyConverter}, ConverterParameter=18}"
-                             Margin="0,10"/>
-                <TextBlock Text="A bright, clean theme for well-lit environments"
-                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                           FontFamily="Consolas"
-                           FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                          Converter={StaticResource MultiplyConverter}, ConverterParameter=14}"
-                           Margin="35,0,0,10"/>
-            </StackPanel>
-        </GroupBox>
+                <!-- Two columns: Theme Selection | Display Preferences -->
+                <UniformGrid Grid.Row="1" Columns="2" HorizontalAlignment="Stretch" Margin="0" Grid.IsSharedSizeScope="True">
+                    <!-- Theme Selection -->
+                    <GroupBox Header="Choose Your Theme"
+                              Style="{StaticResource SettingsGroupBoxStyle}"
+                              Margin="0,0,12,0">
+                        <StackPanel Margin="{DynamicResource PaddingMedium}">
+                            <RadioButton x:Name="DarkThemeRadio"
+                                         Content="Dark Theme (Recommended)" 
+                                         IsChecked="{Binding IsDarkTheme}" 
+                                         Style="{StaticResource SettingsRadioButtonStyle}"
+                                         Margin="0,0,0,8">
+                                <RadioButton.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                </RadioButton.FontSize>
+                            </RadioButton>
 
-        <!-- Display Options -->
-        <GroupBox Header="Display Preferences" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel Margin="20">
-                <CheckBox Content="Start in fullscreen mode" 
-                          IsChecked="{Binding StartInFullscreen}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
+                            <TextBlock Text="A dark color scheme that's easy on the eyes during long editing sessions"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="30,0,0,16"
+                                       TextWrapping="Wrap">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
 
-                <CheckBox Content="Show tooltips" 
-                          IsChecked="{Binding ShowTooltips}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
+                            <RadioButton x:Name="LightThemeRadio"
+                                         Content="Light Theme" 
+                                         IsChecked="{Binding IsLightTheme}" 
+                                         Style="{StaticResource SettingsRadioButtonStyle}"
+                                         Margin="0,0,0,8">
+                                <RadioButton.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                </RadioButton.FontSize>
+                            </RadioButton>
 
-                <!-- Scaling Mode -->
-                <Grid Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                            <TextBlock Text="A bright, clean theme for well-lit environments"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="30,0,0,0"
+                                       TextWrapping="Wrap">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                        </StackPanel>
+                    </GroupBox>
 
-                    <TextBlock Text="Scaling mode:" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
+                    <!-- Display Preferences (split in two columns internally) -->
+                    <GroupBox Header="Display Preferences"
+                              Style="{StaticResource SettingsGroupBoxStyle}"
+                              Margin="12,0,0,0">
+                        <Grid Margin="{DynamicResource PaddingMedium}" Grid.IsSharedSizeScope="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding ScaleMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                              ItemsSource="{Binding ScaleModes}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                 Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                              Width="260"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <!-- Left column: checkboxes -->
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <CheckBox Content="Start in fullscreen mode" 
+                                          IsChecked="{Binding StartInFullscreen}" 
+                                          Style="{StaticResource SettingsCheckBoxStyle}"
+                                          Margin="0,0,0,10">
+                                    <CheckBox.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                    </CheckBox.FontSize>
+                                </CheckBox>
 
-                <!-- Legacy Percent UI -->
-                <Grid Margin="0,10,0,0">
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ScaleMode}" Value="LegacyPercent">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                                <CheckBox Content="Show tooltips" 
+                                          IsChecked="{Binding ShowTooltips}" 
+                                          Style="{StaticResource SettingsCheckBoxStyle}"
+                                          Margin="0,0,0,10">
+                                    <CheckBox.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                    </CheckBox.FontSize>
+                                </CheckBox>
 
-                    <TextBlock Text="UI Scale (%):" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
+                                <CheckBox Content="Use density breakpoints (Compact/Normal/Spacious)" 
+                                          IsChecked="{Binding UseDensityBreakpoints, Mode=TwoWay}" 
+                                          Style="{StaticResource SettingsCheckBoxStyle}"
+                                          Margin="0,0,0,0">
+                                    <CheckBox.FontSize>
+                                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                    </CheckBox.FontSize>
+                                </CheckBox>
+                            </StackPanel>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding UIScaling, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                              ItemsSource="{Binding UIScalingOptions}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                 Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <!-- Right column: scaling controls -->
+                            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                <!-- Scaling Mode -->
+                                <Grid Margin="0,0,0,10" Grid.IsSharedSizeScope="True">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                <!-- Custom Fixed UI -->
-                <Grid Margin="0,10,0,0">
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ScaleMode}" Value="CustomFixed">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="Scaling mode:" 
+                                               Foreground="{DynamicResource ForegroundBrush}" 
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
 
-                    <TextBlock Text="Custom scale:" 
-                               Foreground="{DynamicResource ForegroundBrush}" 
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="2" 
+                                              SelectedItem="{Binding ScaleMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                              ItemsSource="{Binding ScaleModes}"
+                                              Style="{StaticResource SettingsComboBoxStyle}"
+                                              HorizontalAlignment="Stretch"
+                                              MinWidth="200"
+                                              MaxWidth="400"/>
+                                </Grid>
 
-                    <Slider Grid.Column="1" 
-                            Minimum="0.5" Maximum="2.0" TickFrequency="0.05"
-                            IsSnapToTickEnabled="True"
-                            Value="{Binding CustomFixedScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Margin="0,0,10,0"/>
-                    <TextBlock Grid.Column="2"
-                               Text="{Binding CustomFixedScale, StringFormat={}{0:0.00}x}"
-                               Foreground="{DynamicResource AccentBrush}"
-                               FontFamily="Consolas"
-                               FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                                  Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                               VerticalAlignment="Center"/>
-                </Grid>
+                                <!-- Legacy Percent UI -->
+                                <Grid Margin="0,0,0,10"
+                                      Grid.IsSharedSizeScope="True">
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ScaleMode}" Value="LegacyPercent">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
 
-                <!-- Advanced breakpoints -->
-                <CheckBox Content="Use density breakpoints (Compact/Normal/Spacious)" 
-                          IsChecked="{Binding UseDensityBreakpoints, Mode=TwoWay}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale,
-                                             Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                          Margin="0,10"/>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="UI Scale (%):" 
+                                               Foreground="{DynamicResource ForegroundBrush}" 
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
+
+                                    <ComboBox Grid.Column="2" 
+                                              SelectedItem="{Binding UIScaling, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                              ItemsSource="{Binding UIScalingOptions}"
+                                              Style="{StaticResource SettingsComboBoxStyle}"
+                                              HorizontalAlignment="Stretch"
+                                              MinWidth="150"
+                                              MaxWidth="300"/>
+                                </Grid>
+
+                                <!-- Custom Fixed UI -->
+                                <Grid Grid.IsSharedSizeScope="True">
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ScaleMode}" Value="CustomFixed">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="Custom scale:" 
+                                               Foreground="{DynamicResource ForegroundBrush}" 
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.FontSize>
+                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                                        </TextBlock.FontSize>
+                                    </TextBlock>
+
+                                    <Slider Grid.Column="2" 
+                                            Minimum="0.5" Maximum="2.0" TickFrequency="0.05"
+                                            IsSnapToTickEnabled="True"
+                                            Value="{Binding CustomFixedScale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Margin="0,0,10,0"/>
+
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding CustomFixedScale, StringFormat={}{0:0.00}x}"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               FontFamily="Consolas"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                </UniformGrid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

@@ -15,10 +15,21 @@
     <Copyright>Copyright © 2025 CS121287</Copyright>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\Images\MainMenu\Background.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\noise_tile%404x.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\noise_tile.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\scratches%404x.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\scratches.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\selection_texture%404x.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\selection_texture.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\slat_mask%404x.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\slat_mask.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\splatters%404x.png" />
+    <None Remove="Resources\Images\MainMenu\overlays\splatters.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +47,26 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\MainMenu\Background.png" />
+    <Resource Include="Resources\Images\MainMenu\overlays\noise_tile.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MainMenu\overlays\noise_tile@4x.png" />
+    <Resource Include="Resources\Images\MainMenu\overlays\scratches.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MainMenu\overlays\scratches@4x.png" />
+    <Resource Include="Resources\Images\MainMenu\overlays\selection_texture.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MainMenu\overlays\selection_texture@4x.png" />
+    <Resource Include="Resources\Images\MainMenu\overlays\slat_mask.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MainMenu\overlays\slat_mask@4x.png" />
+    <Resource Include="Resources\Images\MainMenu\overlays\splatters.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MainMenu\overlays\splatters@4x.png" />
   </ItemGroup>
 
   <ItemGroup>

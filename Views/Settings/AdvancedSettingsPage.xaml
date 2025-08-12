@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -16,7 +16,7 @@
 
         <TextBlock Grid.Row="0"
                    Text="ADVANCED SETTINGS" 
-                   Foreground="White" 
+                   Foreground="{DynamicResource ForegroundBrush}" 
                    FontFamily="Consolas"
                    FontWeight="Bold" 
                    Margin="{DynamicResource MarginLarge}">
@@ -28,150 +28,139 @@
             </TextBlock.FontSize>
         </TextBlock>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Two equal columns to avoid vertical scrolling where possible -->
+        <UniformGrid Grid.Row="1" Columns="2" HorizontalAlignment="Stretch" Margin="{DynamicResource MarginLarge}">
+            <!-- Debugging Section -->
+            <GroupBox Header="Debugging" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,12,0">
+                <StackPanel>
+                    <CheckBox Content="Show FPS counter" 
+                              IsChecked="{Binding ShowFPSCounter}" 
+                              Style="{StaticResource SettingsCheckBoxStyle}"/>
 
-            <!-- Left Column -->
-            <StackPanel Grid.Column="0">
-                <!-- Debugging Section -->
-                <GroupBox Header="Debugging" Style="{StaticResource SettingsGroupBoxStyle}">
-                    <StackPanel>
-                        <CheckBox Content="Show FPS counter" 
-                                  IsChecked="{Binding ShowFPSCounter}" 
+                    <CheckBox Content="Show memory usage" 
+                              IsChecked="{Binding ShowMemoryUsage}" 
+                              Style="{StaticResource SettingsCheckBoxStyle}"
+                              Margin="{DynamicResource MarginMedium}"/>
+
+                    <CheckBox Content="Enable debug console" 
+                              IsChecked="{Binding EnableDebugConsole}" 
+                              Style="{StaticResource SettingsCheckBoxStyle}"
+                              Margin="{DynamicResource MarginMedium}"/>
+
+                    <Grid Margin="{DynamicResource MarginMedium}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Log level:" 
+                                   Foreground="{DynamicResource ForegroundBrush}" 
+                                   FontSize="{DynamicResource FontSizeMedium}"
+                                   VerticalAlignment="Center"
+                                   Margin="{DynamicResource MarginMedium}"/>
+
+                        <ComboBox Grid.Column="1" 
+                                  SelectedItem="{Binding LogLevel}" 
+                                  ItemsSource="{Binding LogLevels}"
+                                  Style="{StaticResource SettingsComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Plugins Section -->
+            <GroupBox Header="Plugins" 
+                      Style="{StaticResource SettingsGroupBoxStyle}"
+                      Margin="12,0,0,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <CheckBox Content="Enable plugins" 
+                                  IsChecked="{Binding EnablePlugins}" 
                                   Style="{StaticResource SettingsCheckBoxStyle}"/>
-
-                        <CheckBox Content="Show memory usage" 
-                                  IsChecked="{Binding ShowMemoryUsage}" 
-                                  Style="{StaticResource SettingsCheckBoxStyle}"
-                                  Margin="{DynamicResource MarginMedium}"/>
-
-                        <CheckBox Content="Enable debug console" 
-                                  IsChecked="{Binding EnableDebugConsole}" 
-                                  Style="{StaticResource SettingsCheckBoxStyle}"
-                                  Margin="{DynamicResource MarginMedium}"/>
 
                         <Grid Margin="{DynamicResource MarginMedium}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Log level:" 
-                                       Foreground="White" 
+                            <TextBlock Text="Directory:" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"
                                        Margin="{DynamicResource MarginMedium}"/>
 
-                            <ComboBox Grid.Column="1" 
-                                      SelectedItem="{Binding LogLevel}" 
-                                      ItemsSource="{Binding LogLevels}"
-                                      Style="{StaticResource SettingsComboBoxStyle}"
-                                      HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding PluginDirectory}" 
+                                     IsEnabled="{Binding EnablePlugins}"
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
+
+                            <Button Grid.Column="2" 
+                                    Content="Browse" 
+                                    Command="{Binding BrowsePluginDirectoryCommand}"
+                                    IsEnabled="{Binding EnablePlugins}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="70"/>
                         </Grid>
+
+                        <TextBlock Text="Installed Plugins:" 
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}" 
+                                   FontSize="{DynamicResource FontSizeMedium}"
+                                   Margin="{DynamicResource MarginMedium}"/>
                     </StackPanel>
-                </GroupBox>
-            </StackPanel>
 
-            <!-- Right Column -->
-            <DockPanel Grid.Column="2">
-                <!-- Plugins Section -->
-                <GroupBox Header="Plugins" 
-                          Style="{StaticResource SettingsGroupBoxStyle}"
-                          DockPanel.Dock="Top">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <CheckBox Content="Enable plugins" 
-                                      IsChecked="{Binding EnablePlugins}" 
-                                      Style="{StaticResource SettingsCheckBoxStyle}"/>
+                    <Border BorderBrush="{DynamicResource BorderBrush}" 
+                            BorderThickness="1" 
+                            Background="{DynamicResource Surface2Brush}"
+                            MinHeight="150"
+                            MaxHeight="300"
+                            DockPanel.Dock="Top">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding InstalledPlugins}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}" 
+                                                BorderThickness="0,0,0,1" 
+                                                Padding="{DynamicResource PaddingMedium}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                            <Grid Margin="{DynamicResource MarginMedium}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0" 
+                                                          IsChecked="{Binding IsEnabled}" 
+                                                          Margin="{DynamicResource MarginMedium}"/>
 
-                                <TextBlock Text="Directory:" 
-                                           Foreground="White" 
-                                           FontSize="{DynamicResource FontSizeMedium}"
-                                           VerticalAlignment="Center"
-                                           Margin="{DynamicResource MarginMedium}"/>
-
-                                <TextBox Grid.Column="1" 
-                                         Text="{Binding PluginDirectory}" 
-                                         IsEnabled="{Binding EnablePlugins}"
-                                         Style="{StaticResource SettingsTextBoxStyle}"
-                                         Margin="{DynamicResource MarginMedium}"/>
-
-                                <Button Grid.Column="2" 
-                                        Content="Browse" 
-                                        Command="{Binding BrowsePluginDirectoryCommand}"
-                                        IsEnabled="{Binding EnablePlugins}"
-                                        Style="{StaticResource EditorButtonStyle}"
-                                        Width="70"/>
-                            </Grid>
-
-                            <TextBlock Text="Installed Plugins:" 
-                                       Foreground="White" 
-                                       FontSize="{DynamicResource FontSizeMedium}"
-                                       Margin="{DynamicResource MarginMedium}"/>
-                        </StackPanel>
-
-                        <Border BorderBrush="#FF555555" 
-                                BorderThickness="1" 
-                                Background="#FF1a1a1a"
-                                MinHeight="150"
-                                MaxHeight="300"
-                                DockPanel.Dock="Top">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding InstalledPlugins}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderBrush="#FF555555" 
-                                                    BorderThickness="0,0,0,1" 
-                                                    Padding="{DynamicResource PaddingMedium}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <CheckBox Grid.Column="0" 
-                                                              IsChecked="{Binding IsEnabled}" 
-                                                              Margin="{DynamicResource MarginMedium}"/>
-
-                                                    <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="{Binding Name}" 
-                                                                   Foreground="White" 
-                                                                   FontSize="{DynamicResource FontSizeMedium}"
-                                                                   FontWeight="Bold"/>
-                                                        <TextBlock Text="{Binding Description}" 
-                                                                   Foreground="Gray" 
-                                                                   FontSize="{DynamicResource FontSizeSmall}"
-                                                                   TextWrapping="Wrap"/>
-                                                    </StackPanel>
-
-                                                    <TextBlock Grid.Column="2" 
-                                                               Text="{Binding Version}" 
-                                                               Foreground="Gray" 
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding Name}" 
+                                                               Foreground="{DynamicResource ForegroundBrush}" 
+                                                               FontSize="{DynamicResource FontSizeMedium}"
+                                                               FontWeight="Bold"/>
+                                                    <TextBlock Text="{Binding Description}" 
+                                                               Foreground="{DynamicResource ForegroundSecondaryBrush}" 
                                                                FontSize="{DynamicResource FontSizeSmall}"
-                                                               VerticalAlignment="Center"
-                                                               Margin="5,0"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Border>
-                    </DockPanel>
-                </GroupBox>
-            </DockPanel>
-        </Grid>
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="2" 
+                                                           Text="{Binding Version}" 
+                                                           Foreground="{DynamicResource ForegroundSecondaryBrush}" 
+                                                           FontSize="{DynamicResource FontSizeSmall}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="5,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </DockPanel>
+            </GroupBox>
+        </UniformGrid>
     </Grid>
 </UserControl>

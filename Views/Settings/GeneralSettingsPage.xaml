@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200">
 
-    <Grid>
+    <Grid Background="{DynamicResource BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -16,7 +16,7 @@
 
         <TextBlock Grid.Row="0"
                    Text="GENERAL SETTINGS" 
-                   Foreground="White" 
+                   Foreground="{DynamicResource ForegroundBrush}" 
                    FontFamily="Consolas"
                    FontWeight="Bold" 
                    Margin="{DynamicResource MarginLarge}">
@@ -28,17 +28,11 @@
             </TextBlock.FontSize>
         </TextBlock>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left Column -->
-            <StackPanel Grid.Column="0">
+        <!-- Two columns: Theme + Language | Auto-save + Recent Files -->
+        <UniformGrid Grid.Row="1" Columns="2" HorizontalAlignment="Stretch" Margin="{DynamicResource MarginLarge}">
+            <StackPanel Margin="0,0,12,0">
                 <!-- Theme Section -->
-                <GroupBox Header="Theme" Style="{StaticResource SettingsGroupBoxStyle}">
+                <GroupBox Header="Theme" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,0,12">
                     <StackPanel>
                         <RadioButton Content="Dark Mode" 
                                      IsChecked="{Binding IsDarkMode}" 
@@ -52,7 +46,7 @@
                                          Style="{StaticResource SettingsRadioButtonStyle}"/>
                             <Rectangle Width="30" Height="20" 
                                        Fill="{Binding CustomThemeColor}" 
-                                       Stroke="White" 
+                                       Stroke="{DynamicResource ForegroundBrush}" 
                                        StrokeThickness="1" 
                                        Margin="{DynamicResource MarginMedium}"
                                        Cursor="Hand">
@@ -72,10 +66,9 @@
                 </GroupBox>
             </StackPanel>
 
-            <!-- Right Column -->
-            <StackPanel Grid.Column="2">
+            <StackPanel Margin="12,0,0,0">
                 <!-- Auto-save Section -->
-                <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}">
+                <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}" Margin="0,0,0,12">
                     <StackPanel>
                         <CheckBox Content="Enable auto-save" 
                                   IsChecked="{Binding AutoSaveEnabled}" 
@@ -88,7 +81,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Text="Interval (min):" 
-                                       Foreground="White" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"
                                        Margin="{DynamicResource MarginMedium}"/>
@@ -110,7 +103,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Text="Location:" 
-                                       Foreground="White" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"
                                        Margin="{DynamicResource MarginMedium}"/>
@@ -125,7 +118,7 @@
                                     Content="Browse..." 
                                     Command="{Binding BrowseAutoSaveLocationCommand}"
                                     IsEnabled="{Binding AutoSaveEnabled}"
-                                    Style="{StaticResource EditorButtonStyle}"
+                                    Style="{DynamicResource EditorButtonStyle}"
                                     Width="80"/>
                         </Grid>
                     </StackPanel>
@@ -141,7 +134,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Text="Files to show:" 
-                                       Foreground="White" 
+                                       Foreground="{DynamicResource ForegroundBrush}" 
                                        FontSize="{DynamicResource FontSizeMedium}"
                                        VerticalAlignment="Center"
                                        Margin="{DynamicResource MarginMedium}"/>
@@ -165,6 +158,6 @@
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
-        </Grid>
+        </UniformGrid>
     </Grid>
 </UserControl>

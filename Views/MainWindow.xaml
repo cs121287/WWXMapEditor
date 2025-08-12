@@ -13,8 +13,11 @@
         MinWidth="1280"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="{DynamicResource BackgroundBrush}">
+        Background="{DynamicResource BackgroundBrush}"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
     <Grid>
+        <!-- Keep the main menu layer and the content host as before -->
         <local:MainMenuView x:Name="MainMenu" Visibility="{Binding MainMenuVisibility}"/>
         <ContentControl Content="{Binding CurrentView}" 
                         HorizontalAlignment="Stretch"
