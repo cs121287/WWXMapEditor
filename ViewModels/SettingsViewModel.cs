@@ -1,178 +1,185 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using WWXMapEditor.Views.Settings;
+using WWXMapEditor.Services;
 using WWXMapEditor.ViewModels.Settings;
+using WWXMapEditor.Views.Settings;
 
 namespace WWXMapEditor.ViewModels
 {
-    public class SettingsViewModel : ViewModelBase
+    public class SettingsViewModel : INotifyPropertyChanged
     {
-        private readonly MainWindowViewModel _mainWindowViewModel;
+        private readonly MainWindowViewModel _mainViewModel;
+        private readonly SettingsService _settingsService;
+        private object? _currentSettingsPage;
         private int _selectedCategoryIndex;
-        private object _currentSettingsPage;
+        private ObservableCollection<string> _categoryNames;
 
-        // Page ViewModels
-        private readonly GeneralSettingsViewModel _generalSettingsViewModel;
-        private readonly EditorSettingsViewModel _editorSettingsViewModel;
-        private readonly InputSettingsViewModel _inputSettingsViewModel;
-        private readonly FileProjectSettingsViewModel _fileProjectSettingsViewModel;
-        private readonly DisplaySettingsViewModel _displaySettingsViewModel;
-        private readonly AdvancedSettingsViewModel _advancedSettingsViewModel;
+        public SettingsViewModel(MainWindowViewModel mainViewModel)
+        {
+            _mainViewModel = mainViewModel;
+            _settingsService = SettingsService.Instance;
 
-        public ObservableCollection<string> CategoryNames { get; }
+            // Initialize commands
+            CloseCommand = new RelayCommand(Close);
+            ApplyCommand = new RelayCommand(Apply);
+            SaveCommand = new RelayCommand(Save);
+            CancelCommand = new RelayCommand(Cancel);
+            ResetToDefaultsCommand = new RelayCommand(ResetToDefaults);
+
+            // Initialize categories
+            _categoryNames = new ObservableCollection<string>
+            {
+                "General",
+                "Display",
+                "Editor",
+                "File & Project",
+                "Input",
+                "Advanced"
+            };
+
+            // Set initial category
+            SelectedCategoryIndex = 0;
+        }
+
+        #region Properties
+        public ObservableCollection<string> CategoryNames
+        {
+            get => _categoryNames;
+            set
+            {
+                _categoryNames = value;
+                OnPropertyChanged();
+            }
+        }
 
         public int SelectedCategoryIndex
         {
             get => _selectedCategoryIndex;
             set
             {
-                if (SetProperty(ref _selectedCategoryIndex, value))
-                {
-                    UpdateSettingsPage();
-                }
+                _selectedCategoryIndex = value;
+                OnPropertyChanged();
+                LoadSettingsPage(value);
             }
         }
 
-        public object CurrentSettingsPage
+        public object? CurrentSettingsPage
         {
             get => _currentSettingsPage;
-            set => SetProperty(ref _currentSettingsPage, value);
+            set
+            {
+                _currentSettingsPage = value;
+                OnPropertyChanged();
+            }
         }
+        #endregion
 
+        #region Commands
         public ICommand CloseCommand { get; }
         public ICommand ApplyCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand ResetToDefaultsCommand { get; }
+        #endregion
 
-        public SettingsViewModel(MainWindowViewModel mainWindowViewModel)
+        #region Methods
+        private void LoadSettingsPage(int categoryIndex)
         {
-            _mainWindowViewModel = mainWindowViewModel;
-
-            // Initialize category names
-            CategoryNames = new ObservableCollection<string>
-            {
-                "General",
-                "Editor",
-                "Input",
-                "File & Project",
-                "Display",
-                "Advanced"
-            };
-
-            // Initialize page view models
-            _generalSettingsViewModel = new GeneralSettingsViewModel();
-            _editorSettingsViewModel = new EditorSettingsViewModel();
-            _inputSettingsViewModel = new InputSettingsViewModel();
-            _fileProjectSettingsViewModel = new FileProjectSettingsViewModel();
-            _displaySettingsViewModel = new DisplaySettingsViewModel();
-            _advancedSettingsViewModel = new AdvancedSettingsViewModel();
-
-            CloseCommand = new RelayCommand(ExecuteClose);
-            ApplyCommand = new RelayCommand(ExecuteApply);
-            SaveCommand = new RelayCommand(ExecuteSave);
-            CancelCommand = new RelayCommand(ExecuteCancel);
-            ResetToDefaultsCommand = new RelayCommand(ExecuteResetToDefaults);
-
-            // Load all settings
-            LoadAllSettings();
-
-            // Initialize with first category
-            SelectedCategoryIndex = 0;
-        }
-
-        private void UpdateSettingsPage()
-        {
-            switch (SelectedCategoryIndex)
+            switch (categoryIndex)
             {
                 case 0: // General
-                    CurrentSettingsPage = new GeneralSettingsPage { DataContext = _generalSettingsViewModel };
+                    var generalPage = new GeneralSettingsPage();
+                    generalPage.DataContext = new GeneralSettingsViewModel();
+                    CurrentSettingsPage = generalPage;
                     break;
-                case 1: // Editor
-                    CurrentSettingsPage = new EditorSettingsPage { DataContext = _editorSettingsViewModel };
+
+                case 1: // Display
+                    var displayPage = new DisplaySettingsPage();
+                    displayPage.DataContext = new DisplaySettingsViewModel();
+                    CurrentSettingsPage = displayPage;
                     break;
-                case 2: // Input
-                    CurrentSettingsPage = new InputSettingsPage { DataContext = _inputSettingsViewModel };
+
+                case 2: // Editor
+                    var editorPage = new EditorSettingsPage();
+                    editorPage.DataContext = new EditorSettingsViewModel();
+                    CurrentSettingsPage = editorPage;
                     break;
+
                 case 3: // File & Project
-                    CurrentSettingsPage = new FileProjectSettingsPage { DataContext = _fileProjectSettingsViewModel };
+                    var filePage = new FileProjectSettingsPage();
+                    filePage.DataContext = new FileProjectSettingsViewModel();
+                    CurrentSettingsPage = filePage;
                     break;
-                case 4: // Display
-                    CurrentSettingsPage = new DisplaySettingsPage { DataContext = _displaySettingsViewModel };
+
+                case 4: // Input
+                    var inputPage = new InputSettingsPage();
+                    inputPage.DataContext = new InputSettingsViewModel();
+                    CurrentSettingsPage = inputPage;
                     break;
+
                 case 5: // Advanced
-                    CurrentSettingsPage = new AdvancedSettingsPage { DataContext = _advancedSettingsViewModel };
+                    var advancedPage = new AdvancedSettingsPage();
+                    advancedPage.DataContext = new AdvancedSettingsViewModel();
+                    CurrentSettingsPage = advancedPage;
+                    break;
+
+                default:
+                    CurrentSettingsPage = null;
                     break;
             }
         }
 
-        private void LoadAllSettings()
+        private void Close(object? parameter)
         {
-            _generalSettingsViewModel.LoadSettings();
-            _editorSettingsViewModel.LoadSettings();
-            _inputSettingsViewModel.LoadSettings();
-            _fileProjectSettingsViewModel.LoadSettings();
-            _displaySettingsViewModel.LoadSettings();
-            _advancedSettingsViewModel.LoadSettings();
+            // Return to main menu without saving
+            _mainViewModel.NavigateToMainMenu();
         }
 
-        private void ExecuteClose(object parameter)
+        private void Apply(object? parameter)
         {
-            _mainWindowViewModel.NavigateToMainMenu();
+            // Apply settings without closing
+            _settingsService.ApplyAllSettings();
+            _mainViewModel.OnSettingsChanged();
         }
 
-        private void ExecuteApply(object parameter)
+        private void Save(object? parameter)
         {
-            ApplySettings();
+            // Save and apply settings, then close
+            _settingsService.SaveSettings(_settingsService.Settings);
+            _settingsService.ApplyAllSettings();
+            _mainViewModel.OnSettingsChanged();
+            _mainViewModel.NavigateToMainMenu();
         }
 
-        private void ExecuteSave(object parameter)
+        private void Cancel(object? parameter)
         {
-            ApplySettings();
-            SaveSettings();
-            _mainWindowViewModel.NavigateToMainMenu();
+            // Reload settings from file and return to main menu
+            _settingsService.LoadSettings();
+            _settingsService.ApplyAllSettings();
+            _mainViewModel.NavigateToMainMenu();
         }
 
-        private void ExecuteCancel(object parameter)
-        {
-            _mainWindowViewModel.NavigateToMainMenu();
-        }
-
-        private void ExecuteResetToDefaults(object parameter)
-        {
-            ResetSettings();
-        }
-
-        private void ApplySettings()
-        {
-            // Apply settings logic here
-            _generalSettingsViewModel.SaveSettings();
-            _editorSettingsViewModel.SaveSettings();
-            _inputSettingsViewModel.SaveSettings();
-            _fileProjectSettingsViewModel.SaveSettings();
-            _displaySettingsViewModel.SaveSettings();
-            _advancedSettingsViewModel.SaveSettings();
-        }
-
-        private void SaveSettings()
-        {
-            // Save settings to file
-            // TODO: Implement persistent storage
-        }
-
-        private void ResetSettings()
+        private void ResetToDefaults(object? parameter)
         {
             // Reset all settings to defaults
-            _generalSettingsViewModel.ResetToDefaults();
-            _editorSettingsViewModel.ResetToDefaults();
-            _inputSettingsViewModel.ResetToDefaults();
-            _fileProjectSettingsViewModel.ResetToDefaults();
-            _displaySettingsViewModel.ResetToDefaults();
-            _advancedSettingsViewModel.ResetToDefaults();
+            _settingsService.ResetToDefaults();
+            _mainViewModel.OnSettingsChanged();
 
-            // Update the current page to reflect changes
-            UpdateSettingsPage();
+            // Reload the current settings page to reflect changes
+            LoadSettingsPage(_selectedCategoryIndex);
         }
+        #endregion
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
     }
 }

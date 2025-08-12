@@ -8,9 +8,9 @@
              d:DesignHeight="1080" d:DesignWidth="1920">
 
     <Grid>
-        <!-- Animated Background Pattern -->
+        <!-- Subtle animated background pattern -->
         <Grid.Background>
-            <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" Opacity="0.05">
+            <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" Opacity="0.02">
                 <DrawingBrush.Drawing>
                     <DrawingGroup>
                         <GeometryDrawing Brush="{DynamicResource BackgroundBrush}"
@@ -39,207 +39,433 @@
 
             <!-- Header Section -->
             <Border Grid.Row="0" 
-                    Background="{DynamicResource Surface2Brush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,0,0,1"
                     Padding="{DynamicResource PaddingXLarge}">
                 <StackPanel HorizontalAlignment="Center">
                     <TextBlock Text="WWX MAP EDITOR" 
                                Style="{StaticResource HeaderTextStyle}"
-                               FontSize="{DynamicResource FontSizeTitle}"
+                               FontSize="{DynamicResource FontSizeHeader}"
+                               Foreground="{DynamicResource ForegroundBrush}"
                                Margin="{DynamicResource MarginMedium}">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.3" BlurRadius="5"/>
+                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.3" BlurRadius="4"/>
                         </TextBlock.Effect>
                     </TextBlock>
                     <TextBlock Text="Strategic Map Creation Tool" 
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"
-                               FontSize="{DynamicResource FontSizeXLarge}"
-                               Opacity="0.8"/>
+                               FontSize="{DynamicResource FontSizeLarge}"
+                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                               Opacity="0.7"/>
                 </StackPanel>
             </Border>
 
-            <!-- Main Menu Content -->
+            <!-- Main Content Area with Image -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Center Menu Panel -->
-                <Border Grid.Column="1" 
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource SurfaceBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadiusLarge}"
-                        Margin="{DynamicResource MarginXLarge}"
-                        Padding="{DynamicResource PaddingXLarge}">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Direction="270" ShadowDepth="10" Opacity="0.3" BlurRadius="20"/>
-                    </Border.Effect>
+                <!-- Left Content Area -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <StackPanel>
-                        <!-- Menu Title -->
-                        <TextBlock Text="MAIN MENU" 
-                                   Style="{StaticResource TitleTextStyle}"
-                                   HorizontalAlignment="Center"
-                                   Margin="{DynamicResource MarginLarge}"
-                                   FontSize="{DynamicResource FontSizeMenu}"/>
+                    <!-- Center Menu Panel - Moved to top row for alignment with image -->
+                    <Border Grid.Row="0" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerRadiusLarge}"
+                            Padding="40"
+                            Margin="0,40,0,0">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="15"/>
+                        </Border.Effect>
 
-                        <!-- Menu Buttons -->
-                        <Button Content="NEW MAP" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="NewMapCreation">
-                            <Button.ToolTip>
-                                <ToolTip Content="Create a new map from scratch"/>
-                            </Button.ToolTip>
-                        </Button>
+                        <StackPanel>
+                            <!-- Menu Title -->
+                            <TextBlock Text="MAIN MENU" 
+                                       Style="{StaticResource TitleTextStyle}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,30"
+                                       FontSize="{DynamicResource FontSizeXLarge}"
+                                       Foreground="{DynamicResource ForegroundBrush}"/>
 
-                        <Button Content="LOAD MAP" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="LoadMap">
-                            <Button.ToolTip>
-                                <ToolTip Content="Load an existing map for editing"/>
-                            </Button.ToolTip>
-                        </Button>
+                            <!-- Menu Buttons Grid -->
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Button Content="RECENT MAPS" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                IsEnabled="False">
-                            <Button.ToolTip>
-                                <ToolTip Content="Quick access to recently edited maps"/>
-                            </Button.ToolTip>
-                        </Button>
+                                <!-- First Row -->
+                                <Button Grid.Row="0" Grid.Column="0"
+                                        Content="NEW MAP" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="NewMapCreation">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Create a new map from scratch"/>
+                                    </Button.ToolTip>
+                                </Button>
 
-                        <Separator Margin="{DynamicResource MarginLarge}" 
-                                   Background="{DynamicResource BorderBrush}" 
-                                   Height="1"/>
+                                <Button Grid.Row="0" Grid.Column="2"
+                                        Content="SETTINGS" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="Settings">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Configure editor settings and preferences"/>
+                                    </Button.ToolTip>
+                                </Button>
 
-                        <Button Content="SETTINGS" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="Settings">
-                            <Button.ToolTip>
-                                <ToolTip Content="Configure editor settings and preferences"/>
-                            </Button.ToolTip>
-                        </Button>
+                                <!-- Second Row -->
+                                <Button Grid.Row="1" Grid.Column="0"
+                                        Content="LOAD MAP" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="LoadMap">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Load an existing map for editing"/>
+                                    </Button.ToolTip>
+                                </Button>
 
-                        <Button Content="ABOUT" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="About">
-                            <Button.ToolTip>
-                                <ToolTip Content="Information about WWX Map Editor"/>
-                            </Button.ToolTip>
-                        </Button>
+                                <Button Grid.Row="1" Grid.Column="2"
+                                        Content="ABOUT" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="About">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Information about WWX Map Editor"/>
+                                    </Button.ToolTip>
+                                </Button>
 
-                        <Button Content="EXIT" 
-                                Style="{StaticResource MenuButtonStyle}"
-                                Command="{Binding DataContext.ExitCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                            <Button.ToolTip>
-                                <ToolTip Content="Exit the application"/>
-                            </Button.ToolTip>
-                        </Button>
-                    </StackPanel>
-                </Border>
+                                <!-- Third Row -->
+                                <Button Grid.Row="2" Grid.Column="0"
+                                        Content="RECENT MAPS" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        IsEnabled="False">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Quick access to recently edited maps"/>
+                                    </Button.ToolTip>
+                                </Button>
 
-                <!-- Left Side Info Panel -->
-                <Border Grid.Column="0" 
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Right"
-                        Background="{DynamicResource Surface2Brush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadiusLarge}"
-                        Padding="{DynamicResource PaddingXLarge}"
-                        Margin="{DynamicResource MarginXLarge}"
-                        MaxWidth="350">
-                    <StackPanel>
-                        <TextBlock Text="Quick Tips" 
-                                   Style="{StaticResource TitleTextStyle}"
-                                   FontSize="{DynamicResource FontSizeXLarge}"
-                                   Margin="{DynamicResource MarginMedium}"/>
-                        <TextBlock Style="{StaticResource DescriptionTextStyle}"
-                                   TextWrapping="Wrap"
-                                   FontSize="{DynamicResource FontSizeMedium}">
-                            &#8226; Use keyboard shortcuts for faster editing<LineBreak/>
-                            &#8226; Enable auto-save to prevent data loss<LineBreak/>
-                            &#8226; Grid snapping helps with precise placement<LineBreak/>
-                            &#8226; Press F1 for help at any time
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
+                                <Button Grid.Row="2" Grid.Column="2"
+                                        Content="EXIT" 
+                                        Style="{StaticResource MenuButtonStyle}"
+                                        Width="280"
+                                        Height="60"
+                                        Margin="5"
+                                        FontSize="{DynamicResource FontSizeLarge}"
+                                        Command="{Binding DataContext.ExitCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Exit the application"/>
+                                    </Button.ToolTip>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
 
-                <!-- Right Side Stats Panel -->
-                <Border Grid.Column="2" 
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Left"
-                        Background="{DynamicResource Surface2Brush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadiusLarge}"
-                        Padding="{DynamicResource PaddingXLarge}"
-                        Margin="{DynamicResource MarginXLarge}"
-                        MaxWidth="350">
-                    <StackPanel>
-                        <TextBlock Text="Editor Stats" 
-                                   Style="{StaticResource TitleTextStyle}"
-                                   FontSize="{DynamicResource FontSizeXLarge}"
-                                   Margin="{DynamicResource MarginMedium}"/>
-                        <TextBlock Style="{StaticResource DescriptionTextStyle}"
-                                   FontSize="{DynamicResource FontSizeMedium}">
-                            <Run Text="Maps Created: "/>
-                            <Run Text="0" FontWeight="Bold"/><LineBreak/>
-                            <Run Text="Total Edit Time: "/>
-                            <Run Text="0h 0m" FontWeight="Bold"/><LineBreak/>
-                            <Run Text="Last Session: "/>
-                            <Run Text="New User" FontWeight="Bold"/><LineBreak/>
-                            <Run Text="Version: "/>
-                            <Run Text="1.0.0" FontWeight="Bold"/>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
+                    <!-- Spacer for middle row -->
+                    <Grid Grid.Row="1"/>
+
+                    <!-- Info Panels at Bottom -->
+                    <Grid Grid.Row="2" 
+                          Margin="0,40,0,40"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Editor Stats Panel -->
+                        <Border Grid.Column="0" 
+                                Background="{DynamicResource Surface2Brush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerRadiusMedium}"
+                                Padding="25,20"
+                                Width="280">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
+                            </Border.Effect>
+
+                            <StackPanel>
+                                <TextBlock Text="Editor Stats" 
+                                           Style="{StaticResource TitleTextStyle}"
+                                           FontSize="{DynamicResource FontSizeLarge}"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,10"
+                                           Foreground="{DynamicResource ForegroundBrush}"/>
+
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               Text="Maps Created: " 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="0" 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource AccentBrush}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                                               Text="Total Edit Time: " 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="0h 0m" 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource AccentBrush}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                                               Text="Last Session: " 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                                               Text="New User" 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource AccentBrush}"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" 
+                                               Text="Version: " 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" 
+                                               Text="1.0.0" 
+                                               FontSize="{DynamicResource FontSizeSmall}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource AccentBrush}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Quick Tips Panel -->
+                        <Border Grid.Column="2" 
+                                Background="{DynamicResource Surface2Brush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource CornerRadiusMedium}"
+                                Padding="25,20"
+                                Width="320">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="3" Opacity="0.15" BlurRadius="10"/>
+                            </Border.Effect>
+
+                            <StackPanel>
+                                <TextBlock Text="Quick Tips" 
+                                           Style="{StaticResource TitleTextStyle}"
+                                           FontSize="{DynamicResource FontSizeLarge}"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,10"
+                                           Foreground="{DynamicResource ForegroundBrush}"/>
+                                <TextBlock Style="{StaticResource DescriptionTextStyle}"
+                                           TextWrapping="Wrap"
+                                           FontSize="{DynamicResource FontSizeSmall}"
+                                           Foreground="{DynamicResource ForegroundSecondaryBrush}">
+                                    &#8226; Use keyboard shortcuts for faster editing<LineBreak/>
+                                    &#8226; Enable auto-save to prevent data loss<LineBreak/>
+                                    &#8226; Grid snapping helps with precise placement<LineBreak/>
+                                    &#8226; Press F1 for help at any time
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- Right Side Image -->
+                <Grid Grid.Column="1" Margin="20,40,40,40">
+                    <Border Background="{DynamicResource Surface2Brush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource CornerRadiusLarge}"
+                            Padding="2"
+                            VerticalAlignment="Top">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.2" BlurRadius="15"/>
+                        </Border.Effect>
+
+                        <Grid>
+                            <!-- Fallback rectangle if image is not found -->
+                            <Rectangle Fill="{DynamicResource Surface3Brush}"
+                                       RadiusX="8"
+                                       RadiusY="8"/>
+
+                            <!-- Image Container with aspect ratio preservation -->
+                            <Viewbox Stretch="Uniform" 
+                                     StretchDirection="Both"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     MaxWidth="500"
+                                     MaxHeight="500">
+                                <!-- Try multiple image paths for compatibility -->
+                                <Grid>
+                                    <!-- Primary image path -->
+                                    <Image x:Name="MainMenuImage"
+                                           Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
+                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                           Width="400"
+                                           Height="400">
+                                        <Image.Effect>
+                                            <DropShadowEffect Color="Black" 
+                                                              Direction="270" 
+                                                              ShadowDepth="2" 
+                                                              Opacity="0.1" 
+                                                              BlurRadius="5"/>
+                                        </Image.Effect>
+                                    </Image>
+
+                                    <!-- Fallback placeholder if image doesn't load -->
+                                    <Border x:Name="ImagePlaceholder"
+                                            Background="{DynamicResource Surface3Brush}"
+                                            Width="400"
+                                            Height="400"
+                                            CornerRadius="8">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=MainMenuImage, Path=Source}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <TextBlock Text="WWX"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="72"
+                                                       FontWeight="Bold"
+                                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                       Opacity="0.3"/>
+                                            <TextBlock Text="Map Preview"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Bottom"
+                                                       Margin="0,0,0,50"
+                                                       FontSize="18"
+                                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                                       Opacity="0.5"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Viewbox>
+
+                            <!-- Optional overlay for branding or text -->
+                            <Border Background="{DynamicResource BackgroundBrush}"
+                                    Opacity="0.7"
+                                    VerticalAlignment="Bottom"
+                                    CornerRadius="0,0,8,8"
+                                    Padding="10"
+                                    Visibility="Collapsed">
+                                <TextBlock Text="Strategic Warfare"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource ForegroundBrush}"
+                                           FontSize="{DynamicResource FontSizeLarge}"
+                                           FontWeight="Bold"
+                                           FontFamily="Consolas"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
 
             <!-- Footer -->
             <Border Grid.Row="2" 
-                    Background="{DynamicResource Surface2Brush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,1,0,0"
                     Padding="{DynamicResource PaddingLarge}">
                 <Grid>
                     <TextBlock Text="&#169; 2025 WWX Map Editor - User: cs121287" 
                                Style="{StaticResource DescriptionTextStyle}"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"
-                               FontSize="{DynamicResource FontSizeSmall}"/>
+                               FontSize="{DynamicResource FontSizeSmall}"
+                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                               Opacity="0.6"/>
+
                     <StackPanel Orientation="Horizontal" 
-                                HorizontalAlignment="Right"
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
                         <TextBlock Text="Theme: " 
                                    Style="{StaticResource DescriptionTextStyle}"
                                    VerticalAlignment="Center"
-                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   Opacity="0.6"/>
                         <RadioButton Content="Dark" 
                                      IsChecked="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}"
                                      GroupName="ThemeSelection"
                                      Margin="{DynamicResource MarginSmall}"
                                      VerticalAlignment="Center"
                                      FontSize="{DynamicResource FontSizeSmall}"
-                                     Foreground="{DynamicResource ForegroundBrush}"/>
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Opacity="0.8"/>
                         <RadioButton Content="Light" 
                                      IsChecked="{Binding DataContext.IsLightTheme, RelativeSource={RelativeSource AncestorType=Window}}"
                                      GroupName="ThemeSelection"
                                      Margin="{DynamicResource MarginSmall}"
                                      VerticalAlignment="Center"
                                      FontSize="{DynamicResource FontSizeSmall}"
-                                     Foreground="{DynamicResource ForegroundBrush}"/>
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     Opacity="0.8"/>
                     </StackPanel>
+
+                    <TextBlock Text="{Binding CurrentTime}" 
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               FontSize="{DynamicResource FontSizeSmall}"
+                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                               Opacity="0.6"/>
                 </Grid>
             </Border>
         </Grid>

@@ -5,139 +5,159 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="1200">
 
-    <StackPanel>
-        <TextBlock Text="GENERAL SETTINGS" 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="GENERAL SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
                    FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
                    Margin="{DynamicResource MarginLarge}"/>
 
-        <!-- Theme Section -->
-        <GroupBox Header="Theme" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <RadioButton Content="Dark Mode" 
-                             IsChecked="{Binding IsDarkMode}" 
-                             Style="{StaticResource SettingsRadioButtonStyle}"/>
-                <RadioButton Content="Light Mode" 
-                             IsChecked="{Binding IsLightMode}" 
-                             Style="{StaticResource SettingsRadioButtonStyle}"/>
-                <StackPanel Orientation="Horizontal" Margin="{DynamicResource MarginMedium}">
-                    <RadioButton Content="Custom Theme" 
-                                 IsChecked="{Binding IsCustomTheme}" 
-                                 Style="{StaticResource SettingsRadioButtonStyle}"/>
-                    <Rectangle Width="30" Height="20" 
-                               Fill="{Binding CustomThemeColor}" 
-                               Stroke="White" 
-                               StrokeThickness="1" 
-                               Margin="{DynamicResource MarginMedium}"
-                               Cursor="Hand">
-                        <Rectangle.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding PickColorCommand}"/>
-                        </Rectangle.InputBindings>
-                    </Rectangle>
-                </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column -->
+            <StackPanel Grid.Column="0">
+                <!-- Theme Section -->
+                <GroupBox Header="Theme" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <RadioButton Content="Dark Mode" 
+                                     IsChecked="{Binding IsDarkMode}" 
+                                     Style="{StaticResource SettingsRadioButtonStyle}"/>
+                        <RadioButton Content="Light Mode" 
+                                     IsChecked="{Binding IsLightMode}" 
+                                     Style="{StaticResource SettingsRadioButtonStyle}"/>
+                        <StackPanel Orientation="Horizontal" Margin="{DynamicResource MarginMedium}">
+                            <RadioButton Content="Custom Theme" 
+                                         IsChecked="{Binding IsCustomTheme}" 
+                                         Style="{StaticResource SettingsRadioButtonStyle}"/>
+                            <Rectangle Width="30" Height="20" 
+                                       Fill="{Binding CustomThemeColor}" 
+                                       Stroke="White" 
+                                       StrokeThickness="1" 
+                                       Margin="{DynamicResource MarginMedium}"
+                                       Cursor="Hand">
+                                <Rectangle.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding PickColorCommand}"/>
+                                </Rectangle.InputBindings>
+                            </Rectangle>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Language Section -->
+                <GroupBox Header="Language" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <ComboBox SelectedItem="{Binding SelectedLanguage}" 
+                              ItemsSource="{Binding AvailableLanguages}"
+                              Style="{StaticResource SettingsComboBoxStyle}"/>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
 
-        <!-- Language Section -->
-        <GroupBox Header="Language" Style="{StaticResource SettingsGroupBoxStyle}">
-            <ComboBox SelectedItem="{Binding SelectedLanguage}" 
-                      ItemsSource="{Binding AvailableLanguages}"
-                      Style="{StaticResource SettingsComboBoxStyle}"/>
-        </GroupBox>
+            <!-- Right Column -->
+            <StackPanel Grid.Column="2">
+                <!-- Auto-save Section -->
+                <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <CheckBox Content="Enable auto-save" 
+                                  IsChecked="{Binding AutoSaveEnabled}" 
+                                  Style="{StaticResource SettingsCheckBoxStyle}"/>
 
-        <!-- Auto-save Section -->
-        <GroupBox Header="Auto-save" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <CheckBox Content="Enable auto-save" 
-                          IsChecked="{Binding AutoSaveEnabled}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                            <TextBlock Text="Interval (min):" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <TextBlock Text="Auto-save interval (minutes):" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding AutoSaveInterval}" 
+                                      ItemsSource="{Binding AutoSaveIntervals}"
+                                      IsEnabled="{Binding AutoSaveEnabled}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      Width="100"
+                                      HorizontalAlignment="Left"/>
+                        </Grid>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding AutoSaveInterval}" 
-                              ItemsSource="{Binding AutoSaveIntervals}"
-                              IsEnabled="{Binding AutoSaveEnabled}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="100"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                            <TextBlock Text="Location:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <TextBlock Text="Auto-save location:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding AutoSaveLocation}" 
+                                     IsEnabled="{Binding AutoSaveEnabled}"
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
 
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding AutoSaveLocation}" 
-                             IsEnabled="{Binding AutoSaveEnabled}"
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             Margin="{DynamicResource MarginMedium}"/>
+                            <Button Grid.Column="2" 
+                                    Content="Browse..." 
+                                    Command="{Binding BrowseAutoSaveLocationCommand}"
+                                    IsEnabled="{Binding AutoSaveEnabled}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="80"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
 
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseAutoSaveLocationCommand}"
-                            IsEnabled="{Binding AutoSaveEnabled}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"/>
-                </Grid>
+                <!-- Recent Files Section -->
+                <GroupBox Header="Recent Files" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Files to show:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
+
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding RecentFilesCount}" 
+                                      ItemsSource="{Binding RecentFilesCounts}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      Width="100"
+                                      HorizontalAlignment="Left"/>
+                        </Grid>
+
+                        <Button Content="Clear Recent Files History" 
+                                Command="{Binding ClearRecentFilesCommand}"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Width="250"
+                                Height="{DynamicResource ScaledEditorButtonSize}"
+                                FontSize="{DynamicResource FontSizeMedium}"
+                                Margin="{DynamicResource MarginMedium}"
+                                HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
-
-        <!-- Recent Files Section -->
-        <GroupBox Header="Recent Files" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Number of recent files to show:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
-
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding RecentFilesCount}" 
-                              ItemsSource="{Binding RecentFilesCounts}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="100"
-                              HorizontalAlignment="Left"/>
-                </Grid>
-
-                <Button Content="Clear Recent Files History" 
-                        Command="{Binding ClearRecentFilesCommand}"
-                        Style="{StaticResource MenuButtonStyle}"
-                        Width="250"
-                        Height="{DynamicResource ScaledEditorButtonSize}"
-                        FontSize="{DynamicResource FontSizeMedium}"
-                        Margin="{DynamicResource MarginMedium}"
-                        HorizontalAlignment="Left"/>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+        </Grid>
+    </Grid>
 </UserControl>

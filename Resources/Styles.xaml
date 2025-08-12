@@ -18,6 +18,11 @@
     <System:Double x:Key="BaseToolbarButtonSize">36</System:Double>
     <System:Double x:Key="BaseStepCircleSize">30</System:Double>
 
+    <!-- Additional Base Widths for Controls -->
+    <System:Double x:Key="BaseComboBoxWidth">150</System:Double>
+    <System:Double x:Key="BaseTextBoxWidth">200</System:Double>
+    <System:Double x:Key="BaseBrowseButtonWidth">80</System:Double>
+
     <!-- Scaled Values (dynamically updated) -->
     <System:Double x:Key="FontSizeSmall">12</System:Double>
     <System:Double x:Key="FontSizeMedium">14</System:Double>
@@ -33,6 +38,11 @@
     <System:Double x:Key="ScaledEditorButtonSize">40</System:Double>
     <System:Double x:Key="ScaledToolbarButtonSize">36</System:Double>
     <System:Double x:Key="ScaledStepCircleSize">30</System:Double>
+
+    <!-- Additional Scaled Widths -->
+    <System:Double x:Key="ScaledComboBoxWidth">150</System:Double>
+    <System:Double x:Key="ScaledTextBoxWidth">200</System:Double>
+    <System:Double x:Key="ScaledBrowseButtonWidth">80</System:Double>
 
     <!-- Base Thickness Values -->
     <Thickness x:Key="BaseMarginSmall">5</Thickness>
@@ -318,6 +328,7 @@
         <Setter Property="FontFamily" Value="Consolas"/>
         <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="Padding" Value="{DynamicResource PaddingSmall}"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -386,6 +397,7 @@
         <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
         <Setter Property="Padding" Value="{DynamicResource PaddingSmall}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="30"/>
     </Style>
 
     <!-- Panel Styles (New) -->

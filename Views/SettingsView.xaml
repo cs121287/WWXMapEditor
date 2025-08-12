@@ -15,11 +15,14 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,2">
-            <Grid Margin="20,15">
+        <Border Grid.Row="0" 
+                Background="{DynamicResource SurfaceBrush}" 
+                BorderBrush="{DynamicResource BorderBrush}" 
+                BorderThickness="0,0,0,2">
+            <Grid Margin="{DynamicResource MarginLarge}">
                 <TextBlock Text="SETTINGS" 
                            FontFamily="Consolas"
-                           FontSize="36"
+                           FontSize="{DynamicResource FontSizeHeader}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource ForegroundBrush}"
                            HorizontalAlignment="Left"
@@ -28,9 +31,9 @@
                 <Button Content="✕" 
                         HorizontalAlignment="Right"
                         Style="{StaticResource EditorButtonStyle}"
-                        Width="40"
-                        Height="40"
-                        FontSize="20"
+                        Width="{DynamicResource ScaledEditorButtonSize}"
+                        Height="{DynamicResource ScaledEditorButtonSize}"
+                        FontSize="{DynamicResource FontSizeXLarge}"
                         Command="{Binding CloseCommand}"/>
             </Grid>
         </Border>
@@ -38,12 +41,15 @@
         <!-- Settings Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="Auto" MinWidth="200" MaxWidth="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Category List -->
-            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,2,0">
+            <Border Grid.Column="0" 
+                    Background="{DynamicResource SurfaceBrush}" 
+                    BorderBrush="{DynamicResource BorderBrush}" 
+                    BorderThickness="0,0,2,0">
                 <ListBox Background="Transparent"
                          BorderThickness="0"
                          ItemsSource="{Binding CategoryNames}"
@@ -57,11 +63,11 @@
                                         <Border x:Name="Border" 
                                                 Background="Transparent" 
                                                 BorderThickness="0"
-                                                Padding="20,15">
+                                                Padding="{DynamicResource PaddingLarge}">
                                             <TextBlock Text="{Binding}" 
                                                        Foreground="{DynamicResource ForegroundBrush}" 
                                                        FontFamily="Consolas"
-                                                       FontSize="16"/>
+                                                       FontSize="{DynamicResource FontSizeLarge}"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
@@ -81,46 +87,51 @@
                 </ListBox>
             </Border>
 
-            <!-- Settings Pages -->
-            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ContentControl Margin="30" Content="{Binding CurrentSettingsPage}"/>
-            </ScrollViewer>
+            <!-- Settings Pages - No ScrollViewer needed with 2-column layout -->
+            <ContentControl Grid.Column="1" 
+                            Margin="{DynamicResource MarginXLarge}" 
+                            Content="{Binding CurrentSettingsPage}"/>
         </Grid>
 
         <!-- Bottom Bar -->
-        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,2,0,0">
-            <Grid Margin="20,15">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <Border Grid.Row="2" 
+                Background="{DynamicResource SurfaceBrush}" 
+                BorderBrush="{DynamicResource BorderBrush}" 
+                BorderThickness="0,2,0,0">
+            <Grid Margin="{DynamicResource MarginLarge}">
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Left">
                     <Button Content="RESET TO DEFAULTS" 
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="200"
-                            Height="40"
-                            FontSize="14"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            MinWidth="200"
+                            Height="{DynamicResource ScaledEditorButtonSize}"
+                            FontSize="{DynamicResource FontSizeMedium}"
                             Command="{Binding ResetToDefaultsCommand}"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Right">
                     <Button Content="APPLY" 
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="120"
-                            Height="40"
-                            FontSize="16"
-                            Margin="0,0,10,0"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinWidth="120"
+                            Height="{DynamicResource ScaledEditorButtonSize}"
+                            FontSize="{DynamicResource FontSizeLarge}"
+                            Margin="{DynamicResource MarginSmall}"
                             Command="{Binding ApplyCommand}"/>
 
                     <Button Content="SAVE" 
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="120"
-                            Height="40"
-                            FontSize="16"
-                            Margin="0,0,10,0"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinWidth="120"
+                            Height="{DynamicResource ScaledEditorButtonSize}"
+                            FontSize="{DynamicResource FontSizeLarge}"
+                            Margin="{DynamicResource MarginSmall}"
                             Command="{Binding SaveCommand}"/>
 
                     <Button Content="CANCEL" 
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="120"
-                            Height="40"
-                            FontSize="16"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            MinWidth="120"
+                            Height="{DynamicResource ScaledEditorButtonSize}"
+                            FontSize="{DynamicResource FontSizeLarge}"
                             Command="{Binding CancelCommand}"/>
                 </StackPanel>
             </Grid>

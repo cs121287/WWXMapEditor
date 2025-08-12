@@ -5,174 +5,200 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="1200">
 
-    <StackPanel>
-        <TextBlock Text="INPUT SETTINGS" 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="INPUT SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
                    FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
                    Margin="{DynamicResource MarginLarge}"/>
 
-        <!-- Mouse Section -->
-        <GroupBox Header="Mouse" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Mouse sensitivity:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+            <!-- Left Column -->
+            <StackPanel Grid.Column="0">
+                <!-- Mouse Section -->
+                <GroupBox Header="Mouse" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <Slider Grid.Column="1" 
-                            Minimum="0.1" 
-                            Maximum="5.0" 
-                            Value="{Binding MouseSensitivity}"
-                            TickFrequency="0.1"
-                            IsSnapToTickEnabled="True"
-                            Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Sensitivity:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <TextBlock Grid.Column="2" 
-                               Text="{Binding MouseSensitivity, StringFormat=F1}" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               Width="40"/>
-                </Grid>
+                            <Slider Grid.Column="1" 
+                                    Minimum="0.1" 
+                                    Maximum="5.0" 
+                                    Value="{Binding MouseSensitivity}"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True"
+                                    Margin="{DynamicResource MarginMedium}"/>
 
-                <CheckBox Content="Invert mouse wheel zoom" 
-                          IsChecked="{Binding InvertMouseWheelZoom}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Grid.Column="2" 
+                                       Text="{Binding MouseSensitivity, StringFormat=F1}" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       Width="40"/>
+                        </Grid>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <CheckBox Content="Invert mouse wheel zoom" 
+                                  IsChecked="{Binding InvertMouseWheelZoom}" 
+                                  Style="{StaticResource SettingsCheckBoxStyle}"
+                                  Margin="{DynamicResource MarginMedium}"/>
 
-                    <TextBlock Text="Middle mouse button action:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding MiddleMouseAction}" 
-                              ItemsSource="{Binding MiddleMouseActions}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <TextBlock Text="Middle button:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding MiddleMouseAction}" 
+                                      ItemsSource="{Binding MiddleMouseActions}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
 
-                    <TextBlock Text="Right-click action:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding RightClickAction}" 
-                              ItemsSource="{Binding RightClickActions}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <TextBlock Text="Right-click:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
+
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding RightClickAction}" 
+                                      ItemsSource="{Binding RightClickActions}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
 
-        <!-- Keyboard Shortcuts Section -->
-        <GroupBox Header="Keyboard Shortcuts" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <DataGrid ItemsSource="{Binding KeyboardShortcuts}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          Background="#FF2a2a2a"
-                          Foreground="White"
-                          FontSize="{DynamicResource FontSizeMedium}"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="#FF555555"
-                          BorderBrush="#FF555555"
-                          Height="300">
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#FF1a1a1a"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
-                            <Setter Property="BorderBrush" Value="#FF555555"/>
-                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                            <Setter Property="Padding" Value="{DynamicResource PaddingMedium}"/>
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-                    <DataGrid.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                            <Setter Property="Padding" Value="{DynamicResource PaddingMedium}"/>
-                        </Style>
-                    </DataGrid.CellStyle>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Action" 
-                                            Binding="{Binding Action}" 
-                                            Width="*"
-                                            IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Shortcut" 
-                                            Binding="{Binding Shortcut}" 
-                                            Width="150"/>
-                        <DataGridTemplateColumn Header="Edit" Width="80">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="Edit" 
-                                            Command="{Binding DataContext.EditShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource EditorButtonStyle}"
-                                            Width="60"
-                                            Height="25"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+            <!-- Right Column -->
+            <DockPanel Grid.Column="2">
+                <!-- Keyboard Shortcuts Section -->
+                <GroupBox Header="Keyboard Shortcuts" 
+                          Style="{StaticResource SettingsGroupBoxStyle}"
+                          DockPanel.Dock="Top">
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" 
+                                    DockPanel.Dock="Bottom"
+                                    Margin="{DynamicResource MarginMedium}">
+                            <Button Content="Reset to Defaults" 
+                                    Command="{Binding ResetShortcutsCommand}"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Width="150"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"
+                                    FontSize="{DynamicResource FontSizeMedium}"
+                                    Margin="0,0,5,0"/>
 
-                <StackPanel Orientation="Horizontal" Margin="{DynamicResource MarginMedium}">
-                    <Button Content="Reset to Defaults" 
-                            Command="{Binding ResetShortcutsCommand}"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="150"
-                            Height="{DynamicResource ScaledEditorButtonSize}"
-                            FontSize="{DynamicResource FontSizeMedium}"
-                            Margin="{DynamicResource MarginMedium}"/>
+                            <Button Content="Import" 
+                                    Command="{Binding ImportShortcutsCommand}"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Width="80"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"
+                                    FontSize="{DynamicResource FontSizeMedium}"
+                                    Margin="5,0"/>
 
-                    <Button Content="Import" 
-                            Command="{Binding ImportShortcutsCommand}"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="100"
-                            Height="{DynamicResource ScaledEditorButtonSize}"
-                            FontSize="{DynamicResource FontSizeMedium}"
-                            Margin="{DynamicResource MarginMedium}"/>
+                            <Button Content="Export" 
+                                    Command="{Binding ExportShortcutsCommand}"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Width="80"
+                                    Height="{DynamicResource ScaledEditorButtonSize}"
+                                    FontSize="{DynamicResource FontSizeMedium}"
+                                    Margin="5,0,0,0"/>
+                        </StackPanel>
 
-                    <Button Content="Export" 
-                            Command="{Binding ExportShortcutsCommand}"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="100"
-                            Height="{DynamicResource ScaledEditorButtonSize}"
-                            FontSize="{DynamicResource FontSizeMedium}"/>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
-    </StackPanel>
+                        <DataGrid ItemsSource="{Binding KeyboardShortcuts}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  Background="#FF2a2a2a"
+                                  Foreground="White"
+                                  FontSize="{DynamicResource FontSizeMedium}"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="#FF555555"
+                                  BorderBrush="#FF555555"
+                                  MinHeight="250"
+                                  MaxHeight="400"
+                                  DockPanel.Dock="Top">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#FF1a1a1a"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="FontSize" Value="{DynamicResource FontSizeMedium}"/>
+                                    <Setter Property="BorderBrush" Value="#FF555555"/>
+                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    <Setter Property="Padding" Value="{DynamicResource PaddingMedium}"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="Padding" Value="{DynamicResource PaddingMedium}"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Action" 
+                                                    Binding="{Binding Action}" 
+                                                    Width="*"
+                                                    IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Shortcut" 
+                                                    Binding="{Binding Shortcut}" 
+                                                    Width="100"/>
+                                <DataGridTemplateColumn Header="Edit" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Edit" 
+                                                    Command="{Binding DataContext.EditShortcutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource EditorButtonStyle}"
+                                                    Width="50"
+                                                    Height="22"
+                                                    FontSize="{DynamicResource FontSizeSmall}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </GroupBox>
+            </DockPanel>
+        </Grid>
+    </Grid>
 </UserControl>

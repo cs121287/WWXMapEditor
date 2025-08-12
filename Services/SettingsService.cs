@@ -408,7 +408,7 @@ namespace WWXMapEditor.Services
                         }
 
                         // Add new theme
-                        var newTheme = new System.Windows.ResourceDictionary { Source = themeUri };
+                        var newTheme = new ResourceDictionary { Source = themeUri };
                         app.Resources.MergedDictionaries.Add(newTheme);
                     }
                     catch
@@ -474,6 +474,7 @@ namespace WWXMapEditor.Services
             UpdateResource("FontSizeMedium", GetBaseValue("BaseFontSizeMedium") * scale);
             UpdateResource("FontSizeLarge", GetBaseValue("BaseFontSizeLarge") * scale);
             UpdateResource("FontSizeXLarge", GetBaseValue("BaseFontSizeXLarge") * scale);
+            UpdateResource("FontSizeXXLarge", GetBaseValue("BaseFontSizeXXLarge") * scale);
             UpdateResource("FontSizeTitle", GetBaseValue("BaseFontSizeTitle") * scale);
             UpdateResource("FontSizeHeader", GetBaseValue("BaseFontSizeHeader") * scale);
             UpdateResource("FontSizeMenu", GetBaseValue("BaseFontSizeMenu") * scale);
@@ -484,6 +485,11 @@ namespace WWXMapEditor.Services
             UpdateResource("ScaledEditorButtonSize", GetBaseValue("BaseEditorButtonSize") * scale);
             UpdateResource("ScaledToolbarButtonSize", GetBaseValue("BaseToolbarButtonSize") * scale);
             UpdateResource("ScaledStepCircleSize", GetBaseValue("BaseStepCircleSize") * scale);
+
+            // Update control widths
+            UpdateResource("ScaledComboBoxWidth", GetBaseValue("BaseComboBoxWidth") * scale);
+            UpdateResource("ScaledTextBoxWidth", GetBaseValue("BaseTextBoxWidth") * scale);
+            UpdateResource("ScaledBrowseButtonWidth", GetBaseValue("BaseBrowseButtonWidth") * scale);
 
             // Update margins and padding
             UpdateThickness("MarginSmall", 5 * scale);
@@ -521,6 +527,7 @@ namespace WWXMapEditor.Services
                 "BaseFontSizeMedium" => 14,
                 "BaseFontSizeLarge" => 16,
                 "BaseFontSizeXLarge" => 18,
+                "BaseFontSizeXXLarge" => 24,
                 "BaseFontSizeTitle" => 32,
                 "BaseFontSizeHeader" => 36,
                 "BaseFontSizeMenu" => 24,
@@ -529,6 +536,9 @@ namespace WWXMapEditor.Services
                 "BaseEditorButtonSize" => 40,
                 "BaseToolbarButtonSize" => 36,
                 "BaseStepCircleSize" => 30,
+                "BaseComboBoxWidth" => 150,
+                "BaseTextBoxWidth" => 200,
+                "BaseBrowseButtonWidth" => 80,
                 _ => 10
             };
         }

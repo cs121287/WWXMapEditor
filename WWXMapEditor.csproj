@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Images\MainMenu\Background.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Resources\Images\Icons\" />
     <Folder Include="Resources\Themes\" />
     <Folder Include="Views\Configuration\" />
@@ -31,6 +35,7 @@
     <Resource Include="Resources\Images\Icons\app.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\MainMenu\Background.png" />
   </ItemGroup>
 
   <ItemGroup>

@@ -171,6 +171,8 @@ namespace WWXMapEditor.ViewModels
                         NavigateToLoadMap();
                         break;
                     case "Configuration":
+                        NavigateToConfiguration();
+                        break;
                     case "Settings":
                         NavigateToSettings();
                         break;
@@ -236,17 +238,23 @@ namespace WWXMapEditor.ViewModels
 
         public void NavigateToConfiguration()
         {
-            NavigateToSettings();
-        }
-
-        public void NavigateToSettings()
-        {
-            // Hide main menu and show configuration/settings view
+            // Hide main menu and show configuration view
             MainMenuVisibility = Visibility.Collapsed;
             var configView = new ConfigurationView();
             var configViewModel = new ConfigurationViewModel(this);
             configView.DataContext = configViewModel;
             CurrentView = configView;
+            WindowTitle = "WWX Map Editor - Configuration";
+        }
+
+        public void NavigateToSettings()
+        {
+            // Hide main menu and show settings view
+            MainMenuVisibility = Visibility.Collapsed;
+            var settingsView = new SettingsView();
+            var settingsViewModel = new SettingsViewModel(this);
+            settingsView.DataContext = settingsViewModel;
+            CurrentView = settingsView;
             WindowTitle = "WWX Map Editor - Settings";
         }
 

@@ -5,173 +5,196 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WWXMapEditor.Views.Settings"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="1200">
 
-    <StackPanel>
-        <TextBlock Text="FILE &amp; PROJECT SETTINGS" 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="FILE &amp; PROJECT SETTINGS" 
                    Foreground="White" 
                    FontFamily="Consolas"
                    FontSize="{DynamicResource FontSizeXXLarge}" 
                    FontWeight="Bold" 
                    Margin="{DynamicResource MarginLarge}"/>
 
-        <!-- Default Paths Section -->
-        <GroupBox Header="Default Paths" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Default project directory:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+            <!-- Left Column -->
+            <StackPanel Grid.Column="0">
+                <!-- Default Paths Section Part 1 -->
+                <GroupBox Header="Project Paths" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding DefaultProjectDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Projects:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseProjectDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"/>
-                </Grid>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding DefaultProjectDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                            <Button Grid.Column="2" 
+                                    Content="Browse" 
+                                    Command="{Binding BrowseProjectDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="70"/>
+                        </Grid>
 
-                    <TextBlock Text="Default tileset directory:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding DefaultTilesetDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Tilesets:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseTilesetDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"/>
-                </Grid>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding DefaultTilesetDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                            <Button Grid.Column="2" 
+                                    Content="Browse" 
+                                    Command="{Binding BrowseTilesetDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="70"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
 
-                    <TextBlock Text="Default export directory:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                <!-- Default Paths Section Part 2 -->
+                <GroupBox Header="Export Paths" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding DefaultExportDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Exports:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseExportDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"/>
-                </Grid>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding DefaultExportDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="150"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                            <Button Grid.Column="2" 
+                                    Content="Browse" 
+                                    Command="{Binding BrowseExportDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="70"/>
+                        </Grid>
 
-                    <TextBlock Text="Templates directory:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding TemplatesDirectory}" 
-                             Style="{StaticResource SettingsTextBoxStyle}"
-                             Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Templates:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <Button Grid.Column="2" 
-                            Content="Browse..." 
-                            Command="{Binding BrowseTemplatesDirectoryCommand}"
-                            Style="{StaticResource EditorButtonStyle}"
-                            Width="80"/>
-                </Grid>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding TemplatesDirectory}" 
+                                     Style="{StaticResource SettingsTextBoxStyle}"
+                                     Margin="{DynamicResource MarginMedium}"/>
+
+                            <Button Grid.Column="2" 
+                                    Content="Browse" 
+                                    Command="{Binding BrowseTemplatesDirectoryCommand}"
+                                    Style="{StaticResource EditorButtonStyle}"
+                                    Width="70"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
 
-        <!-- File Formats Section -->
-        <GroupBox Header="File Formats" Style="{StaticResource SettingsGroupBoxStyle}">
-            <StackPanel>
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Right Column -->
+            <StackPanel Grid.Column="2">
+                <!-- File Formats Section -->
+                <GroupBox Header="File Formats" Style="{StaticResource SettingsGroupBoxStyle}">
+                    <StackPanel>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Default save format:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Save format:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding DefaultSaveFormat}" 
-                              ItemsSource="{Binding SaveFormats}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding DefaultSaveFormat}" 
+                                      ItemsSource="{Binding SaveFormats}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
 
-                <Grid Margin="{DynamicResource MarginMedium}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Grid Margin="{DynamicResource MarginMedium}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Compression level:" 
-                               Foreground="White" 
-                               FontSize="{DynamicResource FontSizeMedium}"
-                               VerticalAlignment="Center"
-                               Margin="{DynamicResource MarginMedium}"/>
+                            <TextBlock Text="Compression:" 
+                                       Foreground="White" 
+                                       FontSize="{DynamicResource FontSizeMedium}"
+                                       VerticalAlignment="Center"
+                                       Margin="{DynamicResource MarginMedium}"/>
 
-                    <ComboBox Grid.Column="1" 
-                              SelectedItem="{Binding CompressionLevel}" 
-                              ItemsSource="{Binding CompressionLevels}"
-                              Style="{StaticResource SettingsComboBoxStyle}"
-                              Width="150"
-                              HorizontalAlignment="Left"/>
-                </Grid>
+                            <ComboBox Grid.Column="1" 
+                                      SelectedItem="{Binding CompressionLevel}" 
+                                      ItemsSource="{Binding CompressionLevels}"
+                                      Style="{StaticResource SettingsComboBoxStyle}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
 
-                <CheckBox Content="Include metadata in saves" 
-                          IsChecked="{Binding IncludeMetadata}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"
-                          Margin="{DynamicResource MarginMedium}"/>
+                        <CheckBox Content="Include metadata in saves" 
+                                  IsChecked="{Binding IncludeMetadata}" 
+                                  Style="{StaticResource SettingsCheckBoxStyle}"
+                                  Margin="{DynamicResource MarginMedium}"/>
 
-                <CheckBox Content="Backup files on save" 
-                          IsChecked="{Binding BackupOnSave}" 
-                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+                        <CheckBox Content="Backup files on save" 
+                                  IsChecked="{Binding BackupOnSave}" 
+                                  Style="{StaticResource SettingsCheckBoxStyle}"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </GroupBox>
-    </StackPanel>
+        </Grid>
+    </Grid>
 </UserControl>
