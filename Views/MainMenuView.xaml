@@ -76,12 +76,12 @@
             <!-- Assets: Opacity mask for torn slats, selection texture, and board overlays
                  Ensure these files exist and Build Action = Resource -->
             <ImageBrush x:Key="SlatOpacityMaskBrush"
-                        ImageSource="pack://application:,,,/Resources/Images/MainMenu/overlays/slat_mask.png"
+                        ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/slat_mask.png"
                         Stretch="Fill"/>
 
             <!-- Tile the selection texture so it keeps a crisp grain at any size -->
             <ImageBrush x:Key="SelectionTextureBrush"
-                        ImageSource="pack://application:,,,/Resources/Images/MainMenu/overlays/selection_texture.png"
+                        ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/selection_texture.png"
                         TileMode="Tile"
                         ViewportUnits="Absolute"
                         Viewport="0,0,24,24"
@@ -258,7 +258,7 @@
             </Grid.RenderTransform>
 
             <!-- Fullscreen artwork -->
-            <Image Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
+            <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/Background.png"
                    Stretch="UniformToFill"
                    RenderOptions.BitmapScalingMode="HighQuality"/>
 
@@ -455,12 +455,12 @@
                                 </Rectangle>
 
                                 <!-- Board overlays (scratches/splatters) -->
-                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/scratches.png"
+                                <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/scratches.png"
                                        Stretch="UniformToFill"
                                        Opacity="0.10"
                                        IsHitTestVisible="False"
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/splatters.png"
+                                <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/splatters.png"
                                        Stretch="UniformToFill"
                                        Opacity="0.08"
                                        IsHitTestVisible="False"

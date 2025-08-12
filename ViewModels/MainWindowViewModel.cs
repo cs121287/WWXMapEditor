@@ -111,6 +111,7 @@ namespace WWXMapEditor.ViewModels
         public ICommand ExitCommand { get; }
         public ICommand ToggleThemeCommand { get; }
         public ICommand ApplyScalingCommand { get; }
+        public ICommand CloseCommand { get; }
 
         public MainWindowViewModel()
         {
@@ -122,6 +123,8 @@ namespace WWXMapEditor.ViewModels
             ExitCommand = new RelayCommand(_ => System.Windows.Application.Current.Shutdown());
             ToggleThemeCommand = new RelayCommand(_ => ToggleTheme());
             ApplyScalingCommand = new RelayCommand(ExecuteApplyScaling);
+            // Close command used by views like AboutView that inherit this DataContext
+            CloseCommand = new RelayCommand(_ => NavigateToMainMenu());
 
             // Apply current theme and scaling
             ApplyCurrentTheme();
@@ -260,168 +263,12 @@ namespace WWXMapEditor.ViewModels
 
         public void NavigateToAbout()
         {
-            // Hide main menu and show about view
+            // Hide main menu and show AboutView (remove inline about content)
             MainMenuVisibility = Visibility.Collapsed;
 
-            // Create About view
-            var aboutView = new System.Windows.Controls.Grid
-            {
-                Background = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("BackgroundBrush")
-            };
-
-            var contentBorder = new System.Windows.Controls.Border
-            {
-                Background = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("Surface2Brush"),
-                CornerRadius = new System.Windows.CornerRadius(8),
-                Margin = new System.Windows.Thickness(50),
-                Padding = new System.Windows.Thickness(40),
-                MaxWidth = 800,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
-            };
-
-            var stackPanel = new System.Windows.Controls.StackPanel();
-
-            // Title
-            var titleText = new System.Windows.Controls.TextBlock
-            {
-                Text = "WWX Map Editor",
-                FontSize = 36,
-                FontWeight = System.Windows.FontWeights.Bold,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundBrush"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                Margin = new System.Windows.Thickness(0, 0, 0, 20)
-            };
-            stackPanel.Children.Add(titleText);
-
-            // Version
-            var versionText = new System.Windows.Controls.TextBlock
-            {
-                Text = "Version 1.0.0",
-                FontSize = 18,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("AccentBrush"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                Margin = new System.Windows.Thickness(0, 0, 0, 30)
-            };
-            stackPanel.Children.Add(versionText);
-
-            // Description
-            var descriptionText = new System.Windows.Controls.TextBlock
-            {
-                Text = "A powerful map editor for creating and editing WWX game maps. Design custom battlefields, set victory conditions, configure fog of war, and bring your strategic visions to life.",
-                FontSize = 14,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundSecondaryBrush"),
-                TextWrapping = System.Windows.TextWrapping.Wrap,
-                TextAlignment = System.Windows.TextAlignment.Center,
-                Margin = new System.Windows.Thickness(0, 0, 0, 30)
-            };
-            stackPanel.Children.Add(descriptionText);
-
-            // Features
-            var featuresHeader = new System.Windows.Controls.TextBlock
-            {
-                Text = "Features:",
-                FontSize = 16,
-                FontWeight = System.Windows.FontWeights.Bold,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundBrush"),
-                Margin = new System.Windows.Thickness(0, 0, 0, 10)
-            };
-            stackPanel.Children.Add(featuresHeader);
-
-            var features = new string[]
-            {
-                "• Create maps up to 500x500 tiles",
-                "• Multiple terrain types with custom sprites",
-                "• Configurable victory conditions",
-                "• Fog of war settings",
-                "• Support for 2-6 players",
-                "• Dark and Light themes",
-                "• Customizable UI scaling",
-                "• Auto-save functionality",
-                "• Undo/Redo support",
-                "• Grid snapping and rulers",
-                "• Hardware acceleration",
-                "• Keyboard shortcuts",
-                "• Custom tilesets support"
-            };
-
-            foreach (var feature in features)
-            {
-                var featureText = new System.Windows.Controls.TextBlock
-                {
-                    Text = feature,
-                    FontSize = 13,
-                    FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                    Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundSecondaryBrush"),
-                    Margin = new System.Windows.Thickness(20, 2, 0, 2)
-                };
-                stackPanel.Children.Add(featureText);
-            }
-
-            // System Information
-            var systemInfoHeader = new System.Windows.Controls.TextBlock
-            {
-                Text = "System Information:",
-                FontSize = 16,
-                FontWeight = System.Windows.FontWeights.Bold,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundBrush"),
-                Margin = new System.Windows.Thickness(0, 20, 0, 10)
-            };
-            stackPanel.Children.Add(systemInfoHeader);
-
-            var systemInfo = new string[]
-            {
-                $"• User: cs121287",
-                $"• Date: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC",
-                $"• Theme: {_settingsService.Settings.Theme}",
-                $"• UI Scale: {_settingsService.Settings.UiScale:P0}",
-                $"• Auto-save: {(_settingsService.Settings.AutoSaveEnabled ? "Enabled" : "Disabled")}"
-            };
-
-            foreach (var info in systemInfo)
-            {
-                var infoText = new System.Windows.Controls.TextBlock
-                {
-                    Text = info,
-                    FontSize = 12,
-                    FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                    Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundSecondaryBrush"),
-                    Margin = new System.Windows.Thickness(20, 2, 0, 2)
-                };
-                stackPanel.Children.Add(infoText);
-            }
-
-            // Copyright
-            var copyrightText = new System.Windows.Controls.TextBlock
-            {
-                Text = "© 2025 WWX Map Editor. All rights reserved.",
-                FontSize = 12,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
-                Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("ForegroundSecondaryBrush"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                Margin = new System.Windows.Thickness(0, 30, 0, 20)
-            };
-            stackPanel.Children.Add(copyrightText);
-
-            // Back to Menu Button
-            var backButton = new System.Windows.Controls.Button
-            {
-                Content = "Back to Main Menu",
-                Width = 200,
-                Height = 40,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                Style = (System.Windows.Style)System.Windows.Application.Current.FindResource("PrimaryButtonStyle")
-            };
-            backButton.Click += (s, e) => NavigateToMainMenu();
-            stackPanel.Children.Add(backButton);
-
-            contentBorder.Child = stackPanel;
-            aboutView.Children.Add(contentBorder);
+            var aboutView = new AboutView();
+            // Inherit this VM as DataContext so CloseCommand works (AboutView binds CloseCommand)
+            aboutView.DataContext = this;
 
             CurrentView = aboutView;
             WindowTitle = "WWX Map Editor - About";

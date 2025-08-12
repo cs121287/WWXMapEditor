@@ -14,11 +14,9 @@
              MouseMove="UserControl_MouseMove">
 
     <!--
-      AboutView — restyled to match the Main Menu/Configuration look
-      - Parallax background, vignette, aurora drift, scanlines, dust motes.
-      - Header with title and Close button (uses MenuButtonStyle).
-      - Content displayed on a trapezoid "board" with overlays.
-      - Keeps all original text, icon, features list, and bottom Close button.
+      AboutView — styled like Main Menu/Settings
+      - Footer fixed at bottom with © text and a Back button in main-menu style.
+      - Removed the top-right X button per request.
     -->
 
     <UserControl.Resources>
@@ -28,6 +26,148 @@
         <Color x:Key="Aurora1">#4400E58A</Color>
         <Color x:Key="Aurora2">#4420A4FF</Color>
         <Color x:Key="Aurora3">#44B770FF</Color>
+
+        <!-- Selection highlight (same as menu) -->
+        <SolidColorBrush x:Key="MenuHighlightBrush" Color="#CFE3B0" Opacity="0.28"/>
+
+        <!-- Assets used by grunge button (pack URIs reference external assembly) -->
+        <ImageBrush x:Key="SlatOpacityMaskBrush"
+                    ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/slat_mask.png"
+                    Stretch="Fill"/>
+        <ImageBrush x:Key="SelectionTextureBrush"
+                    ImageSource="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/selection_texture.png"
+                    TileMode="Tile"
+                    ViewportUnits="Absolute"
+                    Viewport="0,0,24,24"
+                    Stretch="Fill"/>
+
+        <!-- Grunge menu button (matches main menu buttons) -->
+        <Style x:Key="GrungeMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
+            <Setter Property="Width">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="420"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Height">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="52"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="Background" Value="#E0101010"/>
+            <Setter Property="BorderBrush" Value="#77FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="18,6"/>
+            <Setter Property="Margin" Value="0,8,0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Grid.RenderTransform>
+                                <SkewTransform AngleX="-6"/>
+                            </Grid.RenderTransform>
+
+                            <Border x:Name="SlabBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <Border.OpacityMask>
+                                    <StaticResource ResourceKey="SlatOpacityMaskBrush"/>
+                                </Border.OpacityMask>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#CC000000" Opacity="0.45"/>
+                                </Border.Effect>
+                            </Border>
+
+                            <Grid IsHitTestVisible="False">
+                                <Rectangle Height="1" VerticalAlignment="Top" Fill="#33FFFFFF" Margin="12,6,12,0"/>
+                                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#22FFFFFF" Margin="12,0,12,6"/>
+                            </Grid>
+
+                            <Grid x:Name="SelectFill" Opacity="0.0" ClipToBounds="True">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform x:Name="SelectScale" ScaleX="0" ScaleY="1"/>
+                                </Grid.RenderTransform>
+                                <Grid.RenderTransformOrigin>0,0.5</Grid.RenderTransformOrigin>
+                                <Rectangle Fill="{StaticResource MenuHighlightBrush}" Opacity="1"/>
+                                <Rectangle Fill="{StaticResource SelectionTextureBrush}" Opacity="0.35"/>
+                            </Grid>
+
+                            <Path x:Name="PointerWedge"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Margin="8,0,8,0"
+                                  Fill="{DynamicResource AccentBrush}"
+                                  Stroke="#88222222"
+                                  StrokeThickness="0.8"
+                                  Data="M 0,0 L 12,6 L 0,12 Z"
+                                  Opacity="0">
+                                <Path.RenderTransform>
+                                    <TranslateTransform x:Name="WedgeTx" X="12" Y="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SelectFill" Property="Opacity" Value="1.0"/>
+                                <Setter TargetName="PointerWedge" Property="Opacity" Value="0.9"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="0" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="SelectScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="0" Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="WedgeTx"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="12" Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#99FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="SlabBorder" Property="Background" Value="#F0181818"/>
+                                <Setter TargetName="SlabBorder" Property="BorderBrush" Value="#BBFFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <!-- Header text styles -->
         <Style x:Key="HeaderTitleText" TargetType="TextBlock">
@@ -52,7 +192,7 @@
             </Grid.RenderTransform>
 
             <!-- Fullscreen artwork -->
-            <Image Source="pack://application:,,,/Resources/Images/MainMenu/Background.png"
+            <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/Background.png"
                    Stretch="UniformToFill"
                    RenderOptions.BitmapScalingMode="HighQuality"/>
 
@@ -127,48 +267,60 @@
 
         <!-- FOREGROUND LAYOUT -->
         <DockPanel LastChildFill="True">
-            <!-- Header with title and Close -->
+            <!-- Header with title (X removed) -->
             <Border DockPanel.Dock="Top"
                     Background="#00000000"
                     Padding="18,14,18,10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Orientation="Vertical" Grid.Column="0">
-                        <TextBlock Text="ABOUT"
-                                   Style="{StaticResource HeaderTitleText}">
-                            <TextBlock.FontSize>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="28"/>
-                            </TextBlock.FontSize>
-                            <TextBlock.Effect>
-                                <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
-                        <TextBlock Text="WWX Map Editor"
-                                   Style="{StaticResource HeaderSubText}"
-                                   Margin="2,4,0,0">
-                            <TextBlock.FontSize>
-                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
-                            </TextBlock.FontSize>
-                        </TextBlock>
-                    </StackPanel>
-
-                    <Button Grid.Column="1"
-                            Content="✕"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
-                            Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}"
-                            FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=22}"
-                            Command="{Binding CloseCommand}"/>
-                </Grid>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="ABOUT"
+                               Style="{StaticResource HeaderTitleText}">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="28"/>
+                        </TextBlock.FontSize>
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#AA000000" BlurRadius="10" ShadowDepth="2" Opacity="0.6"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="WWX Map Editor"
+                               Style="{StaticResource HeaderSubText}"
+                               Margin="2,4,0,0">
+                        <TextBlock.FontSize>
+                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                        </TextBlock.FontSize>
+                    </TextBlock>
+                </StackPanel>
             </Border>
 
-            <!-- Content on a trapezoid "board" -->
+            <!-- Footer fixed at bottom like Settings -->
+            <Grid DockPanel.Dock="Bottom" Margin="18,0,18,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="© 2025 WWX Map Editor Team"
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                           FontFamily="Consolas"
+                           VerticalAlignment="Center">
+                    <TextBlock.FontSize>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
+                    </TextBlock.FontSize>
+                </TextBlock>
+
+                <Button Grid.Column="1"
+                        Content="BACK TO MAIN MENU" 
+                        Style="{StaticResource GrungeMenuButton}"
+                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=220}"
+                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}"
+                        FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
+                        Command="{Binding CloseCommand}"/>
+            </Grid>
+
+            <!-- Content on a trapezoid "board" (last child fills remaining space) -->
             <Grid Margin="18,0,18,18">
                 <!-- Spacer below header so board never overlaps -->
                 <Border Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=36}"
@@ -224,12 +376,12 @@
                                 </Rectangle>
 
                                 <!-- Overlays -->
-                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/scratches.png"
+                                <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/scratches.png"
                                        Stretch="UniformToFill"
                                        Opacity="0.10"
                                        IsHitTestVisible="False"
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <Image Source="pack://application:,,,/Resources/Images/MainMenu/overlays/splatters.png"
+                                <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/MainMenu/overlays/splatters.png"
                                        Stretch="UniformToFill"
                                        Opacity="0.08"
                                        IsHitTestVisible="False"
@@ -241,7 +393,7 @@
                         <Border Margin="56,46,64,46" Background="#00000000">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Margin="0" HorizontalAlignment="Center" MaxWidth="820">
-                                    <Image Source="pack://application:,,,/Resources/Images/Icons/app.ico" 
+                                    <Image Source="pack://application:,,,/WWXMapEditor;component/Resources/Images/Icons/app.ico" 
                                            Width="128" 
                                            Height="128" 
                                            Margin="0,0,0,20"/>
@@ -315,38 +467,11 @@
                                         <LineBreak/>
                                         <Run Text="• And much more..."/>
                                     </TextBlock>
-
-                                    <TextBlock Text="© 2025 WWX Map Editor Team" 
-                                               FontFamily="Consolas"
-                                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,30,0,0">
-                                        <TextBlock.FontSize>
-                                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
-                                        </TextBlock.FontSize>
-                                    </TextBlock>
                                 </StackPanel>
                             </ScrollViewer>
                         </Border>
                     </Grid>
                 </Grid>
-            </Grid>
-
-            <!-- Bottom Bar (kept for parity with original) -->
-            <Grid DockPanel.Dock="Bottom" Margin="18,0,18,18">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.ColumnSpan="2" Background="#00000000"/>
-                <Button Grid.Column="1"
-                        Content="CLOSE" 
-                        Style="{StaticResource MenuButtonStyle}"
-                        MinWidth="120"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=44}"
-                        FontSize="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=16}"
-                        Command="{Binding CloseCommand}"/>
             </Grid>
         </DockPanel>
 
