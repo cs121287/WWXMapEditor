@@ -93,7 +93,7 @@ namespace WWXMapEditor.ViewModels
                     case 3:
                         if (IsSpecificCountry(_parentViewModel.Player4Country)) _parentViewModel.Player4Country = "Random";
                         break;
-                        // case 4: nothing to do
+                    // case 4: nothing to do
                 }
             }
             finally
