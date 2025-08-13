@@ -1,366 +1,119 @@
 <UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.PlayerSelectWizardView"
-             x:Name="Root"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps.PlayerSelect"
-             xmlns:conv="clr-namespace:WWXMapEditor.Converters"
-             xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d"
-             d:DesignHeight="800" d:DesignWidth="1200">
-
-    <!-- Shared resources (styles, converters) available to all step views -->
+             xmlns:ps="clr-namespace:WWXMapEditor.Views.NewMapSteps.PlayerSelect">
     <UserControl.Resources>
-        <!-- Converters -->
-        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
-        <conv:IntComparisonConverter x:Key="IntComparisonConverter"/>
-        <conv:UniqueCountryListConverter x:Key="UniqueCountryListConverter"/>
-        <conv:CountryAvailabilityConverter x:Key="CountryAvailabilityConverter"/>
-        <conv:CountryClaimedByConverter x:Key="CountryClaimedByConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Shared resources (styles, brushes, constants, etc.) -->
+                <ResourceDictionary Source="PlayerSelectSharedResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- Basic button styles (fallbacks; use your app styles if available) -->
-        <Style x:Key="SettingsButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource Surface2Brush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,8"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.6"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <!-- Per-step DataTemplates -->
+            <DataTemplate x:Key="Step1Template">
+                <ps:Step1PlayerCountView/>
+            </DataTemplate>
 
-        <Style x:Key="SettingsPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource SettingsButtonStyle}">
-            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}"/>
-        </Style>
+            <DataTemplate x:Key="Step2Template">
+                <ps:Step2Player1View/>
+            </DataTemplate>
 
-        <!-- Section header styles -->
-        <Style x:Key="SectionKicker" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Opacity" Value="0.95"/>
-        </Style>
-        <Style x:Key="SectionSub" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundSecondaryBrush}"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="Opacity" Value="0.9"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-        </Style>
+            <DataTemplate x:Key="Step3Template">
+                <ps:Step3Player2View/>
+            </DataTemplate>
 
-        <!-- Card style -->
-        <Style x:Key="CardBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource Surface3Brush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="0,0,0,15"/>
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="{DynamicResource ShadowColor}" Direction="270" ShadowDepth="3" Opacity="0.22" BlurRadius="10"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <DataTemplate x:Key="Step4Template">
+                <ps:Step4Player3View/>
+            </DataTemplate>
 
-        <!-- Country list -->
-        <x:Array x:Key="CountryOptions" Type="{x:Type sys:String}">
-            <sys:String>Random</sys:String>
-            <sys:String>Redonia</sys:String>
-            <sys:String>Sevaria</sys:String>
-            <sys:String>Auria</sys:String>
-            <sys:String>Maritain</sys:String>
-            <sys:String>Norvos</sys:String>
-            <sys:String>Valtro</sys:String>
-        </x:Array>
+            <DataTemplate x:Key="Step5Template">
+                <ps:Step5Player4View/>
+            </DataTemplate>
 
-        <!-- Flag swatch mapping -->
-        <Style x:Key="FlagSwatchFillStyle" TargetType="Border">
-            <Setter Property="Background" Value="{x:Null}"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding}" Value="Redonia">
-                    <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding}" Value="Sevaria">
-                    <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding}" Value="Auria">
-                    <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding}" Value="Maritain">
-                    <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding}" Value="Norvos">
-                    <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding}" Value="Valtro">
-                    <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- ListBoxItem template with visuals and animations for country tiles -->
-        <Style x:Key="CountryTileContainerBaseStyle" TargetType="ListBoxItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Grid x:Name="RootTile" Width="150" Height="44" Margin="0,6,10,6" RenderTransformOrigin="0.5,0.5">
-                            <Grid.RenderTransform>
-                                <ScaleTransform x:Name="Scale" ScaleX="1" ScaleY="1"/>
-                            </Grid.RenderTransform>
-
-                            <Border x:Name="TileBg"
-                                    Background="{DynamicResource Surface2Brush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="6" ShadowDepth="1" Opacity="0.18"/>
-                                </Border.Effect>
-                            </Border>
-
-                            <!-- Selected fill -->
-                            <Border x:Name="SelFill"
-                                    CornerRadius="8"
-                                    Background="{DynamicResource AccentBrush}"
-                                    Opacity="0.18"/>
-
-                            <Grid Margin="10,0,8,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Swatch (DataContext is the item content string) -->
-                                <Border Grid.Column="0"
-                                        Width="16" Height="16" CornerRadius="3"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1" Margin="0,0,8,0"
-                                        Style="{StaticResource FlagSwatchFillStyle}"/>
-
-                                <!-- Country name -->
-                                <TextBlock Grid.Column="1"
-                                           Text="{TemplateBinding Content}"
-                                           VerticalAlignment="Center"
-                                           FontFamily="Consolas"
-                                           Foreground="{DynamicResource ForegroundBrush}"/>
-
-                                <!-- Taken badge -->
-                                <Border x:Name="TakenBadge"
-                                        Grid.Column="2"
-                                        Background="{DynamicResource Surface3Brush}"
-                                        BorderBrush="{DynamicResource BorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="6"
-                                        Padding="6,2"
-                                        Visibility="Collapsed"
-                                        VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="🔒" VerticalAlignment="Center" Opacity="0.9"/>
-                                        <TextBlock FontFamily="Consolas"
-                                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                                                   VerticalAlignment="Center"
-                                                   Margin="4,0,0,0"
-                                                   Text="Taken"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Grid>
-
-                        <ControlTemplate.Triggers>
-                            <!-- Hover scale -->
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.10"/>
-                                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.10"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="0:0:0.10"/>
-                                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="0:0:0.10"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-
-                            <!-- Selected state -->
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="SelFill" Property="Opacity" Value="0.22"/>
-                                <Setter TargetName="TileBg" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                            </Trigger>
-
-                            <!-- Disabled (taken by other) -->
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="TakenBadge" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="TileBg" Property="Opacity" Value="0.75"/>
-                            </Trigger>
-
-                            <!-- If item is Random, never show Taken badge -->
-                            <Trigger Property="Content" Value="Random">
-                                <Setter TargetName="TakenBadge" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Small header -->
-        <Style x:Key="PlayerHeader" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-        </Style>
-
-        <!-- Constants -->
-        <sys:Int32 x:Key="Players2">2</sys:Int32>
-        <sys:Int32 x:Key="Players3">3</sys:Int32>
-        <sys:Int32 x:Key="Players4">4</sys:Int32>
+            <DataTemplate x:Key="Step6Template">
+                <ps:Step6ConfirmView/>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <!-- Layout: header, step content, nav -->
-    <Grid Margin="12,8,12,12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <!-- Card container for the inner wizard -->
+    <Border Style="{DynamicResource CardBorderStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                <Border Width="44" Height="44" Background="{DynamicResource AccentBrush}" CornerRadius="22" Margin="0,0,10,0">
-                    <TextBlock Text="🏳️" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock.FontSize>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="22"/>
-                        </TextBlock.FontSize>
-                    </TextBlock>
-                </Border>
-                <StackPanel>
-                    <TextBlock Text="PLAYER SELECTION" Style="{StaticResource SectionKicker}">
-                        <TextBlock.FontSize>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="16"/>
-                        </TextBlock.FontSize>
-                    </TextBlock>
-                    <TextBlock>
-                        <Run Text="Step "/>
-                        <Run Text="{Binding ElementName=Root, Path=StepIndex}"/>
-                        <Run Text=" of 6"/>
-                    </TextBlock>
-                </StackPanel>
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,0,12">
+                <TextBlock Text="PLAYER SELECTION" Style="{DynamicResource SectionKicker}" Margin="0,0,12,0"/>
+                <TextBlock Text="{Binding StepIndex, StringFormat=Step {0} of 6}"
+                           Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                           FontFamily="Consolas"
+                           VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Summary only on step 6 -->
-            <Border DockPanel.Dock="Right"
-                    Background="{DynamicResource Surface2Brush}"
-                    CornerRadius="6" Padding="10,6"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+            <!-- Step content host: ContentPresenter with triggers on StepIndex -->
+            <ContentPresenter x:Name="StepHost"
+                              Grid.Row="1"
+                              Content="{Binding}">
+                <ContentPresenter.Style>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="ContentTemplate" Value="{StaticResource Step1Template}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=Root, Path=StepIndex}" Value="6">
-                                <Setter Property="Visibility" Value="Visible"/>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="1">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step1Template}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="2">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step2Template}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="3">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step3Template}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="4">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step4Template}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="5">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step5Template}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StepIndex}" Value="6">
+                                <Setter Property="ContentTemplate" Value="{StaticResource Step6Template}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Border.Style>
-                <StackPanel>
-                    <TextBlock Text="Summary" FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}" Margin="0,0,0,4"/>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="P1: " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                        <TextBlock Text="{Binding ParentViewModel.Player1Country}" FontFamily="Consolas" Margin="4,0,12,0"/>
-                        <TextBlock Text="P2: " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                        <TextBlock Text="{Binding ParentViewModel.Player2Country}" FontFamily="Consolas" Margin="4,0,12,0"/>
-                        <TextBlock Text="P3: " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                        <TextBlock Text="{Binding ParentViewModel.Player3Country}" FontFamily="Consolas" Margin="4,0,12,0"/>
-                        <TextBlock Text="P4: " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
-                        <TextBlock Text="{Binding ParentViewModel.Player4Country}" FontFamily="Consolas"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </DockPanel>
+                </ContentPresenter.Style>
+            </ContentPresenter>
 
-        <!-- Step content container: include each step view and toggle visibility -->
-        <Grid Grid.Row="1">
-            <local:Step1PlayerCountView x:Name="Step1"
-                                        Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=1}"
-                                        />
-            <local:Step2Player1View x:Name="Step2"
-                                    Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=2}"
-                                    />
-            <local:Step3Player2View x:Name="Step3"
-                                    Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=3}"
-                                    />
-            <local:Step4Player3View x:Name="Step4"
-                                    Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=4}"
-                                    />
-            <local:Step5Player4View x:Name="Step5"
-                                    Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=5}"
-                                    />
-            <local:Step6ConfirmView x:Name="Step6"
-                                    Visibility="{Binding ElementName=Root, Path=StepIndex, Converter={StaticResource IntComparisonConverter}, ConverterParameter=6}"
-                                    />
-        </Grid>
+            <!-- Inner wizard nav -->
+            <Grid Grid.Row="2" Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Navigation -->
-        <DockPanel Grid.Row="2" Margin="0,10,0,0">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                <Button x:Name="BackButton"
+                <Button x:Name="BtnBack"
+                        Grid.Column="0"
                         Content="← Back"
-                        Click="BackButton_Click"
-                        Padding="16,8"
+                        MinWidth="80"
                         Margin="0,0,8,0"
-                        Style="{StaticResource SettingsButtonStyle}"/>
-            </StackPanel>
+                        Click="BtnBack_Click"/>
 
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <Button x:Name="NextButton"
-                        Content="{Binding ElementName=Root, Path=NextButtonText}"
-                        Click="NextButton_Click"
-                        Padding="16,8"
-                        Style="{StaticResource SettingsPrimaryButtonStyle}"/>
-            </StackPanel>
-        </DockPanel>
-    </Grid>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding ValidationMessage}"
+                           Foreground="{DynamicResource AccentBrush}"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas"
+                           Opacity="0.9"/>
+
+                <Button x:Name="BtnNext"
+                        Grid.Column="2"
+                        Content="Next →"
+                        MinWidth="92"
+                        Click="BtnNext_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
 </UserControl>

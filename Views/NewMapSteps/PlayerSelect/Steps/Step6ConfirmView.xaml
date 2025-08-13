@@ -1,7 +1,16 @@
 <UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.Step6ConfirmView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/w3.org/2001/XMLSchema"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Root">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Bring in shared styles, brushes, and constants so the designer can resolve them -->
+                <ResourceDictionary Source="../PlayerSelectSharedResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
     <Border Style="{DynamicResource CardBorderStyle}">
         <StackPanel>

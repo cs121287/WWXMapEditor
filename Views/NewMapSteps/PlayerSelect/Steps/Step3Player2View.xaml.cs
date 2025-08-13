@@ -1,5 +1,12 @@
-<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.Step3Player2View"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Code-behind not needed; this stub ensures the XAML compiles as a UserControl -->
-</UserControl>
+using System.Windows.Controls;
+
+namespace WWXMapEditor.Views.NewMapSteps.PlayerSelect
+{
+    public partial class Step3Player2View : System.Windows.Controls.UserControl
+    {
+        public Step3Player2View()
+        {
+            InitializeComponent();
+        }
+    }
+}

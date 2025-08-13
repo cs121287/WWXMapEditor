@@ -1,4 +1,12 @@
-<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.Step4Player3View"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-</UserControl>
+using System.Windows.Controls;
+
+namespace WWXMapEditor.Views.NewMapSteps.PlayerSelect
+{
+    public partial class Step4Player3View : System.Windows.Controls.UserControl
+    {
+        public Step4Player3View()
+        {
+            InitializeComponent();
+        }
+    }
+}

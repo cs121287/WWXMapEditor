@@ -1,22 +1,25 @@
 <UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.Step1PlayerCountView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/w3.org/2001/XMLSchema"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:local="clr-namespace:WWXMapEditor.Views.NewMapSteps.PlayerSelect"
              x:Name="Root">
     <UserControl.Resources>
-        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
-        <conv:IntComparisonConverter x:Key="IntComparisonConverter"/>
-        <sys:Int32 x:Key="Players2">2</sys:Int32>
-        <sys:Int32 x:Key="Players3">3</sys:Int32>
-        <sys:Int32 x:Key="Players4">4</sys:Int32>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Relative to the Steps folder -->
+                <ResourceDictionary Source="../PlayerSelectSharedResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Local converters -->
+            <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+            <conv:IntComparisonConverter x:Key="IntComparisonConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <Border Style="{DynamicResource CardBorderStyle}">
+    <Border Style="{StaticResource CardBorderStyle}">
         <StackPanel>
-            <TextBlock Text="How many players?" Style="{DynamicResource SectionKicker}">
+            <TextBlock Text="How many players?" Style="{StaticResource SectionKicker}">
                 <TextBlock.FontSize>
                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                              Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>

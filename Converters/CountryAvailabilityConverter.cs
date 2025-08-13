@@ -5,37 +5,42 @@ using System.Windows.Data;
 
 namespace WWXMapEditor.Converters
 {
-    // Returns true if the candidate country is available for the current player.
-    // values[0] = candidate country (string)
-    // values[1] = current player's selected country (string)
-    // values[2..] = other players' selected countries (string)
-    // Rules:
-    // - "Random" is always available
-    // - A country selected by another player is unavailable
-    // - The current player's own selection remains enabled (so UI doesn't clear on refresh)
-    public class CountryAvailabilityConverter : IMultiValueConverter
+    // IMultiValueConverter for enabling/disabling a country tile.
+    // values:
+    //   [0] = item country name (string)
+    //   [1] = current player's selection (string)
+    //   [2..] = other players' selections (string)
+    public sealed class CountryAvailabilityConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string candidate = values.Length > 0 ? values[0]?.ToString() ?? string.Empty : string.Empty;
-            string current = values.Length > 1 ? values[1]?.ToString() ?? string.Empty : string.Empty;
+            string item = values.Length > 0 ? values[0]?.ToString() ?? "" : "";
+            string current = values.Length > 1 ? values[1]?.ToString() ?? "Random" : "Random";
+            var others = values.Skip(2).Select(v => v?.ToString() ?? "Random");
 
-            if (string.Equals(candidate, "Random", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(item, "Random", StringComparison.OrdinalIgnoreCase))
+                return true; // "Random" is always available
+
+            // If this item is the currently selected value for this player, allow it
+            if (string.Equals(item, current, StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            var others = values.Skip(2)
-                               .Select(v => v?.ToString())
-                               .Where(s => !string.IsNullOrWhiteSpace(s) && !string.Equals(s, "Random", StringComparison.OrdinalIgnoreCase));
+            // If any other player has already chosen this item (non-Random), disable it
+            foreach (var o in others)
+            {
+                if (!string.Equals(o, "Random", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(o, item, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
 
-            bool takenByOther = others.Any(s => string.Equals(s, candidate, StringComparison.OrdinalIgnoreCase));
-
-            if (!takenByOther) return true;
-
-            // Keep enabled if it's the current player's existing choice
-            return string.Equals(candidate, current, StringComparison.OrdinalIgnoreCase);
+            return true;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-            => throw new NotSupportedException();
+        {
+            return Array.Empty<object>();
+        }
     }
 }

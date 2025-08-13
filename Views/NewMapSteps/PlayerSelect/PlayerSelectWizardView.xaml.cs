@@ -1,200 +1,131 @@
 using System;
 using System.ComponentModel;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using WWXMapEditor.Views.NewMapSteps.PlayerSelect.Support;
+using WWXMapEditor.ViewModels;
 
 namespace WWXMapEditor.Views.NewMapSteps.PlayerSelect
 {
-    public partial class PlayerSelectWizardView : UserControl
+    public partial class PlayerSelectWizardView : System.Windows.Controls.UserControl
     {
-        private UniqueCountryCoordinator? _coordinator;
+        public event EventHandler? ContinueRequested;
+
+        private PlayerSelectStepViewModel? VM => DataContext as PlayerSelectStepViewModel;
 
         public PlayerSelectWizardView()
         {
             InitializeComponent();
-            Loaded += PlayerSelectWizardView_Loaded;
-        }
 
-        private void PlayerSelectWizardView_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Initialize step and button state
-            if (StepIndex < 1) StepIndex = 1;
-            UpdateNextButtonText();
-            UpdateBackButtonEnabled();
-
-            // Wire uniqueness coordinator to the current DataContext (ParentViewModel or the VM itself)
-            HookCoordinator();
-            // React if DataContext changes later
-            DataContextChanged += (_, __) => HookCoordinator();
-        }
-
-        private void HookCoordinator()
-        {
-            _coordinator?.Dispose();
-            var vm = DataContext;
-            if (vm == null) return;
-
-            // The app often uses a wrapper exposing "ParentViewModel"
-            var parent = GetPropertyValue(vm, "ParentViewModel") ?? vm;
-
-            // Ensure properties exist; if not, coordinator will no-op
-            _coordinator = new UniqueCountryCoordinator(parent,
-                player1PropName: "Player1Country",
-                player2PropName: "Player2Country",
-                player3PropName: "Player3Country",
-                player4PropName: "Player4Country",
-                randomKeyword: "Random");
-        }
-
-        // StepIndex DP (1..6)
-        public static readonly DependencyProperty StepIndexProperty =
-            DependencyProperty.Register(
-                nameof(StepIndex),
-                typeof(int),
-                typeof(PlayerSelectWizardView),
-                new PropertyMetadata(1, OnStepIndexChanged));
-
-        public int StepIndex
-        {
-            get => (int)GetValue(StepIndexProperty);
-            set => SetValue(StepIndexProperty, value);
-        }
-
-        private static void OnStepIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var view = (PlayerSelectWizardView)d;
-            view.UpdateNextButtonText();
-            view.UpdateBackButtonEnabled();
-        }
-
-        // Next button text DP
-        public static readonly DependencyProperty NextButtonTextProperty =
-            DependencyProperty.Register(
-                nameof(NextButtonText),
-                typeof(string),
-                typeof(PlayerSelectWizardView),
-                new PropertyMetadata("Next →"));
-
-        public string NextButtonText
-        {
-            get => (string)GetValue(NextButtonTextProperty);
-            set => SetValue(NextButtonTextProperty, value);
-        }
-
-        private void UpdateNextButtonText()
-        {
-            NextButtonText = StepIndex >= 6 ? "Continue →" : "Next →";
-        }
-
-        private void UpdateBackButtonEnabled()
-        {
-            if (BackButton != null)
-                BackButton.IsEnabled = StepIndex > 1;
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            var players = GetNumberOfPlayers();
-
-            switch (StepIndex)
+            Loaded += (_, __) =>
             {
-                case 1: break;
-                case 2: StepIndex = 1; break;
-                case 3: StepIndex = 2; break;
-                case 4: StepIndex = 3; break;
-                case 5: StepIndex = 4; break;
+                HookVM();
+                RefreshButtons();
+            };
+
+            DataContextChanged += (_, __) =>
+            {
+                HookVM();
+                RefreshButtons();
+            };
+        }
+
+        private void HookVM()
+        {
+            if (VM != null)
+            {
+                VM.PropertyChanged -= VMOnPropertyChanged;
+                VM.PropertyChanged += VMOnPropertyChanged;
+
+                // Ensure a sane starting step
+                if (VM.StepIndex < 1 || VM.StepIndex > 6)
+                    VM.StepIndex = 1;
+            }
+        }
+
+        private void VMOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PlayerSelectStepViewModel.StepIndex))
+            {
+                // Triggers on StepHost will handle template switching automatically.
+                RefreshButtons();
+            }
+        }
+
+        private void BtnBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (VM == null) return;
+            var parent = VM.ParentViewModel;
+            int current = VM.StepIndex;
+            int players = parent.NumberOfPlayers;
+
+            VM.StepIndex = ComputePrevStep(current, players);
+            RefreshButtons();
+        }
+
+        private void BtnNext_Click(object sender, RoutedEventArgs e)
+        {
+            if (VM == null) return;
+            var parent = VM.ParentViewModel;
+            int current = VM.StepIndex;
+            int players = parent.NumberOfPlayers;
+
+            int next = ComputeNextStep(current, players);
+            if (current == 6 && next == 6)
+            {
+                // At confirmation step; bubble up to advance outer wizard
+                ContinueRequested?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            VM.StepIndex = next;
+            RefreshButtons();
+        }
+
+        private void RefreshButtons()
+        {
+            if (VM == null) return;
+
+            int current = VM.StepIndex;
+            BtnBack.IsEnabled = current > 1;
+            BtnNext.Content = current == 6 ? "Continue →" : "Next →";
+        }
+
+        // Navigation rules for inner steps:
+        // 1: PlayerCount
+        // 2: Player1
+        // 3: Player2
+        // 4: Player3 (only if players >= 3)
+        // 5: Player4 (only if players == 4)
+        // 6: Confirm
+        private static int ComputeNextStep(int current, int players)
+        {
+            switch (current)
+            {
+                case 1: return 2;
+                case 2: return 3;
+                case 3: return players >= 3 ? 4 : 6;
+                case 4: return players >= 4 ? 5 : 6;
+                case 5: return 6;
+                case 6: return 6;
+                default: return 1;
+            }
+        }
+
+        private static int ComputePrevStep(int current, int players)
+        {
+            switch (current)
+            {
+                case 1: return 1;
+                case 2: return 1;
+                case 3: return 2;
+                case 4: return 3;
+                case 5: return 4;
                 case 6:
-                    if (players >= 4) StepIndex = 5;
-                    else if (players == 3) StepIndex = 4;
-                    else StepIndex = 3;
-                    break;
+                    if (players == 4) return 5;
+                    if (players == 3) return 4;
+                    return 3;
+                default: return 1;
             }
-        }
-
-        private void NextButton_Click(object sender, RoutedEventArgs e)
-        {
-            var players = GetNumberOfPlayers();
-
-            switch (StepIndex)
-            {
-                case 1: StepIndex = 2; break;                          // Number of players
-                case 2: StepIndex = 3; break;                          // Player 1
-                case 3: StepIndex = (players == 2) ? 6 : 4; break;     // Player 2 (+ally) -> confirm if 2p
-                case 4: StepIndex = (players == 3) ? 6 : 5; break;     // Player 3 (+ally) -> confirm if 3p
-                case 5: StepIndex = 6; break;                          // Player 4 (+ally)
-                case 6:
-                    // Hand off to parent VM (a RoutedEvent and a few common names as fallbacks)
-                    if (!TryExecuteParentCommand("ContinueToVictoryConditionsCommand") &&
-                        !TryInvokeParentMethod("ContinueToVictoryConditions") &&
-                        !TryInvokeParentMethod("GoToVictoryConditions") &&
-                        !TryInvokeParentMethod("NextFromPlayerSelect"))
-                    {
-                        RaiseEvent(new RoutedEventArgs(ContinueRequestedEvent));
-                    }
-                    break;
-            }
-        }
-
-        // Routed event as a fallback signal to parent
-        public static readonly RoutedEvent ContinueRequestedEvent =
-            EventManager.RegisterRoutedEvent("ContinueRequested", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PlayerSelectWizardView));
-
-        public event RoutedEventHandler ContinueRequested
-        {
-            add { AddHandler(ContinueRequestedEvent, value); }
-            remove { RemoveHandler(ContinueRequestedEvent, value); }
-        }
-
-        private int GetNumberOfPlayers()
-        {
-            var vm = DataContext;
-            if (vm == null) return 2;
-
-            var parent = GetPropertyValue(vm, "ParentViewModel") ?? vm;
-
-            var val = GetPropertyValue(parent, "NumberOfPlayers");
-            if (val is int i) return i;
-            if (val is string s && int.TryParse(s, out var parsed)) return parsed;
-
-            return 2;
-        }
-
-        private bool TryExecuteParentCommand(string commandPropertyName)
-        {
-            var vm = DataContext;
-            if (vm == null) return false;
-
-            var parent = GetPropertyValue(vm, "ParentViewModel") ?? vm;
-            var cmdObj = GetPropertyValue(parent, commandPropertyName);
-            if (cmdObj is System.Windows.Input.ICommand cmd && cmd.CanExecute(null))
-            {
-                cmd.Execute(null);
-                return true;
-            }
-            return false;
-        }
-
-        private bool TryInvokeParentMethod(string methodName)
-        {
-            var vm = DataContext;
-            if (vm == null) return false;
-
-            var parent = GetPropertyValue(vm, "ParentViewModel") ?? vm;
-            var mi = parent.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (mi != null)
-            {
-                try { mi.Invoke(parent, null); return true; }
-                catch { }
-            }
-            return false;
-        }
-
-        private static object? GetPropertyValue(object obj, string name)
-        {
-            var pi = obj.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return pi?.GetValue(obj);
         }
     }
 }
