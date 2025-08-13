@@ -1,0 +1,194 @@
+<UserControl x:Class="WWXMapEditor.Views.NewMapSteps.PlayerSelect.Step6ConfirmView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/w3.org/2001/XMLSchema"
+             x:Name="Root">
+
+    <Border Style="{DynamicResource CardBorderStyle}">
+        <StackPanel>
+            <TextBlock Text="Confirm Player Setup" Style="{DynamicResource SectionKicker}" Margin="0,0,0,8"/>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- P1 -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Player 1" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,6"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ParentViewModel.Player1Country}" FontFamily="Consolas" Margin="0,0,12,6"/>
+                <Border Grid.Row="0" Grid.Column="2" Width="18" Height="18" CornerRadius="3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Redonia">
+                                    <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Sevaria">
+                                    <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Auria">
+                                    <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Maritain">
+                                    <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Norvos">
+                                    <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player1Country}" Value="Valtro">
+                                    <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- P2 -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Player 2" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,6"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock Text="{Binding ParentViewModel.Player2Country}" FontFamily="Consolas" />
+                    <TextBlock Text="  •  " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                    <TextBlock FontFamily="Consolas">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Enemy"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ParentViewModel.Player2IsAlly}" Value="True">
+                                        <Setter Property="Text" Value="Ally"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Border Grid.Row="1" Grid.Column="2" Width="18" Height="18" CornerRadius="3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Redonia">
+                                    <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Sevaria">
+                                    <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Auria">
+                                    <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Maritain">
+                                    <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Norvos">
+                                    <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player2Country}" Value="Valtro">
+                                    <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- P3 -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Player 3" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,6"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,12,6">
+                    <TextBlock Text="{Binding ParentViewModel.Player3Country}" FontFamily="Consolas" />
+                    <TextBlock Text="  •  " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                    <TextBlock FontFamily="Consolas">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Enemy"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ParentViewModel.Player3IsAlly}" Value="True">
+                                        <Setter Property="Text" Value="Ally"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Border Grid.Row="2" Grid.Column="2" Width="18" Height="18" CornerRadius="3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Redonia">
+                                    <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Sevaria">
+                                    <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Auria">
+                                    <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Maritain">
+                                    <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Norvos">
+                                    <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player3Country}" Value="Valtro">
+                                    <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- P4 -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Player 4" FontFamily="Consolas" FontWeight="Bold" Margin="0,0,12,0"/>
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,12,0">
+                    <TextBlock Text="{Binding ParentViewModel.Player4Country}" FontFamily="Consolas" />
+                    <TextBlock Text="  •  " FontFamily="Consolas" Foreground="{DynamicResource ForegroundSecondaryBrush}"/>
+                    <TextBlock FontFamily="Consolas">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Enemy"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ParentViewModel.Player4IsAlly}" Value="True">
+                                        <Setter Property="Text" Value="Ally"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Border Grid.Row="3" Grid.Column="2" Width="18" Height="18" CornerRadius="3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Redonia">
+                                    <Setter Property="Background" Value="{DynamicResource CountryRedoniaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Sevaria">
+                                    <Setter Property="Background" Value="{DynamicResource CountrySevariaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Auria">
+                                    <Setter Property="Background" Value="{DynamicResource CountryAuriaBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Maritain">
+                                    <Setter Property="Background" Value="{DynamicResource CountryMaritainBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Norvos">
+                                    <Setter Property="Background" Value="{DynamicResource CountryNorvosBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ParentViewModel.Player4Country}" Value="Valtro">
+                                    <Setter Property="Background" Value="{DynamicResource CountryValtroBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

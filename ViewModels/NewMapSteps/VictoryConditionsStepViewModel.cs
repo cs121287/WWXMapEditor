@@ -4,7 +4,7 @@ namespace WWXMapEditor.ViewModels
     {
         private readonly NewMapViewModel _parentViewModel;
 
-        public  NewMapViewModel ParentViewModel => _parentViewModel;
+        public NewMapViewModel ParentViewModel => _parentViewModel;
 
         public VictoryConditionsStepViewModel(NewMapViewModel parentViewModel)
         {

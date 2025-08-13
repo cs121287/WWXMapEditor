@@ -8,7 +8,7 @@
              xmlns:scaling="clr-namespace:WWXMapEditor.UI.Scaling"
              xmlns:conv="clr-namespace:WWXMapEditor.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1200">
+             d:DesignHeight="800" d:DesignWidth="1200">
 
     <UserControl.Resources>
         <!-- Converters -->
@@ -46,8 +46,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Effect">
                 <Setter.Value>
@@ -56,7 +56,83 @@
             </Setter>
         </Style>
 
-        <!-- Terrain Type Strings -->
+        <!-- Animated numeric TextBox (theme-aware, with focus + error effects) -->
+        <Style x:Key="AnimatedNumericTextBox" TargetType="TextBox" BasedOn="{StaticResource SettingsTextBoxStyle}">
+            <Setter Property="Height">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="42"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize">
+                <Setter.Value>
+                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+            <Style.Triggers>
+                <!-- Focused: subtle scale + border emphasis -->
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1.03" Duration="0:0:0.12"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1.03" Duration="0:0:0.12"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                 To="1.0" Duration="0:0:0.12"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                 To="1.0" Duration="0:0:0.12"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+
+                <!-- Invalid: shake + tooltip with error -->
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)">
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.05" Value="6"/>
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.10" Value="-6"/>
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.15" Value="3"/>
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.20" Value="-3"/>
+                                    <LinearDoubleKeyFrame KeyTime="0:0:0.25" Value="0"/>
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Terrain Type Strings (preserved for the right column card) -->
         <sys:String x:Key="TerrainPlains">Plains</sys:String>
         <sys:String x:Key="TerrainMountain">Mountain</sys:String>
         <sys:String x:Key="TerrainForest">Forest</sys:String>
@@ -93,11 +169,17 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0" 
-                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
                         Background="{DynamicResource AccentBrush}"
                         CornerRadius="28"
                         Margin="0,0,12,0">
+                    <Border.Width>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="56"/>
+                    </Border.Width>
+                    <Border.Height>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="56"/>
+                    </Border.Height>
                     <TextBlock Text="📝"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center">
@@ -139,7 +221,7 @@
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
                                FontWeight="Bold"
-                               Margin="0,0,0,10">
+                               Margin="0,0,0,8">
                         <TextBlock.FontSize>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
@@ -152,7 +234,7 @@
                              VerticalContentAlignment="Center">
                         <TextBox.Height>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="45"/>
+                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="42"/>
                         </TextBox.Height>
                         <TextBox.FontSize>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
@@ -160,17 +242,17 @@
                         </TextBox.FontSize>
                     </TextBox>
 
-                    <TextBlock Grid.Row="2"
-                               Text="{Binding ParentViewModel.MapName.Length, StringFormat='Characters: {0}/50'}"
-                               Foreground="{DynamicResource ForegroundSecondaryBrush}"
-                               FontFamily="Consolas"
-                               HorizontalAlignment="Right"
-                               Margin="0,5,0,0">
-                        <TextBlock.FontSize>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
-                        </TextBlock.FontSize>
-                    </TextBlock>
+                    <DockPanel Grid.Row="2" LastChildFill="False" Margin="0,6,0,0">
+                        <TextBlock Text="{Binding ParentViewModel.MapName.Length, StringFormat='Characters: {0}/50'}"
+                                   Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                   FontFamily="Consolas"
+                                   DockPanel.Dock="Left">
+                            <TextBlock.FontSize>
+                                <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                            </TextBlock.FontSize>
+                        </TextBlock>
+                    </DockPanel>
                 </Grid>
             </Border>
 
@@ -188,7 +270,7 @@
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
                                FontWeight="Bold"
-                               Margin="0,0,0,10">
+                               Margin="0,0,0,8">
                         <TextBlock.FontSize>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
@@ -216,7 +298,7 @@
                                Foreground="{DynamicResource ForegroundSecondaryBrush}"
                                FontFamily="Consolas"
                                FontStyle="Italic"
-                               Margin="0,5,0,0">
+                               Margin="0,6,0,0">
                         <TextBlock.FontSize>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
@@ -240,11 +322,17 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0" 
-                        Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
-                        Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=56}"
                         Background="{DynamicResource AccentBrush}"
                         CornerRadius="28"
                         Margin="0,0,12,0">
+                    <Border.Width>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="56"/>
+                    </Border.Width>
+                    <Border.Height>
+                        <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                 Converter="{StaticResource MultiplyConverter}" ConverterParameter="56"/>
+                    </Border.Height>
                     <TextBlock Text="⚙️"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center">
@@ -272,105 +360,145 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Size Card -->
+            <!-- Size Card (two text boxes with validation and animations) -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Width -->
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Width"
+                    <!-- Title row with live dimension preview -->
+                    <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
+                        <TextBlock Text="Map Size"
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    FontFamily="Consolas"
                                    FontWeight="Bold"
-                                   Margin="0,0,0,8">
+                                   DockPanel.Dock="Left">
                             <TextBlock.FontSize>
                                 <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
                             </TextBlock.FontSize>
                         </TextBlock>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Slider Grid.Column="0"
-                                    Value="{Binding ParentViewModel.MapWidth}"
-                                    Minimum="10" Maximum="200"
-                                    TickFrequency="10"
-                                    IsSnapToTickEnabled="True"
-                                    Margin="0,0,10,0"/>
-                            <Border Grid.Column="1"
-                                    Background="{DynamicResource AccentBrush}"
-                                    CornerRadius="4"
-                                    Padding="10,5"
-                                    MinWidth="50">
-                                <TextBlock Text="{Binding ParentViewModel.MapWidth}"
-                                           Foreground="{DynamicResource BackgroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
+                        <Border Background="{DynamicResource SurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="8,4"
+                                Margin="8,0,0,0"
+                                DockPanel.Dock="Right">
+                            <TextBlock FontFamily="Consolas"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                                </TextBlock.FontSize>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0} × {1} tiles">
+                                        <Binding Path="ParentViewModel.MapWidth"/>
+                                        <Binding Path="ParentViewModel.MapHeight"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Border>
+                    </DockPanel>
 
-                    <!-- times sign -->
-                    <TextBlock Grid.Column="1" Text="×"
-                               Foreground="{DynamicResource ForegroundBrush}"
-                               FontFamily="Consolas"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Margin="0,15,0,0">
-                        <TextBlock.FontSize>
-                            <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                     Converter="{StaticResource MultiplyConverter}" ConverterParameter="20"/>
-                        </TextBlock.FontSize>
-                    </TextBlock>
+                    <!-- Editors row: Width × Height -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Height -->
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Height"
+                        <!-- Width -->
+                        <StackPanel Grid.Column="0" Orientation="Vertical">
+                            <TextBlock Text="Width"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="0,0,0,4">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                            <TextBox Style="{StaticResource AnimatedNumericTextBox}">
+                                <TextBox.Text>
+                                    <Binding Path="ParentViewModel.MapWidth"
+                                             UpdateSourceTrigger="PropertyChanged"
+                                             ValidatesOnDataErrors="True"
+                                             ValidatesOnExceptions="True"
+                                             NotifyOnValidationError="True">
+                                        <Binding.ValidationRules>
+                                            <conv:NumericRangeValidationRule MinExclusive="20" MaxExclusive="400"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
+                            <TextBlock Text="Must be greater than 20, less than 400"
+                                       TextAlignment="Left"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="2,4,2,0" Width="244" Height="31" TextWrapping="WrapWithOverflow">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- times sign -->
+                        <TextBlock Grid.Column="1" Text="×"
                                    Foreground="{DynamicResource ForegroundBrush}"
                                    FontFamily="Consolas"
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,8">
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0">
                             <TextBlock.FontSize>
                                 <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
-                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="13"/>
+                                         Converter="{StaticResource MultiplyConverter}" ConverterParameter="20"/>
                             </TextBlock.FontSize>
                         </TextBlock>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Slider Grid.Column="0"
-                                    Value="{Binding ParentViewModel.MapHeight}"
-                                    Minimum="10" Maximum="200"
-                                    TickFrequency="10"
-                                    IsSnapToTickEnabled="True"
-                                    Margin="0,0,10,0"/>
-                            <Border Grid.Column="1"
-                                    Background="{DynamicResource AccentBrush}"
-                                    CornerRadius="4"
-                                    Padding="10,5"
-                                    MinWidth="50">
-                                <TextBlock Text="{Binding ParentViewModel.MapHeight}"
-                                           Foreground="{DynamicResource BackgroundBrush}"
-                                           FontFamily="Consolas"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"/>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
+
+                        <!-- Height -->
+                        <StackPanel Grid.Column="2" Orientation="Vertical">
+                            <TextBlock Text="Height"
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="0,0,0,4">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="12"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                            <TextBox Style="{StaticResource AnimatedNumericTextBox}">
+                                <TextBox.Text>
+                                    <Binding Path="ParentViewModel.MapHeight"
+                                             UpdateSourceTrigger="PropertyChanged"
+                                             ValidatesOnDataErrors="True"
+                                             ValidatesOnExceptions="True"
+                                             NotifyOnValidationError="True">
+                                        <Binding.ValidationRules>
+                                            <conv:NumericRangeValidationRule MinExclusive="20" MaxExclusive="400"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
+                            <TextBlock Text=""
+                                       Foreground="{DynamicResource ForegroundSecondaryBrush}"
+                                       FontFamily="Consolas"
+                                       Margin="2,4,0,0">
+                                <TextBlock.FontSize>
+                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="11"/>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Terrain Card -->
+            <!-- Terrain Card (preserved) -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -383,7 +511,7 @@
                                Foreground="{DynamicResource ForegroundBrush}"
                                FontFamily="Consolas"
                                FontWeight="Bold"
-                               Margin="0,0,0,10">
+                               Margin="0,0,0,8">
                         <TextBlock.FontSize>
                             <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
                                      Converter="{StaticResource MultiplyConverter}" ConverterParameter="14"/>
@@ -393,7 +521,7 @@
                     <WrapPanel Grid.Row="1" Orientation="Horizontal">
                         <!-- Plains -->
                         <RadioButton GroupName="TerrainType"
-                                     Margin="0,0,12,10"
+                                     Margin="0,0,10,8"
                                      IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainPlains}}">
                             <RadioButton.Template>
                                 <ControlTemplate TargetType="RadioButton">
@@ -402,7 +530,7 @@
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="2"
                                             CornerRadius="6"
-                                            Padding="15,10"
+                                            Padding="12,8"
                                             Cursor="Hand">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -410,9 +538,18 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0"
-                                                    Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainPlainsBrush}"/>
+                                                    CornerRadius="3"
+                                                    Margin="0,0,8,0"
+                                                    Background="{DynamicResource TerrainPlainsBrush}">
+                                                <Border.Width>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Width>
+                                                <Border.Height>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Height>
+                                            </Border>
                                             <TextBlock Grid.Column="1" Text="Plains" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
@@ -436,7 +573,7 @@
 
                         <!-- Mountain -->
                         <RadioButton GroupName="TerrainType"
-                                     Margin="0,0,12,10"
+                                     Margin="0,0,10,8"
                                      IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainMountain}}">
                             <RadioButton.Template>
                                 <ControlTemplate TargetType="RadioButton">
@@ -445,7 +582,7 @@
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="2"
                                             CornerRadius="6"
-                                            Padding="15,10"
+                                            Padding="12,8"
                                             Cursor="Hand">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -453,9 +590,18 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0"
-                                                    Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainMountainBrush}"/>
+                                                    CornerRadius="3"
+                                                    Margin="0,0,8,0"
+                                                    Background="{DynamicResource TerrainMountainBrush}">
+                                                <Border.Width>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Width>
+                                                <Border.Height>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Height>
+                                            </Border>
                                             <TextBlock Grid.Column="1" Text="Mountain" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
@@ -479,7 +625,7 @@
 
                         <!-- Forest -->
                         <RadioButton GroupName="TerrainType"
-                                     Margin="0,0,12,10"
+                                     Margin="0,0,10,8"
                                      IsChecked="{Binding ParentViewModel.SelectedTerrain, Converter={StaticResource StringComparisonConverter}, ConverterParameter={StaticResource TerrainForest}}">
                             <RadioButton.Template>
                                 <ControlTemplate TargetType="RadioButton">
@@ -488,7 +634,7 @@
                                             BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="2"
                                             CornerRadius="6"
-                                            Padding="15,10"
+                                            Padding="12,8"
                                             Cursor="Hand">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -496,9 +642,18 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0"
-                                                    Width="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    Height="{Binding Source={x:Static scaling:ScaleService.Instance}, Path=FontScale, Converter={StaticResource MultiplyConverter}, ConverterParameter=20}"
-                                                    CornerRadius="3" Margin="0,0,10,0" Background="{DynamicResource TerrainForestBrush}"/>
+                                                    CornerRadius="3"
+                                                    Margin="0,0,8,0"
+                                                    Background="{DynamicResource TerrainForestBrush}">
+                                                <Border.Width>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Width>
+                                                <Border.Height>
+                                                    <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"
+                                                             Converter="{StaticResource MultiplyConverter}" ConverterParameter="18"/>
+                                                </Border.Height>
+                                            </Border>
                                             <TextBlock Grid.Column="1" Text="Forest" Foreground="{DynamicResource ForegroundBrush}" FontFamily="Consolas">
                                                 <TextBlock.FontSize>
                                                     <Binding Source="{x:Static scaling:ScaleService.Instance}" Path="FontScale"

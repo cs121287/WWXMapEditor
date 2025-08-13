@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using WWXMapEditor.Models;
 using WWXMapEditor.Views.NewMapSteps;
+using WWXMapEditor.Views.NewMapSteps.PlayerSelect;
 using WWXMapEditor.Services;
 
 namespace WWXMapEditor.ViewModels
@@ -516,8 +517,20 @@ namespace WWXMapEditor.ViewModels
                     }
                 case 1:
                     {
-                        System.Windows.FrameworkElement view = new PlayerSelectStepView();
+                        // Swap in the new PlayerSelect wizard view that manages mini-steps internally.
+                        PlayerSelectWizardView view = new PlayerSelectWizardView();
                         view.DataContext = _playerSelectViewModel;
+
+                        // When the inner wizard signals "Continue", advance the outer wizard to Victory Conditions.
+                        view.ContinueRequested += (_, __) =>
+                        {
+                            // Ensure step-level validation still passes; otherwise no-op.
+                            if (CanExecuteNext(null))
+                            {
+                                ExecuteNext(null);
+                            }
+                        };
+
                         CurrentStepContent = view;
                         break;
                     }
@@ -587,7 +600,7 @@ namespace WWXMapEditor.ViewModels
                     if (NumberOfPlayers == 4 && NumberOfPlayersEnemiesCount < 1)
                         return false;
 
-                    // Countries can be Random or any; no additional validation required
+                    // Countries can be Random or any; uniqueness is enforced in PlayerSelectStepViewModel
                     return true;
 
                 case 2: // Victory Conditions
@@ -686,7 +699,7 @@ namespace WWXMapEditor.ViewModels
             }
             catch (Exception ex)
             {
-                ValidationMessage = $"Failed to create map: {ex.Message}";
+                ValidationMessage = $"Failed to create the map: {ex.Message}";
                 System.Windows.MessageBox.Show(
                     $"An error occurred while creating the map:\n\n{ex.Message}",
                     "Map Creation Error",
